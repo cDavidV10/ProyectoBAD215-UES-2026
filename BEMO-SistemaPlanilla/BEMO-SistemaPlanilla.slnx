@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PanelAdmin/PanelAdmin.csproj" />
+  <Project Path="PanelRRHH/PanelRRHH.csproj" />
+</Solution>

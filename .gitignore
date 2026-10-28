@@ -1,0 +1,33 @@
+# Visual Studio / .NET
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+[Bb]in/
+[Oo]bj/
+TestResults/
+*.psess
+*.vsp
+*.vspx
+*.nupkg
+*.snupkg
+
+# Variables de entorno (no subir credenciales ni secretos)
+.env
+.env.*
+!.env.example
+
+# Archivos locales de IDE
+.idea/
+.vscode/
+*.swp
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
+
+# Logs y archivos temporales
+*.log
+*.tmp
+*.cache
