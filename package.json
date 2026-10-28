@@ -1,0 +1,26 @@
+{
+  "name": "sistema_planilla",
+  "version": "1.0.0",
+  "description": "---",
+  "main": "index.js",
+  "scripts": {
+    "build:admin": "tailwindcss -i ./input.css -o ./BEMO-SistemaPlanilla/PanelAdmin/wwwroot/css/site.css",
+    "build:rrhh": "tailwindcss -i ./input.css -o ./BEMO-SistemaPlanilla/PanelRRHH/wwwroot/css/site.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cDavidV10/ProyectoBAD215-UES-2026.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/cDavidV10/ProyectoBAD215-UES-2026/issues"
+  },
+  "homepage": "https://github.com/cDavidV10/ProyectoBAD215-UES-2026#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

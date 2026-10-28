@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@source "./BEMO-SistemaPlanilla/PanelAdmin/Views";
+@source "./BEMO-SistemaPlanilla/PanelAdmin/wwwroot";
+@source "./BEMO-SistemaPlanilla/PanelRRHH/Views";
+@source "./BEMO-SistemaPlanilla/PanelRRHH/wwwroot";

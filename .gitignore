@@ -7,11 +7,39 @@
 [Bb]in/
 [Oo]bj/
 TestResults/
+publish/
+*.pubxml.user
 *.psess
 *.vsp
 *.vspx
 *.nupkg
 *.snupkg
+packages/
+project.lock.json
+
+# ReSharper / Rider
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# Node.js / Tailwind / npm
+node_modules/
+dist/
+build/
+coverage/
+.nyc_output/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# Tailwind CSS generado
+**/wwwroot/css/site.css
 
 # Variables de entorno (no subir credenciales ni secretos)
 .env
