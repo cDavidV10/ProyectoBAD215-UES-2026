@@ -16,6 +16,14 @@ publish/
 *.snupkg
 packages/
 project.lock.json
+*.jfm
+*.dbmdl
+*.dbproj.schemaview
+*.publish.xml
+
+# Herramientas locales de .NET
+.dotnet/
+*.dll.config
 
 # ReSharper / Rider
 _ReSharper*/
@@ -45,6 +53,8 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+appsettings.Local.json
+appsettings.*.local.json
 
 # Archivos locales de IDE
 .idea/

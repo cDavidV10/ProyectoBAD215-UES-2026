@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="Datos/Datos.csproj" Id="3bdfab5e-3905-423a-95df-3bffea06163a" />
+  <Project Path="Entidades/Entidades.csproj" Id="45bd9e2a-7498-4bb5-8ffd-1a0bdddc22ef" />
   <Project Path="PanelAdmin/PanelAdmin.csproj" />
   <Project Path="PanelRRHH/PanelRRHH.csproj" />
 </Solution>
