@@ -4,6 +4,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.slnx.user
 [Bb]in/
 [Oo]bj/
 TestResults/
@@ -20,6 +21,12 @@ project.lock.json
 *.dbmdl
 *.dbproj.schemaview
 *.publish.xml
+*.trx
+TestResults.xml
+*.coverage
+*.coveragexml
+*.dump
+*.dmp
 
 # Herramientas locales de .NET
 .dotnet/
@@ -45,6 +52,8 @@ pnpm-debug.log*
 .eslintcache
 .stylelintcache
 *.tsbuildinfo
+.envrc
+.npmrc.local
 
 # Tailwind CSS generado
 **/wwwroot/css/site.css
@@ -55,6 +64,9 @@ pnpm-debug.log*
 !.env.example
 appsettings.Local.json
 appsettings.*.local.json
+appsettings.Production.json
+secrets.json
+**/Properties/serviceDependencies*.json.user
 
 # Archivos locales de IDE
 .idea/
@@ -69,3 +81,5 @@ Thumbs.db
 *.log
 *.tmp
 *.cache
+*.bak
+*.orig
