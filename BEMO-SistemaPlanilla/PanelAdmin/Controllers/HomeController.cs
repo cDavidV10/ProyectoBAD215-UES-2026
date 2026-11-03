@@ -1,25 +1,20 @@
+using BEMO.Datos;
 using Microsoft.AspNetCore.Mvc;
-using PanelAdmin.Models;
-using System.Diagnostics;
 
-namespace PanelAdmin.Controllers
+namespace PanelAdmin.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly BemoContext _contexto;
+
+    public HomeController(BemoContext contexto)
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        _contexto = contexto;
+    }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    public async Task<IActionResult> Index()
+    {
+        ViewBag.Conectado = await _contexto.Database.CanConnectAsync();
+        return View();
     }
 }

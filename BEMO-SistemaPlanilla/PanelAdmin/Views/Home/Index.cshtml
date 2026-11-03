@@ -1,8 +1,8 @@
 ﻿@{
     ViewData["Title"] = "BEMO";
+    var conectado = ViewBag.Conectado is true;
 }
 
 <div class="text-center">
-    <h1 class="">Hola</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">Solucion del proyecto</a>.</p>
+    <p>Conexión: @(conectado ? "correcta" : "fallida")</p>
 </div>
