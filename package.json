@@ -4,8 +4,6 @@
   "description": "---",
   "main": "index.js",
   "scripts": {
-    "build:admin": "tailwindcss -i ./input.css -o ./BEMO-SistemaPlanilla/PanelAdmin/wwwroot/css/site.css",
-    "build:rrhh": "tailwindcss -i ./input.css -o ./BEMO-SistemaPlanilla/PanelRRHH/wwwroot/css/site.css",
     "build:web": "tailwindcss -i ./input.css -o ./BEMO-SistemaPlanilla/BEMOWeb/wwwroot/css/site.css"
   },
   "repository": {
