@@ -1,15 +1,13 @@
-﻿using BEMO.Datos;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace BEMO.Negocio;
+namespace BEMO.Datos;
 
-public static class Registro
+public static class RegistroDatos
 {
-    public static IServiceCollection AgregarNegocio(this IServiceCollection servicios, string cadenaConexion)
+    public static IServiceCollection AgregarDatos(this IServiceCollection servicios, string cadenaConexion)
     {
-        servicios.AddDbContext<BemoContext>(opciones => opciones.UseSqlServer(cadenaConexion));
-        servicios.AddScoped<ConexionNegocio>();
+        servicios.AddSingleton(new Conexion(cadenaConexion));
+        servicios.AddScoped<DAODeptoUbicacion>();
         return servicios;
     }
 }

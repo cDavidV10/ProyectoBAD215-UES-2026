@@ -1,6 +1,11 @@
 namespace BEMO.Datos;
 
-internal static class Conexion
+public class Conexion
 {
-    public static string CadenaConexion { get; } = string.Empty;
+    public string Cadena { get; }
+
+    public Conexion(string cadena)
+    {
+        Cadena = cadena;
+    }
 }
