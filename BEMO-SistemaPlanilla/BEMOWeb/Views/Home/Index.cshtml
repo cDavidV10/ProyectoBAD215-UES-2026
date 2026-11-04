@@ -1,0 +1,29 @@
+﻿@model IEnumerable<BEMO.Entidades.DepartamentoUbicacion>
+
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="mx-auto max-w-2xl py-10">
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 class="text-2xl font-bold text-slate-900">Departamentos de ubicación</h1>
+        <p class="mt-2 text-sm text-slate-600">
+            Seleccione un departamento registrado en BEMO.
+        </p>
+
+        <label for="departamento" class="mt-6 block text-sm font-medium text-slate-700">
+            Departamento
+        </label>
+        <select id="departamento"
+                name="departamento"
+                class="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+            <option value="">Seleccione un departamento</option>
+            @foreach (var departamento in Model)
+            {
+                <option value="@departamento.IdDepartamentoUbicacion">
+                    @departamento.NombreDepartamentoUbicacion
+                </option>
+            }
+        </select>
+    </section>
+</div>

@@ -14,7 +14,6 @@ public static class RegistroNegocio
             opciones.UseSqlServer(cadenaConexion));
 
         servicios.AgregarDatos(cadenaConexion);
-        servicios.AddScoped<ConexionNegocio>();
         servicios.AddScoped<CN_DeptoUbicacion>();
 
         return servicios;

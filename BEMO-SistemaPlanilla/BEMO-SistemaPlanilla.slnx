@@ -1,7 +1,6 @@
 <Solution>
+  <Project Path="BEMOWeb/BEMOWeb.csproj" Id="6627c40f-d97d-40fb-a234-8d3cc8dbecfe" />
   <Project Path="Datos/Datos.csproj" Id="db16e9ad-4fa5-4449-aabb-639a40fbba22" />
   <Project Path="Entidades/Entidades.csproj" Id="a97d81cb-f7f1-4752-b8c5-b5f508c026b2" />
   <Project Path="Negocio/Negocio.csproj" Id="c7e8a1a5-5d6a-4e47-b25f-ebc4833b1e62" />
-  <Project Path="PanelAdmin/PanelAdmin.csproj" />
-  <Project Path="PanelRRHH/PanelRRHH.csproj" />
 </Solution>
