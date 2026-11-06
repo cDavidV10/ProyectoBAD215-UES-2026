@@ -1,22 +1,34 @@
-using BEMO.Negocio;
 using BEMOWeb.Models;
 using Microsoft.AspNetCore.Mvc;
+using BEMO.Datos;
 using System.Diagnostics;
+using Microsoft.Data.SqlClient;
 
 namespace BEMOWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly CN_DeptoUbicacion _departamentos;
+        private readonly Conexion _conexion;
 
-        public HomeController(CN_DeptoUbicacion departamentos)
+        public HomeController(Conexion conexion)
         {
-            _departamentos = departamentos;
+            _conexion = conexion;
         }
 
         public IActionResult Index()
         {
-            return View(_departamentos.listar());
+            try
+            {
+                using var conexionSql = new SqlConnection(_conexion.Cadena);
+                conexionSql.Open();
+                ViewBag.Conectado = true;
+            }
+            catch (SqlException)
+            {
+                ViewBag.Conectado = false;
+            }
+
+            return View(new LoginViewModel());
         }
 
         public IActionResult Privacy()

@@ -8,9 +8,21 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="10.0.14" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <ProjectReference Include="..\Negocio\Negocio.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Controllers\" />
+    <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Admin\Models\" />
+    <Folder Include="Areas\Admin\Views\" />
+    <Folder Include="Areas\RRHH\Controllers\" />
+    <Folder Include="Areas\RRHH\Data\" />
+    <Folder Include="Areas\RRHH\Models\" />
+    <Folder Include="Areas\RRHH\Views\" />
   </ItemGroup>
 
   <Target Name="TailwindCompile" BeforeTargets="Build">
