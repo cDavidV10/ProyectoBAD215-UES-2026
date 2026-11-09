@@ -3,23 +3,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BEMO.Entidades;
 
-[Table("MUNICIPIO_UBICACION", Schema = "dbo")]
-public class MunicipioUbicacion
+[Table("DISTRITO_UBICACION", Schema = "dbo")]
+public class DistritoUbicacion
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [Column("id_municipio")]
-    public int IdMunicipio { get; set; }
+    [Column("id_distrito")]
+    public int IdDistrito { get; set; }
 
     [Column("id_departamento_ubicacion")]
     public int IdDepartamentoUbicacion { get; set; }
 
     [Required]
     [StringLength(50)]
-    [Column("nombre_municipio")]
-    public string NombreMunicipio { get; set; } = string.Empty;
+    [Column("nombre_distrito")]
+    public string NombreDistrito { get; set; } = string.Empty;
 
     [ForeignKey(nameof(IdDepartamentoUbicacion))]
     public DepartamentoUbicacion DepartamentoUbicacion { get; set; } = null!;
-    public ICollection<Empleado> Empleados { get; set; } = new List<Empleado>();
+
+    public ICollection<Direccion> Direcciones { get; set; } = new List<Direccion>();
 }

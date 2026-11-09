@@ -14,13 +14,11 @@ public class DetallePlanilla
     [Column("id_planilla")]
     public int IdPlanilla { get; set; }
 
-    [Required]
-    [StringLength(20)]
-    [Column("codigo_renta")]
-    public string CodigoRenta { get; set; } = string.Empty;
+    [Column("id_contrato")]
+    public int IdContrato { get; set; }
 
-    [Column("id_anticipo")]
-    public int? IdAnticipo { get; set; }
+    [Column("id_renta")]
+    public int IdRenta { get; set; }
 
     [Column("dias_trabajados")]
     public int DiasTrabajados { get; set; }
@@ -31,31 +29,49 @@ public class DetallePlanilla
     [Column("horas_extras")]
     public int HorasExtras { get; set; }
 
+    [Column("salario_mensual", TypeName = "decimal(10,2)")]
+    public decimal SalarioMensual { get; set; }
+
+    [Column("salario_quincenal", TypeName = "decimal(10,2)")]
+    public decimal SalarioQuincenal { get; set; }
+
     [Column("bonificaciones", TypeName = "decimal(10,2)")]
     public decimal Bonificaciones { get; set; }
 
     [Column("aguinaldo", TypeName = "decimal(10,2)")]
     public decimal Aguinaldo { get; set; }
 
-    [Column("afp", TypeName = "decimal(10,2)")]
-    public decimal Afp { get; set; }
+    [Column("total_bruto", TypeName = "decimal(10,2)")]
+    public decimal TotalBruto { get; set; }
 
-    [Column("isss", TypeName = "decimal(10,2)")]
-    public decimal Isss { get; set; }
-
-    [Column("renta", TypeName = "decimal(10,2)")]
+    [Column("monto_renta", TypeName = "decimal(10,2)")]
     public decimal MontoRenta { get; set; }
 
-    [Column("total_descuentos", TypeName = "decimal(10,2)")]
-    public decimal TotalDescuentos { get; set; }
+    [Column("descuentos_prestamos", TypeName = "decimal(10,2)")]
+    public decimal DescuentosPrestamos { get; set; }
 
-    [Column("valor_cuota_prestamo", TypeName = "decimal(10,2)")]
-    public decimal ValorCuotaPrestamo { get; set; }
+    [Column("descuentos_anticipos", TypeName = "decimal(10,2)")]
+    public decimal DescuentosAnticipos { get; set; }
+
+    [Column("total_deducciones", TypeName = "decimal(10,2)")]
+    public decimal TotalDeducciones { get; set; }
+
+    [Column("salario_liquido", TypeName = "decimal(10,2)")]
+    public decimal SalarioLiquido { get; set; }
+
+    [Required]
+    [StringLength(20)]
+    [Column("estado")]
+    public string Estado { get; set; } = "PENDIENTE";
 
     [ForeignKey(nameof(IdPlanilla))]
     public Planilla Planilla { get; set; } = null!;
-    [ForeignKey(nameof(CodigoRenta))]
-    public Renta RentaAplicada { get; set; } = null!;
-    [ForeignKey(nameof(IdAnticipo))]
-    public AnticipoSalario? Anticipo { get; set; }
+
+    [ForeignKey(nameof(IdContrato))]
+    public Contrato Contrato { get; set; } = null!;
+
+    [ForeignKey(nameof(IdRenta))]
+    public Renta Renta { get; set; } = null!;
+
+    public ICollection<DetalleDescuentoPlanilla> DetallesDescuentoPlanilla { get; set; } = new List<DetalleDescuentoPlanilla>();
 }

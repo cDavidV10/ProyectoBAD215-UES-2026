@@ -7,14 +7,17 @@ namespace BEMO.Entidades;
 public class Renta
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("id_renta")]
+    public int IdRenta { get; set; }
+
+    [Column("id_tipo_renta")]
+    public int IdTipoRenta { get; set; }
+
     [Required]
     [StringLength(20)]
     [Column("codigo_renta")]
     public string CodigoRenta { get; set; } = string.Empty;
-
-    [Column("id_tipo_renta")]
-    public int IdTipoRenta { get; set; }
 
     [Column("rango_minimo_renta", TypeName = "decimal(10,2)")]
     public decimal RangoMinimoRenta { get; set; }
@@ -22,7 +25,7 @@ public class Renta
     [Column("rango_maximo_renta", TypeName = "decimal(10,2)")]
     public decimal RangoMaximoRenta { get; set; }
 
-    [Column("porcentaje_renta", TypeName = "decimal(5,2)")]
+    [Column("porcentaje_renta", TypeName = "decimal(10,2)")]
     public decimal PorcentajeRenta { get; set; }
 
     [Column("valor_fijo", TypeName = "decimal(10,2)")]
@@ -33,5 +36,6 @@ public class Renta
 
     [ForeignKey(nameof(IdTipoRenta))]
     public TipoRenta TipoRenta { get; set; } = null!;
+
     public ICollection<DetallePlanilla> DetallesPlanilla { get; set; } = new List<DetallePlanilla>();
 }

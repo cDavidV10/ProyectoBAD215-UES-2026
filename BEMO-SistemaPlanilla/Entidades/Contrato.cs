@@ -30,7 +30,7 @@ public class Contrato
     public DateOnly FechaContratacion { get; set; }
 
     [Column("fecha_culminacion")]
-    public DateOnly FechaCulminacion { get; set; }
+    public DateOnly? FechaCulminacion { get; set; }
 
     [Required]
     [StringLength(20)]
@@ -45,5 +45,5 @@ public class Contrato
     public Departamento Departamento { get; set; } = null!;
     [ForeignKey(nameof(IdTipoContrato))]
     public TipoContrato TipoContrato { get; set; } = null!;
-    public ICollection<Planilla> Planillas { get; set; } = new List<Planilla>();
+    public ICollection<DetallePlanilla> DetallesPlanilla { get; set; } = new List<DetallePlanilla>();
 }

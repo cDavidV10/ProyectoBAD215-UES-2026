@@ -18,10 +18,16 @@ public class Prestamo
     public DateOnly FechaOtorgamiento { get; set; }
 
     [Column("fecha_finalizacion")]
-    public DateOnly FechaFinalizacion { get; set; }
+    public DateOnly? FechaFinalizacion { get; set; }
 
     [Column("monto", TypeName = "decimal(10,2)")]
     public decimal Monto { get; set; }
+
+    [Column("num_cuotas")]
+    public int NumCuotas { get; set; }
+
+    [Column("cuota_quincenal", TypeName = "decimal(10,2)")]
+    public decimal CuotaQuincenal { get; set; }
 
     [Required]
     [StringLength(20)]
@@ -30,9 +36,6 @@ public class Prestamo
 
     [Column("saldo_pendiente", TypeName = "decimal(10,2)")]
     public decimal SaldoPendiente { get; set; }
-
-    [Column("num_cuotas")]
-    public int NumCuotas { get; set; }
 
     [ForeignKey(nameof(IdEmpleado))]
     public Empleado Empleado { get; set; } = null!;

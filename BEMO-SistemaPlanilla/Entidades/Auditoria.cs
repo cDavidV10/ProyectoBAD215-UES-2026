@@ -11,21 +11,21 @@ public class Auditoria
     [Column("id_auditoria")]
     public int IdAuditoria { get; set; }
 
-    [Column("codigo_empleado")]
-    public int CodigoEmpleado { get; set; }
+    [Column("codigo_usuario")]
+    public int CodigoUsuario { get; set; }
 
-    [Column("fecha_aplicacion")]
-    public DateOnly FechaAplicacion { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    [Column("fecha_aplicacion", TypeName = "datetime2(0)")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime FechaAplicacion { get; set; }
 
     [Required]
     [StringLength(30)]
     [Column("campo_modificado")]
     public string CampoModificado { get; set; } = string.Empty;
 
-    [Required]
     [StringLength(100)]
     [Column("valor_viejo")]
-    public string ValorViejo { get; set; } = string.Empty;
+    public string? ValorViejo { get; set; }
 
     [Required]
     [StringLength(100)]

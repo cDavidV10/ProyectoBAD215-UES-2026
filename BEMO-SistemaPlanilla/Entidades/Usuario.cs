@@ -12,7 +12,10 @@ public class Usuario
     public int IdUsuario { get; set; }
 
     [Column("id_empleado")]
-    public int? IdEmpleado { get; set; }
+    public int IdEmpleado { get; set; }
+
+    [Column("id_rol")]
+    public int IdRol { get; set; }
 
     [Required]
     [StringLength(50)]
@@ -25,5 +28,8 @@ public class Usuario
     public string PasswordHash { get; set; } = string.Empty;
 
     [ForeignKey(nameof(IdEmpleado))]
-    public Empleado? Empleado { get; set; }
+    public Empleado Empleado { get; set; } = null!;
+
+    [ForeignKey(nameof(IdRol))]
+    public Rol Rol { get; set; } = null!;
 }

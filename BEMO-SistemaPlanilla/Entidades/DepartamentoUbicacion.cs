@@ -16,5 +16,5 @@ public class DepartamentoUbicacion
     [Column("nombre_departamento_ubicacion")]
     public string NombreDepartamentoUbicacion { get; set; } = string.Empty;
 
-    public ICollection<MunicipioUbicacion> Municipios { get; set; } = new List<MunicipioUbicacion>();
+    public ICollection<DistritoUbicacion> Distritos { get; set; } = new List<DistritoUbicacion>();
 }

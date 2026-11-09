@@ -11,8 +11,11 @@ public class Empleado
     [Column("id_empleado")]
     public int IdEmpleado { get; set; }
 
-    [Column("id_municipio")]
-    public int IdMunicipio { get; set; }
+    [Column("id_afp")]
+    public int IdAfp { get; set; }
+
+    [Column("id_direccion")]
+    public int IdDireccion { get; set; }
 
     [Required]
     [StringLength(10)]
@@ -29,9 +32,14 @@ public class Empleado
     [Column("apellido")]
     public string Apellido { get; set; } = string.Empty;
 
-    [StringLength(10)]
+    [StringLength(17)]
     [Column("nit")]
     public string? Nit { get; set; }
+
+    [Required]
+    [StringLength(15)]
+    [Column("numero_isss")]
+    public string NumeroIsss { get; set; } = string.Empty;
 
     [Required]
     [StringLength(12)]
@@ -50,11 +58,15 @@ public class Empleado
     [Column("estado")]
     public string Estado { get; set; } = "ACTIVO";
 
-    [ForeignKey(nameof(IdMunicipio))]
-    public MunicipioUbicacion Municipio { get; set; } = null!;
-    public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
+    [ForeignKey(nameof(IdAfp))]
+    public Afp Afp { get; set; } = null!;
+
+    [ForeignKey(nameof(IdDireccion))]
+    public Direccion Direccion { get; set; } = null!;
+
+    public Usuario? Usuario { get; set; }
     public ICollection<Contrato> Contratos { get; set; } = new List<Contrato>();
     public ICollection<Prestamo> Prestamos { get; set; } = new List<Prestamo>();
-    public ICollection<DescuentoLey> DescuentosLey { get; set; } = new List<DescuentoLey>();
+    public ICollection<AnticipoSalario> AnticiposSalario { get; set; } = new List<AnticipoSalario>();
     public ICollection<DetalleCapacitacion> DetallesCapacitacion { get; set; } = new List<DetalleCapacitacion>();
 }
