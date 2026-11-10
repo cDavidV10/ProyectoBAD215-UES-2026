@@ -1,12 +1,30 @@
 using BEMO.Negocio;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 DotNetEnv.Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración para compilar HTML en tiempo de ejecución de forma automática
 builder.Services.AddControllersWithViews()
     .AddRazorRuntimeCompilation();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Home/Index";
+        options.AccessDeniedPath = "/Home/Index";
+        options.Cookie.Name = "BEMO.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 var cadena = builder.Configuration.GetConnectionString("Bemo")
     ?? throw new InvalidOperationException("Falta ConnectionStrings__Bemo en el archivo .env");
@@ -15,7 +33,6 @@ builder.Services.AgregarNegocio(cadena);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -24,18 +41,17 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
 
-// 1. Ruta para que el sistema encuentre las Áreas (Admin y RRHH)
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-// 2. Ruta predeterminada modificada para arrancar en el Login
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")

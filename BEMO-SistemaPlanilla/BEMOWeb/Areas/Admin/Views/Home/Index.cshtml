@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<section class="mb-8">
+    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[#9F5F2F]">Administración</p>
+    <h1 class="mt-2 text-3xl font-bold text-[#381F12]">Bienvenido, @User.Identity?.Name</h1>
+    <p class="mt-2 text-[#804C2C]">Panel de control del Sistema de Planilla BEMO.</p>
+</section>
+
+<section class="grid gap-5 md:grid-cols-2">
+    <article class="rounded-2xl border border-[#E3D2AE] bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-[#381F12]">Administración del sistema</h2>
+        <p class="mt-2 leading-7 text-[#684026]">Desde aquí puedes gestionar las funciones disponibles para el rol de administrador.</p>
+    </article>
+</section>

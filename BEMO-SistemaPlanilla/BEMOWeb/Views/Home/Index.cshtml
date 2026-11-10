@@ -66,16 +66,16 @@
                         <div asp-validation-summary="ModelOnly" class="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700"></div>
 
                         <div>
-                            <label asp-for="Correo" class="mb-2 block text-sm font-semibold text-[#684026]">
+                            <label asp-for="NombreUsuario" class="mb-2 block text-sm font-semibold text-[#684026]">
                                 Usuario
                             </label>
-                            <input asp-for="Correo"
-                                   type="email"
-                                   autocomplete="email"
+                            <input asp-for="NombreUsuario"
+                                   type="text"
+                                   autocomplete="off"
                                    placeholder="usuario123"
                                    class="block w-full rounded-xl border border-[#D7C49E] bg-[#FFFDF8] px-4 py-3 text-[#381F12] outline-none transition placeholder:text-[#B8A88A] focus:border-[#9F5F2F] focus:ring-4 focus:ring-[#CE8E41]/20"
                                    required>
-                            <span asp-validation-for="Correo" class="mt-1 block text-sm text-red-600"></span>
+                            <span asp-validation-for="NombreUsuario" class="mt-1 block text-sm text-red-600"></span>
                         </div>
 
                         <div>

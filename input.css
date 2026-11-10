@@ -1,4 +1,5 @@
 @import "tailwindcss";
 
 @source "./BEMO-SistemaPlanilla/BEMOWeb/Views";
+@source "./BEMO-SistemaPlanilla/BEMOWeb/Areas";
 @source "./BEMO-SistemaPlanilla/BEMOWeb/wwwroot";

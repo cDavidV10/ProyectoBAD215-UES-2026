@@ -15,6 +15,7 @@ public static class RegistroNegocio
 
         servicios.AgregarDatos(cadenaConexion);
         servicios.AddScoped<CN_DeptoUbicacion>();
+        servicios.AddScoped<CN_Login>();
 
         return servicios;
     }
