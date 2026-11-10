@@ -20,9 +20,14 @@ namespace BEMO.Negocio
             return _metodos.Buscar(user);
         }
 
-        public bool ValidarCredenciales(string user, string clave, out Usuario? usuario)
+        public bool ValidarCredenciales(
+            string user,
+            string clave,
+            out Usuario? usuario,
+            out bool hashInvalido)
         {
             usuario = null;
+            hashInvalido = false;
 
             if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(clave))
             {
@@ -35,8 +40,17 @@ namespace BEMO.Negocio
                 return false;
             }
 
-            var resultado = _passwordHasher.VerifyHashedPassword(
-                encontrado.NombreUsuario, encontrado.PasswordHash, clave);
+            PasswordVerificationResult resultado;
+            try
+            {
+                resultado = _passwordHasher.VerifyHashedPassword(
+                    encontrado.NombreUsuario, encontrado.PasswordHash, clave);
+            }
+            catch (FormatException)
+            {
+                hashInvalido = true;
+                return false;
+            }
 
             if (resultado == PasswordVerificationResult.Failed)
             {

@@ -59,10 +59,16 @@ namespace BEMOWeb.Controllers
             if (!_loginNegocio.ValidarCredenciales(
                     modelo.NombreUsuario,
                     modelo.Clave,
-                    out var usuario)
+                    out var usuario,
+                    out var hashInvalido)
                 || usuario == null)
             {
-                
+              ModelState.AddModelError(
+                    string.Empty,
+                    hashInvalido
+                        ? "El hash de la contraseña de este usuario no es válido. Contacta al administrador."
+                        : "No se encontró el usuario o la contraseña es incorrecta.");
+               
                 modelo.Clave = string.Empty;
                 return View("~/Views/Home/Index.cshtml", modelo);
             }
@@ -103,7 +109,7 @@ namespace BEMOWeb.Controllers
         {
             var passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<string>();
 
-            string contraseñaTextoPlano = "54321"; 
+            string contraseñaTextoPlano = "123"; 
             string usuarioSimulado = "admin";
             string hashResultado = passwordHasher.HashPassword(usuarioSimulado, contraseñaTextoPlano);
 

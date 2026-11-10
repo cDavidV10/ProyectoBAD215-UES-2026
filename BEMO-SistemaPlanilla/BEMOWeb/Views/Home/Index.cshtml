@@ -63,7 +63,12 @@
 
                     <form asp-controller="Login" asp-action="Login" method="post" class="space-y-5">
                         @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly" class="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700"></div>
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div asp-validation-summary="ModelOnly"
+                                 role="alert"
+                                 class="rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700"></div>
+                        }
 
                         <div>
                             <label asp-for="NombreUsuario" class="mb-2 block text-sm font-semibold text-[#684026]">

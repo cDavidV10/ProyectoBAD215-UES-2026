@@ -1,3 +1,29 @@
+@{
+    var areaName = ViewContext.RouteData.Values["area"]?.ToString() ?? string.Empty;
+    var isAdmin = areaName.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+    var roleName = isAdmin ? "Administrador de nómina" : "Recursos Humanos";
+    var modules = isAdmin
+        ? new[]
+        {
+            new { Text = "Inicio", Controller = "Home", Icon = "home" },
+            new { Text = "Empleados", Controller = "Empleados", Icon = "users" },
+            new { Text = "Contratos", Controller = "Contratos", Icon = "document" },
+            new { Text = "Estructura organizacional", Controller = "EstructuraOrganizacional", Icon = "organization" },
+            new { Text = "Planilla", Controller = "Planilla", Icon = "calendar" },
+            new { Text = "Parámetros legales", Controller = "ParametrosLegales", Icon = "scale" },
+            new { Text = "Préstamos y anticipos", Controller = "PrestamosAnticipos", Icon = "coins" },
+            new { Text = "Capacitaciones", Controller = "Capacitaciones", Icon = "education" },
+            new { Text = "Usuarios y roles", Controller = "Usuarios", Icon = "user-settings" },
+            new { Text = "Auditoría", Controller = "Auditoria", Icon = "search" }
+        }
+        : new[]
+        {
+            new { Text = "Inicio", Controller = "Home", Icon = "home" },
+            new { Text = "Empleados", Controller = "Empleados", Icon = "users" },
+            new { Text = "Préstamos y anticipos", Controller = "PrestamosAnticipos", Icon = "coins" },
+            new { Text = "Capacitaciones", Controller = "Capacitaciones", Icon = "education" }
+        };
+}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,8 +33,20 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="min-h-screen bg-[#F7F1E5] text-[#381F12]">
-    <header class="bg-[#9F5F2F] text-white shadow-md">
-        <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4">
+    <svg aria-hidden="true" class="hidden">
+        <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z" /></symbol>
+        <symbol id="icon-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></symbol>
+        <symbol id="icon-document" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8" /></symbol>
+        <symbol id="icon-organization" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="5" rx="1" /><rect x="2" y="17" width="6" height="5" rx="1" /><rect x="16" y="17" width="6" height="5" rx="1" /><path d="M12 7v5M5 17v-5h14v5M19 12v5" /></symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></symbol>
+        <symbol id="icon-scale" viewBox="0 0 24 24"><path d="M12 3v18M5 6h14M7 6l-4 8h8L7 6ZM17 6l-4 8h8l-4-8ZM8 21h8" /></symbol>
+        <symbol id="icon-coins" viewBox="0 0 24 24"><ellipse cx="9" cy="5" rx="7" ry="3" /><path d="M2 5v5c0 1.66 3.13 3 7 3s7-1.34 7-3V5M2 10v5c0 1.66 3.13 3 7 3 1.15 0 2.24-.13 3.2-.36M16 8.5c3.39.25 6 1.53 6 3.04v9c0 1.66-3.13 3-7 3-2.08 0-3.95-.4-5.22-1.03" /><path d="M16 14.5c-1.55 0-2.94-.22-4-.59" /></symbol>
+        <symbol id="icon-education" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5zM6 11v6c3.5 3 8.5 3 12 0v-6M22 9v6" /></symbol>
+        <symbol id="icon-user-settings" viewBox="0 0 24 24"><path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="m19.4 15.6.4.4 1.2-.2.8 1.4-.8 1 .1.5 1 .8-.5 1.5-1.3.1-.4.4.2 1.2-1.4.8-1-.8-.5.1-.8 1-1.5-.5-.1-1.3-.4-.4-1.2.2-.8-1.4.8-1-.1-.5-1-.8.5-1.5 1.3-.1.4-.4-.2-1.2 1.4-.8 1 .8.5-.1.8-1 1.5.5zM18 18.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" /></symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></symbol>
+    </svg>
+    <header class="h-[4.75rem] bg-[#9F5F2F] text-white shadow-md">
+        <div class="flex h-full items-center justify-between gap-4 px-5">
             <a asp-area="" asp-controller="Home" asp-action="Index" class="flex items-center gap-3">
                 <img src="~/Images/logo_blanco.webp" asp-append-version="true" alt="BEMO" class="size-11 rounded-lg bg-[#381F12]/30 object-contain" />
                 <span>
@@ -20,7 +58,7 @@
                 <span class="text-sm text-[#F5E8D2]">@User.Identity?.Name</span>
                 <form asp-area="" asp-controller="Login" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white cursor-pointer">
+                    <button type="submit" class="cursor-pointer rounded-lg border border-white/40 px-4 py-2 text-sm font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white">
                         Cerrar sesión
                     </button>
                 </form>
@@ -28,14 +66,40 @@
         </div>
     </header>
 
-    <main class="mx-auto min-h-[calc(100vh-9rem)] max-w-6xl px-5 py-10">
-        @RenderBody()
-    </main>
+    <div class="flex min-h-[calc(100vh-4.75rem)] flex-col md:flex-row">
+        <aside class="flex shrink-0 flex-col border-b border-[#E3D2AE] bg-[#FBF8F1] md:w-64 md:border-b-0 md:border-r">
+            <p class="hidden px-5 pb-3 pt-6 text-sm font-semibold uppercase tracking-[0.18em] text-[#9F5F2F] md:block">Módulos</p>
+            <nav aria-label="Módulos" class="flex gap-2 overflow-x-auto px-2 py-2 md:flex-1 md:flex-col md:overflow-visible md:px-2 md:py-0">
+                @foreach (var module in modules)
+                {
+                    var isActive = string.Equals(
+                        ViewContext.RouteData.Values["controller"]?.ToString(),
+                        module.Controller,
+                        StringComparison.OrdinalIgnoreCase);
+                    <a asp-area="@areaName" asp-controller="@module.Controller" asp-action="Index"
+                       aria-current="@(isActive ? "page" : null)"
+                       class="flex shrink-0 items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium transition @(isActive ? "bg-[#9F5F2F] text-white shadow-sm" : "text-[#381F12] hover:bg-[#F1E4D0]")">
+                        <svg class="size-6 shrink-0 fill-none stroke-current" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <use href="#icon-@module.Icon"></use>
+                        </svg>
+                        <span>@module.Text</span>
+                    </a>
+                }
+            </nav>
+            <p class="hidden border-t border-[#E3D2AE] px-5 py-5 text-sm text-[#684026] md:block">@roleName</p>
+        </aside>
 
-    <footer class="border-t border-[#E3D2AE] bg-white/70">
-        <div class="mx-auto max-w-6xl px-5 py-4 text-sm text-[#804C2C]">
-            &copy; 2026 BEMO - Corporación Textil Salvadoreña
+        <div class="flex min-w-0 flex-1 flex-col">
+            <main class="flex-1 px-6 py-8 md:px-12 md:py-10">
+                @RenderBody()
+            </main>
+            <footer class="border-t border-[#E3D2AE] bg-white/70">
+                <div class="px-6 py-4 text-sm text-[#804C2C] md:px-12">
+                    <p class="font-semibold text-[#684026]">Cada detalle cuenta para una planilla precisa y a tiempo.</p>
+                    <p class="mt-2 text-xs">&copy; 2026 BEMO - Corporación Textil Salvadoreña</p>
+                </div>
+            </footer>
         </div>
-    </footer>
+    </div>
 </body>
 </html>
