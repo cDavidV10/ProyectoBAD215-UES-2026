@@ -1,0 +1,10 @@
+@{
+    ViewData["Title"] = "Nueva solicitud de anticipo";
+}
+
+<div class="space-y-5"><div><p class="bemo-breadcrumb">Préstamos y anticipos <span class="mx-2">›</span> Nueva solicitud</p><h1 class="bemo-title mt-3">Nueva solicitud de anticipo</h1></div>
+    <form class="bemo-card grid gap-8 p-5 md:grid-cols-[1fr_23rem] md:p-8" data-demo-form>
+        <div class="space-y-5"><div class="grid gap-4 md:grid-cols-2"><div><label class="bemo-label bemo-required">Empleado</label><div class="relative"><svg class="bemo-icon absolute left-3 top-3" viewBox="0 0 24 24"><use href="#icon-search"></use></svg><input class="bemo-input pl-11" placeholder="Buscar empleado..." required /></div></div><div><label class="bemo-label bemo-required">Fecha de solicitud</label><input class="bemo-input" type="date" placeholder="dd/mm/aaaa" required /></div><div><label class="bemo-label bemo-required">Monto solicitado ($)</label><input class="bemo-input" type="number" placeholder="Ingrese monto..." required /></div><div><label class="bemo-label bemo-required">Quincena de descuento</label><select class="bemo-select" required><option>Seleccione una quincena...</option><option>Primera (01-15)</option><option>Segunda (16-30)</option></select></div><div class="md:col-span-2"><label class="bemo-label">Motivo</label><textarea class="bemo-textarea" placeholder="Ingrese el motivo..."></textarea></div></div><div class="bemo-divider flex flex-wrap gap-3 pt-4"><button class="bemo-button bemo-button-primary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>Guardar solicitud</button><a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a></div></div>
+        <aside class="bemo-card self-start p-5"><h2 class="text-lg font-extrabold">Estado inicial</h2><span class="bemo-status bemo-status-brown mt-4">Pendiente</span><div class="bemo-divider mt-5 pt-5"><p class="leading-7">El anticipo se descontará en la quincena seleccionada, previa aprobación.</p></div></aside>
+    </form>
+</div>

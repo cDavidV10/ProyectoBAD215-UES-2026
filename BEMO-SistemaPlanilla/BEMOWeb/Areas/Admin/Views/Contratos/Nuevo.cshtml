@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Nuevo contrato";
+}
+
+<div class="space-y-5">
+    <div><p class="bemo-breadcrumb">Contratos <span class="mx-2">›</span> Nuevo contrato</p><h1 class="bemo-title mt-3">Nuevo contrato</h1></div>
+    <form class="bemo-card space-y-5 p-5 md:p-8" data-demo-form>
+        <section><h2 class="mb-2 text-xl font-extrabold">Empleado</h2><label class="bemo-label bemo-required">Buscar empleado por código o nombre</label><select class="bemo-select max-w-2xl" required><option>Seleccione un empleado</option><option>EMP-001 - Carlos Andrés Martínez López</option><option>EMP-002 - María Elena Hernández Rivera</option></select></section>
+        <div class="bemo-divider"></div>
+        <section><h2 class="mb-3 text-xl font-extrabold">Condiciones laborales</h2><div class="grid gap-4 md:grid-cols-3">
+            <div><label class="bemo-label bemo-required">Departamento</label><select class="bemo-select" required><option>Seleccione un departamento</option><option>Producción</option><option>Administración</option></select></div>
+            <div><label class="bemo-label bemo-required">Cargo</label><select class="bemo-select" required><option>Seleccione un cargo</option><option>Operario de producción</option><option>Analista de Recursos Humanos</option></select></div>
+            <div><label class="bemo-label bemo-required">Tipo de contrato</label><select class="bemo-select" required><option>Seleccione un tipo de contrato</option><option>Indefinido</option><option>Temporal</option></select></div>
+            <div><label class="bemo-label bemo-required">Fecha de inicio</label><input class="bemo-input" type="date" required /></div>
+            <div><label class="bemo-label">Fecha de finalización</label><input class="bemo-input" type="date" /><p class="mt-1 text-xs italic text-[#684026]">Solo para contratos con fecha de término.</p></div>
+            <div><label class="bemo-label bemo-required">Salario mensual ($)</label><input class="bemo-input" type="number" placeholder="Ingrese el salario" required /></div>
+            <div><label class="bemo-label">Jornada laboral</label><select class="bemo-select"><option>Seleccione una jornada</option><option>Tiempo completo</option><option>Medio tiempo</option></select></div>
+            <div class="md:col-span-2"><label class="bemo-label">Observaciones</label><textarea class="bemo-textarea" placeholder="Ingrese observaciones"></textarea></div>
+        </div></section>
+        <div class="flex flex-wrap gap-3"><button class="bemo-button bemo-button-primary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>Guardar contrato</button><a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a></div>
+    </form>
+</div>

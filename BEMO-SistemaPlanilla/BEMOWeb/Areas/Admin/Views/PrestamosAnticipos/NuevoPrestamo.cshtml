@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Nueva solicitud de préstamo";
+}
+
+<div class="space-y-5"><div><p class="bemo-breadcrumb">Préstamos y anticipos <span class="mx-2">›</span> Nueva solicitud de préstamo</p><h1 class="bemo-title mt-3">Nueva solicitud de préstamo</h1></div>
+    <form class="bemo-card space-y-5 p-5 md:p-7" data-demo-form>
+        <div class="grid gap-4 rounded-xl border border-[#E3D2AE] bg-[#FBF8F1] p-4 md:grid-cols-[12rem_1fr]"><div><p class="bemo-label">Estado inicial</p><span class="bemo-status bemo-status-brown">Pendiente</span></div><div class="border-l border-[#E3D2AE] pl-4"><p class="bemo-label">Ayuda</p><p>La cuota se validará con el límite configurado sobre el salario neto.</p></div></div>
+        <div class="grid gap-4 md:grid-cols-3"><div><label class="bemo-label bemo-required">Empleado</label><div class="relative"><svg class="bemo-icon absolute left-3 top-3" viewBox="0 0 24 24"><use href="#icon-search"></use></svg><input class="bemo-input pl-11" placeholder="Buscar empleado..." required /></div></div><div><label class="bemo-label bemo-required">Fecha de solicitud</label><input class="bemo-input" type="date" required /></div><div><label class="bemo-label bemo-required">Monto solicitado ($)</label><input class="bemo-input" type="number" placeholder="Ingrese el monto..." required /></div><div><label class="bemo-label bemo-required">Número de cuotas</label><input class="bemo-input" type="number" placeholder="Ingrese el número..." required /></div><div><label class="bemo-label">Cuota estimada ($)</label><input class="bemo-input" value="-" disabled /></div><div><label class="bemo-label bemo-required">Primera quincena de descuento</label><select class="bemo-select" required><option>Seleccione una opción...</option><option>Noviembre 2026 · Primera</option><option>Noviembre 2026 · Segunda</option></select></div><div class="md:col-span-3"><label class="bemo-label">Motivo</label><textarea class="bemo-textarea" placeholder="Ingrese el motivo de la solicitud..."></textarea></div></div>
+        <div class="bemo-divider flex flex-wrap justify-end gap-3 pt-4"><a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a><button class="bemo-button bemo-button-primary" type="submit">Guardar solicitud</button></div>
+    </form>
+</div>

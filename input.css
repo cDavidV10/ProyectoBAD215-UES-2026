@@ -8,3 +8,352 @@
 @source "./BEMO-SistemaPlanilla/BEMOWeb/Views";
 @source "./BEMO-SistemaPlanilla/BEMOWeb/Areas";
 @source "./BEMO-SistemaPlanilla/BEMOWeb/wwwroot";
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: "Inter Variable", Inter, sans-serif;
+    background: #f7f1e5;
+    color: #381f12;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .bemo-page {
+    min-height: 100%;
+    background:
+      radial-gradient(circle at 85% 5%, rgba(255, 255, 255, .7), transparent 28rem),
+      linear-gradient(135deg, #faf6ed 0%, #f7f1e5 55%, #f4ecdd 100%);
+  }
+
+  .bemo-kicker {
+    color: #9f5f2f;
+    font-size: .91rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+
+  .bemo-title {
+    color: #381f12;
+    font-size: clamp(1.7rem, 2.4vw, 2.3rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    line-height: 1.1;
+  }
+
+  .bemo-subtitle {
+    color: #684026;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+
+  .bemo-card,
+  .bemo-panel {
+    border: 1px solid #e3d2ae;
+    border-radius: .9rem;
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 1px 2px rgba(104, 64, 38, .03);
+  }
+
+  .bemo-panel {
+    padding: .9rem;
+  }
+
+  .bemo-section-bar {
+    border-radius: .55rem;
+    background: linear-gradient(90deg, #f3e8d4, #fbf7ef);
+    color: #381f12;
+    font-size: 1.05rem;
+    font-weight: 800;
+    padding: .42rem .8rem;
+  }
+
+  .bemo-label {
+    display: block;
+    color: #381f12;
+    font-size: .91rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: .4rem;
+  }
+
+  .bemo-required::after {
+    color: #bd231c;
+    content: " *";
+  }
+
+  .bemo-input,
+  .bemo-select,
+  .bemo-textarea {
+    width: 100%;
+    border: 1px solid #d7c49e;
+    border-radius: .55rem;
+    background: #fff;
+    color: #381f12;
+    font-size: 1rem;
+    outline: none;
+    padding: .65rem .8rem;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+
+  .bemo-input::placeholder,
+  .bemo-textarea::placeholder {
+    color: #8e8b87;
+  }
+
+  .bemo-input:focus,
+  .bemo-select:focus,
+  .bemo-textarea:focus {
+    border-color: #9f5f2f;
+    box-shadow: 0 0 0 3px rgba(206, 142, 65, .2);
+  }
+
+  .bemo-input:disabled,
+  .bemo-select:disabled {
+    background: #f1f1f1;
+    color: #898989;
+  }
+
+  .bemo-textarea {
+    min-height: 5.4rem;
+    resize: vertical;
+  }
+
+  .bemo-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    border-radius: .62rem;
+    cursor: pointer;
+    font-size: .98rem;
+    font-weight: 750;
+    line-height: 1;
+    min-height: 2.75rem;
+    padding: .78rem 1.2rem;
+    transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+
+  .bemo-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .bemo-button-primary {
+    background: #9f5f2f;
+    box-shadow: 0 5px 12px rgba(159, 95, 47, .14);
+    color: #fff;
+  }
+
+  .bemo-button-primary:hover {
+    background: #804c2c;
+  }
+
+  .bemo-button-secondary {
+    border: 1px solid #b8753e;
+    background: #fff;
+    color: #5d301b;
+  }
+
+  .bemo-button-ghost {
+    border: 1px solid #d7c49e;
+    background: #fff;
+    color: #381f12;
+    min-height: 2.35rem;
+    padding: .55rem .85rem;
+  }
+
+  .bemo-button-ghost:hover {
+    background: #fbf4e7;
+  }
+
+  .bemo-button:disabled {
+    background: #c7c7c7;
+    box-shadow: none;
+    color: #fff;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .bemo-icon {
+    height: 1.45rem;
+    width: 1.45rem;
+    fill: none;
+    flex: 0 0 auto;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  .bemo-icon-sm {
+    height: 1.15rem;
+    width: 1.15rem;
+  }
+
+  .bemo-stat {
+    align-items: center;
+    border: 1px solid #e3c48f;
+    border-radius: .8rem;
+    background: rgba(255, 255, 255, .94);
+    display: flex;
+    gap: 1rem;
+    min-height: 6rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .bemo-stat-icon {
+    align-items: center;
+    border-right: 1px solid #d7a660;
+    color: #6b351b;
+    display: flex;
+    justify-content: center;
+    min-height: 3.2rem;
+    padding-right: 1.25rem;
+    width: 5rem;
+  }
+
+  .bemo-stat-label {
+    color: #684026;
+    font-size: .95rem;
+    font-weight: 650;
+  }
+
+  .bemo-stat-value {
+    color: #381f12;
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1.05;
+    margin-top: .3rem;
+  }
+
+  .bemo-status {
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: .84rem;
+    font-weight: 700;
+    padding: .32rem .7rem;
+    white-space: nowrap;
+  }
+
+  .bemo-status-green { background: #d9f3c9; color: #2c7022; }
+  .bemo-status-red { background: #ffd6d4; color: #9f2722; }
+  .bemo-status-yellow { background: #ffe6a9; color: #7d4e0a; }
+  .bemo-status-gray { background: #e1e1e1; color: #4c4c4c; }
+  .bemo-status-brown { background: #f4e7ca; color: #633617; }
+
+  .bemo-table-wrap {
+    overflow-x: auto;
+  }
+
+  .bemo-table {
+    border-collapse: collapse;
+    min-width: 720px;
+    width: 100%;
+  }
+
+  .bemo-table th {
+    background: #f6eddd;
+    color: #381f12;
+    font-weight: 800;
+    text-align: left;
+  }
+
+  .bemo-table th,
+  .bemo-table td {
+    border-bottom: 1px solid #e6d5b6;
+    padding: .68rem .82rem;
+    vertical-align: middle;
+  }
+
+  .bemo-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .bemo-table tbody tr:hover {
+    background: #fffaf1;
+  }
+
+  .bemo-info {
+    align-items: flex-start;
+    background: #f7f0e2;
+    border-radius: .65rem;
+    color: #4d2a18;
+    display: flex;
+    gap: .7rem;
+    padding: .75rem .9rem;
+  }
+
+  .bemo-divider {
+    border-top: 1px solid #e3d2ae;
+  }
+
+  .bemo-tab {
+    border: 1px solid #e3c49a;
+    border-bottom: 0;
+    border-radius: .6rem .6rem 0 0;
+    color: #381f12;
+    font-weight: 750;
+    padding: .6rem 1.25rem;
+  }
+
+  .bemo-tab.active {
+    background: #9f5f2f;
+    color: #fff;
+  }
+
+  .bemo-check {
+    accent-color: #9f5f2f;
+    height: 1.35rem;
+    width: 1.35rem;
+  }
+
+  .bemo-breadcrumb {
+    color: #9f5f2f;
+    font-size: .92rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+
+  .bemo-link-action {
+    color: #381f12;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bemo-link-action:hover {
+    color: #9f5f2f;
+  }
+
+  @media (max-width: 768px) {
+    .bemo-stat {
+      min-height: 5.25rem;
+      padding: .8rem;
+    }
+
+    .bemo-stat-icon {
+      padding-right: .75rem;
+      width: 3.8rem;
+    }
+
+    .bemo-stat-value {
+      font-size: 1.45rem;
+    }
+  }
+}

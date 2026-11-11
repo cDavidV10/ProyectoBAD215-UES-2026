@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Contratos";
+}
+
+<div class="space-y-6">
+    <header class="grid gap-5 lg:grid-cols-[1fr_auto]">
+        <div><p class="bemo-kicker">Administración</p><h1 class="bemo-title mt-2">Contratos</h1><p class="bemo-subtitle mt-2">Gestiona las condiciones laborales del personal.</p><a asp-action="Nuevo" class="bemo-button bemo-button-primary mt-5"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>Nuevo contrato</a></div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:min-w-[38rem]">
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg></div><div><p class="bemo-stat-label">Vigentes</p><p class="bemo-stat-value">122</p></div></div>
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Por vencer</p><p class="bemo-stat-value">8</p></div></div>
+        </div>
+    </header>
+
+    <section class="bemo-card grid gap-4 p-4 md:grid-cols-3">
+        <div><label class="bemo-label">Empleado</label><select class="bemo-select"><option>Todos los empleados</option><option>Ana Lucía Martínez</option><option>Carlos Ernesto Rivas</option></select></div>
+        <div><label class="bemo-label">Tipo de contrato</label><select class="bemo-select"><option>Todos los tipos</option><option>Indefinido</option><option>Temporal</option></select></div>
+        <div><label class="bemo-label">Estado</label><select class="bemo-select"><option>Todos los estados</option><option>Vigente</option><option>Por vencer</option></select></div>
+    </section>
+
+    <section class="bemo-card overflow-hidden"><div class="bemo-table-wrap"><table class="bemo-table"><thead><tr><th>N.º</th><th>Empleado</th><th>Cargo</th><th>Tipo</th><th>Salario mensual</th><th>Inicio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+        <tr><td>0001</td><td>Ana Lucía Martínez</td><td>Analista de Recursos Humanos</td><td>Indefinido</td><td>$1,250.00</td><td>15/01/2024</td><td><span class="bemo-status bemo-status-green">Vigente</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
+        <tr><td>0002</td><td>Carlos Ernesto Rivas</td><td>Supervisor de Producción</td><td>Temporal</td><td>$1,100.00</td><td>01/03/2025</td><td><span class="bemo-status bemo-status-yellow">Por vencer</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
+        <tr><td>0003</td><td>María Fernanda Gómez</td><td>Auxiliar Contable</td><td>Indefinido</td><td>$900.00</td><td>10/06/2023</td><td><span class="bemo-status bemo-status-green">Vigente</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
+        <tr><td>0004</td><td>José Alberto Perdomo</td><td>Operario de Producción</td><td>Temporal</td><td>$750.00</td><td>01/02/2025</td><td><span class="bemo-status bemo-status-green">Vigente</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
+    </tbody></table></div></section>
+</div>
