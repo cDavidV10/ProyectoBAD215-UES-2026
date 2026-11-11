@@ -1,4 +1,4 @@
-@model BEMOWeb.Models.AdminDashboardViewModel
+@model BEMOWeb.Models.EmpleadoModel
 
 @{
     ViewData["Title"] = "Empleados";
@@ -58,11 +58,11 @@
                    data-filter-input="employees" />
         </div>
         <select class="bemo-select" aria-label="Filtrar por departamento" data-filter-select="employees">
-            <option>Todos los departamentos</option>
-            <option>Producción</option>
-            <option>Recursos Humanos</option>
-            <option>Mantenimiento</option>
-            <option>Administración</option>
+            <option value="">Todos los departamentos</option>
+            @foreach (var departamento in Model.Departamentos)
+            {
+                <option value="@departamento.NombreDepartamento">@departamento.NombreDepartamento</option>
+            }
         </select>
         <select class="bemo-select" aria-label="Filtrar por estado">
             <option>Todos los estados</option>

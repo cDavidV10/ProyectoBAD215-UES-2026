@@ -16,7 +16,7 @@ namespace BEMOWeb.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            var modelo = new BEMOWeb.Models.AdminDashboardViewModel
+            var modelo = new BEMOWeb.Models.EmpleadoModel
             {
                 EmpleadosActivos = _empleados.UsuariosActivos(),
                 EmpleadosInactivos = _empleados.EmpleadosInactivos()
