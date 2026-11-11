@@ -36,23 +36,8 @@ public class DAOEmpleado
         var empleados = new List<Empleado>();
 
         const string consulta = @"
-            WITH EmpleadosUnicos AS
-            (
-                SELECT id_empleado, dui, nit, numero_isss, nombre, apellido, telefono, correo,
-                       fecha_nac, estado, nombre_afp, nombre_calle, numero_casa, nombre_municipio,
-                       departamento_ubicacion, id_contrato, nombre_tipo_contrato, nombre_cargo,
-                       nombre_departamento, salario_bruto, fecha_contratacion, fecha_culminacion,
-                       estado_contrato,
-                       ROW_NUMBER() OVER (PARTITION BY id_empleado ORDER BY id_contrato DESC) AS fila
-                FROM dbo.VW_Empleados_General
-            )
-            SELECT id_empleado, dui, nit, numero_isss, nombre, apellido, telefono, correo,
-                   fecha_nac, estado, nombre_afp, nombre_calle, numero_casa, nombre_municipio,
-                   departamento_ubicacion, id_contrato, nombre_tipo_contrato, nombre_cargo,
-                   nombre_departamento, salario_bruto, fecha_contratacion, fecha_culminacion,
-                   estado_contrato
-            FROM EmpleadosUnicos
-            WHERE fila = 1
+            SELECT *
+            FROM dbo.VW_Empleados_General
             ORDER BY id_empleado
             OFFSET @desplazamiento ROWS
             FETCH NEXT @tamanoPagina ROWS ONLY;";
@@ -104,9 +89,7 @@ public class DAOEmpleado
 
     public int TotalEmpleadosGeneral()
     {
-        const string consulta = @"
-            SELECT COUNT(DISTINCT id_empleado)
-            FROM dbo.VW_Empleados_General;";
+        const string consulta = "SELECT COUNT(*) FROM dbo.VW_Empleados_General;";
 
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand(consulta, conexionSql);
