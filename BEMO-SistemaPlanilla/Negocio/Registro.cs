@@ -8,6 +8,7 @@ public static class RegistroDatos
     {
         servicios.AddSingleton(new Conexion(cadenaConexion));
         servicios.AddScoped<DAODeptoUbicacion>();
+        servicios.AddScoped<DAOEmpleado>();
         servicios.AddScoped<DAOLogin>();
         return servicios;
     }

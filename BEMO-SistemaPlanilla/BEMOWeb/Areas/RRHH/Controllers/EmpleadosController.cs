@@ -7,7 +7,24 @@ namespace BEMOWeb.Areas.RRHH.Controllers;
 [Authorize(Roles = "RECURSOS HUMANOS")]
 public class EmpleadosController : Controller
 {
-    public IActionResult Index() => View("~/Areas/Admin/Views/Empleados/Index.cshtml");
+    private readonly BEMO.Negocio.CN_Empleado _empleados;
+
+    public EmpleadosController(BEMO.Negocio.CN_Empleado empleados)
+    {
+        _empleados = empleados;
+    }
+
+    public IActionResult Index()
+    {
+        var modelo = new BEMOWeb.Models.AdminDashboardViewModel
+        {
+            EmpleadosActivos = _empleados.UsuariosActivos(),
+            EmpleadosInactivos = _empleados.EmpleadosInactivos(),
+            EmpleadosTotales = _empleados.EmpladosTotales()
+        };
+
+        return View("~/Areas/Admin/Views/Empleados/Index.cshtml", modelo);
+    }
 
     public IActionResult Nuevo() => View("~/Areas/Admin/Views/Empleados/Nuevo.cshtml");
 }

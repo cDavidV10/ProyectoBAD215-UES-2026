@@ -7,9 +7,22 @@ namespace BEMOWeb.Areas.Admin.Controllers
     [Authorize(Roles = "ADMINISTRADOR NOMINA")]
     public class HomeController : Controller
     {
+        private readonly BEMO.Negocio.CN_Empleado _empleados;
+
+        public HomeController(BEMO.Negocio.CN_Empleado empleados)
+        {
+            _empleados = empleados;
+        }
+
         public IActionResult Index()
         {
-            return View();
+            var modelo = new BEMOWeb.Models.AdminDashboardViewModel
+            {
+                EmpleadosActivos = _empleados.UsuariosActivos(),
+                EmpleadosInactivos = _empleados.EmpleadosInactivos()
+            };
+
+            return View(modelo);
         }
     }
 }
