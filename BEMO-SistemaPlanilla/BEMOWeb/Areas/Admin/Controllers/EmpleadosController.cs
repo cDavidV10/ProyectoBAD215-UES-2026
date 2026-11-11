@@ -17,14 +17,24 @@ public class EmpleadosController : Controller
             _empleados = empleados;
             _departamento = departamento;
         }
-    public IActionResult Index()
+    public IActionResult Index(int pagina = 1)
         {
+            const int tamanoPagina = 10;
+            var totalRegistros = _empleados.TotalEmpleadosGeneral();
+            var totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (double)tamanoPagina));
+            pagina = Math.Clamp(pagina, 1, totalPaginas);
+
             var empleadoModel = new Models.EmpleadoModel
             {
                 EmpleadosActivos = _empleados.UsuariosActivos(),
                 EmpleadosInactivos = _empleados.EmpleadosInactivos(),
                 EmpleadosTotales = _empleados.EmpladosTotales(),
-                Departamentos = _departamento.Listar()
+                Departamentos = _departamento.Listar(),
+                ListaEmpleados = _empleados.Listar(pagina, tamanoPagina),
+                PaginaActual = pagina,
+                TotalPaginas = totalPaginas,
+                TotalRegistros = totalRegistros,
+                TamanoPagina = tamanoPagina
             };
 
             return View(empleadoModel);

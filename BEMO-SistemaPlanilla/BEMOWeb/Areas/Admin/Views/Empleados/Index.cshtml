@@ -1,7 +1,10 @@
+@using System.Linq
 @model BEMOWeb.Models.EmpleadoModel
 
 @{
     ViewData["Title"] = "Empleados";
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
 }
 
 <div class="space-y-6">
@@ -12,50 +15,30 @@
             <p class="bemo-subtitle mt-2">Administra la información del personal.</p>
         </div>
         <a asp-controller="Empleados" asp-action="Nuevo" class="bemo-button bemo-button-primary self-start">
-            <svg class="bemo-icon" viewBox="0 0 24 24">
-                <use href="#icon-plus"></use>
-            </svg>
+            <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
             Nuevo empleado
         </a>
     </header>
 
     <section class="grid gap-4 lg:grid-cols-3">
         <div class="bemo-stat">
-            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
-                <use href="#icon-users"></use>
-            </svg></div>
-            <div>
-                <p class="bemo-stat-label">Total de empleados</p>
-                <p class="bemo-stat-value">@Model.EmpleadosTotales</p>
-            </div>
+            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-users"></use></svg></div>
+            <div><p class="bemo-stat-label">Total de empleados</p><p class="bemo-stat-value">@Model.EmpleadosTotales</p></div>
         </div>
         <div class="bemo-stat">
-            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
-                <use href="#icon-check"></use>
-            </svg></div>
-            <div>
-                <p class="bemo-stat-label">Activos</p>
-                <p class="bemo-stat-value">@Model.EmpleadosActivos</p>
-            </div>
+            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div>
+            <div><p class="bemo-stat-label">Activos</p><p class="bemo-stat-value">@Model.EmpleadosActivos</p></div>
         </div>
         <div class="bemo-stat">
-            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
-                <use href="#icon-ban"></use>
-            </svg></div>
-            <div>
-                <p class="bemo-stat-label">Inactivos</p>
-                <p class="bemo-stat-value">@Model.EmpleadosInactivos</p>
-            </div>
+            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg></div>
+            <div><p class="bemo-stat-label">Inactivos</p><p class="bemo-stat-value">@Model.EmpleadosInactivos</p></div>
         </div>
     </section>
 
     <section class="grid gap-4 lg:grid-cols-[1.25fr_1fr_1fr]">
         <div class="relative">
-            <svg class="bemo-icon absolute left-4 top-3 text-[#381F12]" viewBox="0 0 24 24">
-                <use href="#icon-search"></use>
-            </svg>
-            <input class="bemo-input pl-12" type="search" placeholder="Buscar por nombre o código..."
-                   data-filter-input="employees" />
+            <svg class="bemo-icon absolute left-4 top-3 text-[#381F12]" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>
+            <input class="bemo-input pl-12" type="search" placeholder="Buscar por nombre o código..." data-filter-input="employees" />
         </div>
         <select class="bemo-select" aria-label="Filtrar por departamento" data-filter-select="employees">
             <option value="">Todos los departamentos</option>
@@ -65,9 +48,9 @@
             }
         </select>
         <select class="bemo-select" aria-label="Filtrar por estado">
-            <option>Todos los estados</option>
-            <option>Activo</option>
-            <option>Inactivo</option>
+            <option value="">Todos los estados</option>
+            <option value="ACTIVO">Activo</option>
+            <option value="INACTIVO">Inactivo</option>
         </select>
     </section>
 
@@ -85,69 +68,55 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr data-filter-value="EMP-001 Carlos Andrés Martínez López Producción Operario de producción">
-                        <td>EMP-001</td>
-                        <td> Carlos Andrés Martínez López</td>
-                        <td>Producción</td>
-                        <td>Operario de producción</td>
-                        <td><span class="bemo-status bemo-status-green">Activo</span></td>
-                        <td><button class="bemo-link-action mr-3" type="button"><svg class="bemo-icon-sm inline"
-                                                                                     viewBox="0 0 24 24">
-                            <use href="#icon-eye"></use>
-                        </svg> Ver</button><span class="text-[#C5A77B]">|</span><button
-                        class="bemo-link-action ml-3" type="button"><svg class="bemo-icon-sm inline"
-                                                                     viewBox="0 0 24 24">
-                        <use href="#icon-edit"></use>
-                    </svg> Editar</button></td>
-                </tr>
-                <tr
-                    data-filter-value="EMP-002 María Elena Hernández Rivera Recursos Humanos Analista de talento humano">
-                    <td>EMP-002</td>
-                    <td>María Elena Hernández Rivera</td>
-                    <td>Recursos Humanos</td>
-                    <td>Analista de talento humano</td>
-                    <td><span class="bemo-status bemo-status-green">Activo</span></td>
-                    <td><button class="bemo-link-action mr-3" type="button"><svg class="bemo-icon-sm inline"
-                                                                                 viewBox="0 0 24 24">
-                        <use href="#icon-eye"></use>
-                    </svg> Ver</button><span class="text-[#C5A77B]">|</span><button
-                    class="bemo-link-action ml-3" type="button"><svg class="bemo-icon-sm inline"
-                                                                 viewBox="0 0 24 24">
-                    <use href="#icon-edit"></use>
-                </svg> Editar</button></td>
-            </tr>
-            <tr data-filter-value="EMP-003 José Ricardo Pérez Aguilar Mantenimiento Técnico de mantenimiento">
-                <td>EMP-003</td>
-                <td>José Ricardo Pérez Aguilar</td>
-                <td>Mantenimiento</td>
-                <td>Técnico de mantenimiento</td>
-                <td><span class="bemo-status bemo-status-red">Inactivo</span></td>
-                <td><button class="bemo-link-action mr-3" type="button"><svg class="bemo-icon-sm inline"
-                                                                             viewBox="0 0 24 24">
-                    <use href="#icon-eye"></use>
-                </svg> Ver</button><span class="text-[#C5A77B]">|</span><button
-                class="bemo-link-action ml-3" type="button"><svg class="bemo-icon-sm inline"
-                                                             viewBox="0 0 24 24">
-                <use href="#icon-edit"></use>
-            </svg> Editar</button></td>
-        </tr>
-        <tr data-filter-value="EMP-004 Ana Gabriela Castro Morales Administración Asistente administrativa">
-            <td>EMP-004</td>
-            <td>Ana Gabriela Castro Morales</td>
-            <td>Administración</td>
-            <td>Asistente administrativa</td>
-            <td><span class="bemo-status bemo-status-green">Activo</span></td>
-            <td><button class="bemo-link-action mr-3" type="button"><svg class="bemo-icon-sm inline"
-                                                                         viewBox="0 0 24 24">
-                <use href="#icon-eye"></use>
-            </svg> Ver</button><span class="text-[#C5A77B]">|</span><button
-            class="bemo-link-action ml-3" type="button"><svg class="bemo-icon-sm inline"
-                                                         viewBox="0 0 24 24">
-            <use href="#icon-edit"></use>
-        </svg> Editar</button></td>
-    </tr>
-</tbody>
-</table>
-</div>
-</section>
+                    @if (Model.ListaEmpleados.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-center">No hay empleados para mostrar.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var empleado in Model.ListaEmpleados)
+                        {
+                            var contrato = empleado.Contratos.FirstOrDefault();
+                            var departamento = contrato?.Departamento?.NombreDepartamento ?? "Sin departamento";
+                            var cargo = contrato?.Cargo?.NombreCargo ?? "Sin cargo";
+                            var activo = string.Equals(empleado.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase);
+                            var claseEstado = activo ? "bemo-status-green" : "bemo-status-red";
+                            var textoEstado = activo ? "Activo" : "Inactivo";
+                            <tr data-filter-value="@($"{empleado.Dui} {empleado.Nombre} {empleado.Apellido} {departamento} {cargo}")">
+                                <td>@empleado.Dui</td>
+                                <td>@empleado.Nombre @empleado.Apellido</td>
+                                <td>@departamento</td>
+                                <td>@cargo</td>
+                                <td><span class="bemo-status @claseEstado">@textoEstado</span></td>
+                                <td>
+                                    <button class="bemo-link-action mr-3" type="button"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg> Ver</button>
+                                    <span class="text-[#C5A77B]">|</span>
+                                    <button class="bemo-link-action ml-3" type="button"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg> Editar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de empleados">
+        <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros empleados</p>
+        <div class="flex flex-wrap gap-2">
+            @if (Model.PaginaActual > 1)
+            {
+                <a class="bemo-button bemo-button-secondary" href="?pagina=@(Model.PaginaActual - 1)">Anterior</a>
+            }
+            @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+            {
+                var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                <a class="@clasePagina" href="?pagina=@pagina">@pagina</a>
+            }
+            @if (Model.PaginaActual < Model.TotalPaginas)
+            {
+                <a class="bemo-button bemo-button-secondary" href="?pagina=@(Model.PaginaActual + 1)">Siguiente</a>
+            }
+        </div>
+    </nav>
 </div>

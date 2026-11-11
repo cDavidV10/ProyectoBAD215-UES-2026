@@ -27,5 +27,15 @@ namespace BEMO.Negocio
         {
             return _metodos.EmpleadosTotales();
         }
+
+        public List<Empleado> Listar(int pagina, int tamanoPagina)
+        {
+            return _metodos.Listar(pagina, tamanoPagina);
+        }
+
+        public int TotalEmpleadosGeneral()
+        {
+            return _metodos.TotalEmpleadosGeneral();
+        }
     }
 }
