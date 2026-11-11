@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BEMOWeb.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Administrador")]
+[Authorize(Roles = "ADMINISTRADOR NOMINA")]
 public class ContratosController : Controller
 {
     public IActionResult Index() => View();
