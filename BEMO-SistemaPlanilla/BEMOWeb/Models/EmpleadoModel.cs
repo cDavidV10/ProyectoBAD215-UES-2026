@@ -20,5 +20,5 @@ public class EmpleadoModel
 
     public int TotalRegistros { get; init; }
 
-    public int TamanoPagina { get; init; } = 10;
+    public int TamanoPagina { get; init; } = 5;
 }

@@ -19,7 +19,7 @@ public class EmpleadosController : Controller
         }
     public IActionResult Index(int pagina = 1)
         {
-            const int tamanoPagina = 10;
+            const int tamanoPagina = 5;
             var totalRegistros = _empleados.TotalEmpleadosGeneral();
             var totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (double)tamanoPagina));
             pagina = Math.Clamp(pagina, 1, totalPaginas);
