@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+@theme {
+  --font-sans: "Inter Variable", Inter, sans-serif;
+}
 
 @source "./BEMO-SistemaPlanilla/BEMOWeb/Views";
 @source "./BEMO-SistemaPlanilla/BEMOWeb/Areas";

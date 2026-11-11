@@ -57,6 +57,7 @@ pnpm-debug.log*
 
 # Tailwind CSS generado
 **/wwwroot/css/site.css
+**/wwwroot/css/files/
 
 # Variables de entorno (no subir credenciales ni secretos)
 .env
