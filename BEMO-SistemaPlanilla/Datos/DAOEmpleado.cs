@@ -28,7 +28,13 @@ public class DAOEmpleado
         return ContarEmpleadosPorEstado("ACTIVO") + ContarEmpleadosPorEstado("INACTIVO");
     }
 
-    public (List<Empleado> Empleados, int Total) ListarPaginado(int pagina, int tamanoPagina, string? busqueda, string? departamento, string? estado)
+    public (List<Empleado> Empleados, int Total) ListarPaginado(
+        int pagina,
+        int tamanoPagina,
+        string? busqueda,
+        string? departamento,
+        string? estado,
+        int? totalSinFiltros = null)
     {
         pagina = Math.Max(1, pagina);
         tamanoPagina = Math.Max(1, tamanoPagina);
@@ -37,9 +43,11 @@ public class DAOEmpleado
         estado = NormalizarFiltro(estado);
         var desplazamiento = (pagina - 1) * tamanoPagina;
         var empleados = new List<Empleado>();
-        var total = 0;
+        var sinFiltros = busqueda is null && departamento is null && estado is null;
+        var usarTotalConocido = sinFiltros && totalSinFiltros.HasValue;
+        var total = usarTotalConocido ? totalSinFiltros!.Value : 0;
 
-        const string consulta = @"
+        const string consultaConTotal = @"
             WITH EmpleadosUnicos AS
             (
                 SELECT
@@ -108,6 +116,76 @@ public class DAOEmpleado
             FETCH NEXT @tamanoPagina ROWS ONLY
             OPTION (RECOMPILE);";
 
+        const string consultaSinTotal = @"
+            WITH EmpleadosUnicos AS
+            (
+                SELECT
+                    id_empleado,
+                    dui,
+                    nit,
+                    numero_isss,
+                    nombre,
+                    apellido,
+                    telefono,
+                    correo,
+                    fecha_nac,
+                    estado,
+                    nombre_afp,
+                    nombre_calle,
+                    numero_casa,
+                    id_contrato,
+                    nombre_tipo_contrato,
+                    nombre_cargo,
+                    nombre_departamento,
+                    salario_bruto,
+                    fecha_contratacion,
+                    fecha_culminacion,
+                    estado_contrato,
+                    ROW_NUMBER() OVER
+                    (
+                        PARTITION BY id_empleado
+                        ORDER BY id_contrato DESC
+                    ) AS fila
+                FROM dbo.VW_Empleados_General
+                WHERE (@busqueda IS NULL
+                       OR dui LIKE '%' + @busqueda + '%'
+                       OR nombre LIKE '%' + @busqueda + '%'
+                       OR apellido LIKE '%' + @busqueda + '%'
+                       OR CONCAT(nombre, ' ', apellido) LIKE '%' + @busqueda + '%')
+                  AND (@departamento IS NULL OR nombre_departamento = @departamento)
+                  AND (@estado IS NULL OR estado = @estado)
+            )
+            SELECT
+                id_empleado,
+                dui,
+                nit,
+                numero_isss,
+                nombre,
+                apellido,
+                telefono,
+                correo,
+                fecha_nac,
+                estado,
+                nombre_afp,
+                nombre_calle,
+                numero_casa,
+                id_contrato,
+                nombre_tipo_contrato,
+                nombre_cargo,
+                nombre_departamento,
+                salario_bruto,
+                fecha_contratacion,
+                fecha_culminacion,
+                estado_contrato
+            FROM EmpleadosUnicos
+            WHERE fila = 1
+            ORDER BY id_empleado
+            OFFSET @desplazamiento ROWS
+            FETCH NEXT @tamanoPagina ROWS ONLY
+            OPTION (RECOMPILE);";
+
+        var consulta = usarTotalConocido ? consultaSinTotal : consultaConTotal;
+
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand(consulta, conexionSql);
         cmd.Parameters.Add("@desplazamiento", SqlDbType.Int).Value = desplazamiento;
@@ -159,6 +237,60 @@ public class DAOEmpleado
         return (empleados, total);
     }
 
+    public int Registrar(
+        Empleado empleado,
+        int idMunicipio,
+        string nombreCalle,
+        string numeroCasa,
+        int idCargo,
+        int idDepartamento,
+        int idTipoContrato,
+        decimal salarioBruto,
+        DateOnly fechaContratacion,
+        DateOnly? fechaCulminacion)
+    {
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand("dbo.usp_Registrar_Empleado", conexionSql)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        cmd.Parameters.Add("@dui", SqlDbType.Char, 10).Value = empleado.Dui.Trim();
+        cmd.Parameters.Add("@nombre", SqlDbType.VarChar, 50).Value = empleado.Nombre.Trim();
+        cmd.Parameters.Add("@apellido", SqlDbType.VarChar, 20).Value = empleado.Apellido.Trim();
+        cmd.Parameters.Add("@nit", SqlDbType.VarChar, 17).Value = ValorOpcional(empleado.Nit);
+        cmd.Parameters.Add("@numero_isss", SqlDbType.VarChar, 15).Value = empleado.NumeroIsss.Trim();
+        cmd.Parameters.Add("@telefono", SqlDbType.VarChar, 12).Value = empleado.Telefono.Trim();
+        cmd.Parameters.Add("@correo", SqlDbType.VarChar, 100).Value = ValorOpcional(empleado.Correo);
+        cmd.Parameters.Add("@fecha_nac", SqlDbType.Date).Value = empleado.FechaNac.ToDateTime(TimeOnly.MinValue);
+        cmd.Parameters.Add("@id_afp", SqlDbType.Int).Value = empleado.IdAfp;
+        cmd.Parameters.Add("@id_municipio", SqlDbType.Int).Value = idMunicipio;
+        cmd.Parameters.Add("@nombre_calle", SqlDbType.VarChar, 50).Value = nombreCalle.Trim();
+        cmd.Parameters.Add("@numero_casa", SqlDbType.VarChar, 10).Value = numeroCasa.Trim();
+        cmd.Parameters.Add("@id_cargo", SqlDbType.Int).Value = idCargo;
+        cmd.Parameters.Add("@id_departamento", SqlDbType.Int).Value = idDepartamento;
+        cmd.Parameters.Add("@id_tipo_contrato", SqlDbType.Int).Value = idTipoContrato;
+
+        var salario = cmd.Parameters.Add("@salario_bruto", SqlDbType.Decimal);
+        salario.Precision = 10;
+        salario.Scale = 2;
+        salario.Value = salarioBruto;
+
+        cmd.Parameters.Add("@fecha_contratacion", SqlDbType.Date).Value = fechaContratacion.ToDateTime(TimeOnly.MinValue);
+        cmd.Parameters.Add("@fecha_culminacion", SqlDbType.Date).Value =
+            fechaCulminacion.HasValue
+                ? fechaCulminacion.Value.ToDateTime(TimeOnly.MinValue)
+                : DBNull.Value;
+
+        var idEmpleado = cmd.Parameters.Add("@id_empleado", SqlDbType.Int);
+        idEmpleado.Direction = ParameterDirection.Output;
+
+        conexionSql.Open();
+        cmd.ExecuteNonQuery();
+
+        return Convert.ToInt32(idEmpleado.Value);
+    }
+
     public (int Activos, int Inactivos, int Total) ObtenerResumen()
     {
         const string consulta = @"
@@ -197,6 +329,11 @@ public class DAOEmpleado
     private static string? NormalizarFiltro(string? filtro)
     {
         return string.IsNullOrWhiteSpace(filtro) ? null : filtro.Trim();
+    }
+
+    private static object ValorOpcional(string? valor)
+    {
+        return string.IsNullOrWhiteSpace(valor) ? DBNull.Value : valor.Trim();
     }
 
     private static Contrato? CrearContrato(SqlDataReader dr, int idEmpleado)

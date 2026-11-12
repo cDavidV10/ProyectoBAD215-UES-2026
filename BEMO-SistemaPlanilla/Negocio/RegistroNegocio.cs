@@ -15,6 +15,10 @@ public static class RegistroNegocio
 
         servicios.AgregarDatos(cadenaConexion);
         servicios.AddScoped<CN_DeptoUbicacion>();
+        servicios.AddScoped<CN_MunicipioUbicacion>();
+        servicios.AddScoped<CN_Afp>();
+        servicios.AddScoped<CN_Cargo>();
+        servicios.AddScoped<CN_TipoContrato>();
         servicios.AddScoped<global::Negocio.CN_Departamento>();
         servicios.AddScoped<CN_Empleado>();
         servicios.AddScoped<CN_Login>();

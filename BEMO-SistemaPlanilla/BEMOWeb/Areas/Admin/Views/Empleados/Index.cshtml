@@ -44,6 +44,11 @@
         </a>
     </header>
 
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <div class="bemo-alert bemo-alert-success" role="status"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg><span>@mensaje</span></div>
+    }
+
     <section class="grid gap-4 lg:grid-cols-3">
         <div class="bemo-stat">
             <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-users"></use></svg></div>

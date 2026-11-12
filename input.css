@@ -123,6 +123,21 @@
     border-color: #9f5f2f;
     box-shadow: 0 0 0 3px rgba(206, 142, 65, .2);
   }
+  .bemo-input-error {
+    border-color: #bd231c !important;
+    background: #fff7f7;
+    box-shadow: 0 0 0 2px rgba(189, 35, 28, .12);
+  }
+  .bemo-input-error:focus {
+    border-color: #bd231c !important;
+    box-shadow: 0 0 0 3px rgba(189, 35, 28, .18);
+  }
+  div:has(> .bemo-validation-message:not(:empty)) > .bemo-input,
+  div:has(> .bemo-validation-message:not(:empty)) > .bemo-select {
+    border-color: #bd231c;
+    background: #fff7f7;
+    box-shadow: 0 0 0 2px rgba(189, 35, 28, .12);
+  }
 
   .bemo-input:disabled,
   .bemo-select:disabled {
@@ -297,6 +312,31 @@
     display: flex;
     gap: .7rem;
     padding: .75rem .9rem;
+  }
+  .bemo-alert {
+    align-items: flex-start;
+    border-radius: .65rem;
+    display: flex;
+    gap: .7rem;
+    padding: .8rem .95rem;
+  }
+  .bemo-alert-success {
+    background: #e4f6d8;
+    border: 1px solid #b8df9f;
+    color: #246b1c;
+  }
+  .bemo-alert-error {
+    background: #fff0ef;
+    border: 1px solid #e7aaa6;
+    color: #8f1d18;
+  }
+  .bemo-alert-error ul {
+    list-style: disc;
+    margin: .35rem 0 0 1.1rem;
+  }
+  .bemo-validation-message:not(:empty) {
+    display: block;
+    margin-top: .3rem;
   }
 
   .bemo-divider {
