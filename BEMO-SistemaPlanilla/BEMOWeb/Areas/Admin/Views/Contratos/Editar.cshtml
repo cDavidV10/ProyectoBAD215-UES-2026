@@ -1,0 +1,113 @@
+@model BEMOWeb.Models.EditarContratoModel
+
+@{
+    ViewData["Title"] = "Editar contrato";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+}
+
+<div class="space-y-5">
+    <div>
+        <p class="bemo-breadcrumb">Contratos <span class="mx-2">›</span> Editar contrato</p>
+        <h1 class="bemo-title mt-3">Editar contrato</h1>
+        <p class="bemo-subtitle mt-2">Actualiza las condiciones laborales del contrato seleccionado.</p>
+    </div>
+
+    <form asp-area="@areaActual" asp-controller="Contratos" asp-action="Editar" method="post"
+          class="bemo-card space-y-4 p-4 md:p-5" data-employee-form>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="IdContrato" value="@Model.IdContrato" />
+
+        <div class="bemo-alert bemo-alert-error" data-client-validation-message role="alert" hidden>
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+            <span>Revisa los campos marcados antes de guardar.</span>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="bemo-alert bemo-alert-error" role="alert">
+                <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                <div>
+                    <strong>Corrige los campos marcados antes de guardar.</strong>
+                    <div asp-validation-summary="All" class="text-sm"></div>
+                </div>
+            </div>
+        }
+
+        <div class="bemo-section-bar">Empleado asociado</div>
+        <div>
+            <label class="bemo-label" for="empleado">Empleado</label>
+            <input class="bemo-input bg-[#F1F1F1]" id="empleado" value="@Model.NombreEmpleado" readonly disabled />
+            <p class="mt-1 text-sm text-[#684026]">El empleado asociado no se puede cambiar desde este módulo.</p>
+        </div>
+
+        <div class="bemo-divider pt-2"><div class="bemo-section-bar">Condiciones laborales</div></div>
+        <div class="grid gap-4 md:grid-cols-3">
+            <div>
+                <label class="bemo-label bemo-required" for="departamento">Departamento laboral</label>
+                <select class="bemo-select" id="departamento" name="IdDepartamento" required>
+                    <option value="">Seleccione departamento</option>
+                    @foreach (var departamento in Model.Departamentos)
+                    {
+                        <option value="@departamento.IdDepartamento" selected="@(Model.IdDepartamento == departamento.IdDepartamento ? "selected" : null)">
+                            @departamento.NombreDepartamento
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="IdDepartamento" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="cargo">Cargo</label>
+                <select class="bemo-select" id="cargo" name="IdCargo" required>
+                    <option value="">Seleccione cargo</option>
+                    @foreach (var cargo in Model.Cargos)
+                    {
+                        <option value="@cargo.IdCargo" selected="@(Model.IdCargo == cargo.IdCargo ? "selected" : null)">
+                            @cargo.NombreCargo ($@cargo.RangoMinimoCargo.ToString("N2") - $@cargo.RangoMaximoCargo.ToString("N2"))
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="IdCargo" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="tipo-contrato">Tipo de contrato</label>
+                <select class="bemo-select" id="tipo-contrato" name="IdTipoContrato" data-contract-type required>
+                    <option value="">Seleccione tipo de contrato</option>
+                    @foreach (var tipo in Model.TiposContrato)
+                    {
+                        <option value="@tipo.IdTipoContrato" selected="@(Model.IdTipoContrato == tipo.IdTipoContrato ? "selected" : null)">
+                            @tipo.NombreTipoContrato
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="IdTipoContrato" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="salario">Salario bruto</label>
+                <input class="bemo-input" id="salario" name="SalarioBruto" value="@Model.SalarioBruto" type="number"
+                       min="0.01" max="99999999.99" step="0.01" required />
+                <span asp-validation-for="SalarioBruto" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="fecha-contratacion">Fecha de contratación</label>
+                <input class="bemo-input" id="fecha-contratacion" name="FechaContratacion"
+                       value="@(Model.FechaContratacion?.ToString("yyyy-MM-dd"))" type="date" data-contract-start required />
+                <span asp-validation-for="FechaContratacion" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label" for="fecha-culminacion">Fecha de culminación</label>
+                <input class="bemo-input" id="fecha-culminacion" name="FechaCulminacion"
+                       value="@(Model.FechaCulminacion?.ToString("yyyy-MM-dd"))" type="date" data-contract-end />
+                <span asp-validation-for="FechaCulminacion" class="bemo-validation-message text-sm text-red-700"></span>
+                <p class="mt-1 text-xs italic text-[#684026]">Para contratos permanentes debe quedar vacía.</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+            <button class="bemo-button bemo-button-primary" type="submit">
+                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>
+                Guardar cambios
+            </button>
+            <a asp-area="@areaActual" asp-controller="Contratos" asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

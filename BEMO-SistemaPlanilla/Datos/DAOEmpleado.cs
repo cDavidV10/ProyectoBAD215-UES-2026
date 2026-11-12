@@ -28,6 +28,47 @@ public class DAOEmpleado
         return ContarEmpleadosPorEstado("ACTIVO") + ContarEmpleadosPorEstado("INACTIVO");
     }
 
+    public List<Empleado> ListarActivosSinContrato()
+    {
+        const string consulta = @"
+            SELECT
+                e.id_empleado,
+                e.dui,
+                e.nombre,
+                e.apellido,
+                e.estado
+            FROM dbo.EMPLEADO e
+            WHERE e.estado = 'ACTIVO'
+              AND NOT EXISTS
+              (
+                  SELECT 1
+                  FROM dbo.CONTRATO c
+                  WHERE c.id_empleado = e.id_empleado
+                    AND c.estado = 'VIGENTE'
+              )
+            ORDER BY e.apellido, e.nombre, e.id_empleado;";
+
+        var empleados = new List<Empleado>();
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+
+        conexionSql.Open();
+        using var dr = cmd.ExecuteReader();
+        while (dr.Read())
+        {
+            empleados.Add(new Empleado
+            {
+                IdEmpleado = Convert.ToInt32(dr["id_empleado"]),
+                Dui = Convert.ToString(dr["dui"])?.Trim() ?? string.Empty,
+                Nombre = Convert.ToString(dr["nombre"]) ?? string.Empty,
+                Apellido = Convert.ToString(dr["apellido"]) ?? string.Empty,
+                Estado = Convert.ToString(dr["estado"]) ?? string.Empty
+            });
+        }
+
+        return empleados;
+    }
+
     public (List<Empleado> Empleados, int Total) ListarPaginado(
         int pagina,
         int tamanoPagina,

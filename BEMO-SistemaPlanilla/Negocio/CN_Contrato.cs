@@ -17,6 +17,11 @@ public class CN_Contrato
         return _metodos.ListarVigentes();
     }
 
+    public ContratoListado? ObtenerPorId(int idContrato)
+    {
+        return _metodos.ObtenerPorId(idContrato);
+    }
+
     public (List<ContratoListado> Contratos, int Total) ListarPaginado(
         int pagina,
         int tamanoPagina,
@@ -32,5 +37,48 @@ public class CN_Contrato
             idEmpleado,
             tipoContrato,
             situacion);
+    }
+
+    public int Registrar(
+        int idEmpleado,
+        int idCargo,
+        int idDepartamento,
+        int idTipoContrato,
+        decimal salarioBruto,
+        DateOnly fechaContratacion,
+        DateOnly? fechaCulminacion)
+    {
+        return _metodos.Registrar(
+            idEmpleado,
+            idCargo,
+            idDepartamento,
+            idTipoContrato,
+            salarioBruto,
+            fechaContratacion,
+            fechaCulminacion);
+    }
+
+    public void Actualizar(
+        int idContrato,
+        int idCargo,
+        int idDepartamento,
+        int idTipoContrato,
+        decimal salarioBruto,
+        DateOnly fechaContratacion,
+        DateOnly? fechaCulminacion)
+    {
+        _metodos.Actualizar(
+            idContrato,
+            idCargo,
+            idDepartamento,
+            idTipoContrato,
+            salarioBruto,
+            fechaContratacion,
+            fechaCulminacion);
+    }
+
+    public void Finalizar(int idContrato)
+    {
+        _metodos.Finalizar(idContrato);
     }
 }

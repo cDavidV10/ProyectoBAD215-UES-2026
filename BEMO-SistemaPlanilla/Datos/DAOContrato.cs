@@ -19,6 +19,9 @@ public class DAOContrato
             SELECT
                 c.id_contrato,
                 c.id_empleado,
+                c.id_cargo,
+                c.id_departamento,
+                c.id_tipo_contrato,
                 CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado,
                 ca.nombre_cargo,
                 tc.nombre_tipo_contrato,
@@ -58,6 +61,43 @@ public class DAOContrato
         return contratos;
     }
 
+    public ContratoListado? ObtenerPorId(int idContrato)
+    {
+        const string consulta = @"
+            SELECT TOP (1)
+                c.id_contrato,
+                c.id_empleado,
+                c.id_cargo,
+                c.id_departamento,
+                c.id_tipo_contrato,
+                CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado,
+                ca.nombre_cargo,
+                tc.nombre_tipo_contrato,
+                d.nombre_departamento,
+                c.salario_bruto,
+                c.fecha_contratacion,
+                c.fecha_culminacion,
+                c.estado,
+                CASE
+                    WHEN c.fecha_culminacion IS NULL THEN NULL
+                    ELSE DATEDIFF(DAY, CAST(GETDATE() AS DATE), c.fecha_culminacion)
+                END AS dias_restantes
+            FROM dbo.CONTRATO c
+            INNER JOIN dbo.EMPLEADO e ON e.id_empleado = c.id_empleado
+            INNER JOIN dbo.CARGO ca ON ca.id_cargo = c.id_cargo
+            INNER JOIN dbo.TIPO_CONTRATO tc ON tc.id_tipo_contrato = c.id_tipo_contrato
+            INNER JOIN dbo.DEPARTAMENTO d ON d.id_departamento = c.id_departamento
+            WHERE c.id_contrato = @id_contrato;";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@id_contrato", SqlDbType.Int).Value = idContrato;
+
+        conexionSql.Open();
+        using var dr = cmd.ExecuteReader();
+        return dr.Read() ? MapearContrato(dr) : null;
+    }
+
     public (List<ContratoListado> Contratos, int Total) ListarPaginado(
         int pagina,
         int tamanoPagina,
@@ -79,6 +119,9 @@ public class DAOContrato
                 SELECT
                     c.id_contrato,
                     c.id_empleado,
+                    c.id_cargo,
+                    c.id_departamento,
+                    c.id_tipo_contrato,
                     CONCAT(e.nombre, ' ', e.apellido) AS nombre_empleado,
                     ca.nombre_cargo,
                     tc.nombre_tipo_contrato,
@@ -118,6 +161,9 @@ public class DAOContrato
             SELECT
                 id_contrato,
                 id_empleado,
+                id_cargo,
+                id_departamento,
+                id_tipo_contrato,
                 nombre_empleado,
                 nombre_cargo,
                 nombre_tipo_contrato,
@@ -168,6 +214,213 @@ public class DAOContrato
         return (contratos, total);
     }
 
+    public int Registrar(
+        int idEmpleado,
+        int idCargo,
+        int idDepartamento,
+        int idTipoContrato,
+        decimal salarioBruto,
+        DateOnly fechaContratacion,
+        DateOnly? fechaCulminacion)
+    {
+        const string consulta = @"
+            SET NOCOUNT ON;
+            SET XACT_ABORT ON;
+
+            BEGIN TRY
+                DECLARE @msg NVARCHAR(200);
+                DECLARE @rango_min DECIMAL(10,2), @rango_max DECIMAL(10,2);
+                DECLARE @nombre_tipo VARCHAR(50);
+
+                IF NOT EXISTS
+                (
+                    SELECT 1 FROM dbo.EMPLEADO
+                    WHERE id_empleado = @id_empleado AND estado = 'ACTIVO'
+                )
+                    THROW 51020, N'El empleado no existe o no está activo', 1;
+
+                IF EXISTS
+                (
+                    SELECT 1 FROM dbo.CONTRATO
+                    WHERE id_empleado = @id_empleado AND estado = 'VIGENTE'
+                )
+                    THROW 51028, N'El empleado ya tiene un contrato vigente', 1;
+
+                IF NOT EXISTS (SELECT 1 FROM dbo.DEPARTAMENTO WHERE id_departamento = @id_departamento)
+                    THROW 51006, N'El departamento indicado no existe', 1;
+
+                IF NOT EXISTS (SELECT 1 FROM dbo.TIPO_CONTRATO WHERE id_tipo_contrato = @id_tipo_contrato)
+                    THROW 51007, N'El tipo de contrato indicado no existe', 1;
+
+                SELECT @nombre_tipo = nombre_tipo_contrato
+                FROM dbo.TIPO_CONTRATO
+                WHERE id_tipo_contrato = @id_tipo_contrato;
+
+                SELECT @rango_min = rango_minimo_cargo, @rango_max = rango_maximo_cargo
+                FROM dbo.CARGO
+                WHERE id_cargo = @id_cargo;
+
+                IF @rango_min IS NULL
+                    THROW 51008, N'El cargo indicado no existe', 1;
+
+                IF @salario_bruto NOT BETWEEN @rango_min AND @rango_max
+                BEGIN
+                    SET @msg = CONCAT(N'El salario debe estar entre ', @rango_min, N' y ', @rango_max, N' (rango del cargo)');
+                    THROW 51009, @msg, 1;
+                END;
+
+                IF @nombre_tipo = 'PERMANENTE' AND @fecha_culminacion IS NOT NULL
+                    THROW 51032, N'Un contrato permanente no lleva fecha de culminación', 1;
+
+                IF @nombre_tipo = 'TEMPORAL' AND @fecha_culminacion IS NULL
+                    THROW 51033, N'Un contrato temporal requiere fecha de culminación', 1;
+
+                IF @fecha_culminacion IS NOT NULL AND @fecha_culminacion <= CAST(GETDATE() AS DATE)
+                    THROW 51011, N'La fecha de culminación debe ser posterior a la fecha actual', 1;
+
+                IF @fecha_culminacion IS NOT NULL AND @fecha_culminacion < @fecha_contratacion
+                    THROW 51010, N'La fecha de culminación no puede ser anterior a la contratación', 1;
+
+                BEGIN TRANSACTION;
+
+                DECLARE @id_contrato INT = NEXT VALUE FOR dbo.Seq_Contrato;
+
+                INSERT INTO dbo.CONTRATO
+                (
+                    id_contrato,
+                    id_empleado,
+                    id_cargo,
+                    id_departamento,
+                    id_tipo_contrato,
+                    salario_bruto,
+                    fecha_contratacion,
+                    fecha_culminacion,
+                    estado
+                )
+                VALUES
+                (
+                    @id_contrato,
+                    @id_empleado,
+                    @id_cargo,
+                    @id_departamento,
+                    @id_tipo_contrato,
+                    @salario_bruto,
+                    @fecha_contratacion,
+                    @fecha_culminacion,
+                    'VIGENTE'
+                );
+
+                COMMIT TRANSACTION;
+                SELECT @id_contrato;
+            END TRY
+            BEGIN CATCH
+                IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                THROW;
+            END CATCH;";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+        cmd.Parameters.Add("@id_cargo", SqlDbType.Int).Value = idCargo;
+        cmd.Parameters.Add("@id_departamento", SqlDbType.Int).Value = idDepartamento;
+        cmd.Parameters.Add("@id_tipo_contrato", SqlDbType.Int).Value = idTipoContrato;
+        var salario = cmd.Parameters.Add("@salario_bruto", SqlDbType.Decimal);
+        salario.Precision = 10;
+        salario.Scale = 2;
+        salario.Value = salarioBruto;
+        cmd.Parameters.Add("@fecha_contratacion", SqlDbType.Date).Value = fechaContratacion.ToDateTime(TimeOnly.MinValue);
+        cmd.Parameters.Add("@fecha_culminacion", SqlDbType.Date).Value =
+            (object?)fechaCulminacion?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value;
+
+        conexionSql.Open();
+        return Convert.ToInt32(cmd.ExecuteScalar());
+    }
+
+    public void Actualizar(
+        int idContrato,
+        int idCargo,
+        int idDepartamento,
+        int idTipoContrato,
+        decimal salarioBruto,
+        DateOnly fechaContratacion,
+        DateOnly? fechaCulminacion)
+    {
+        const string consulta = @"
+            UPDATE dbo.CONTRATO
+            SET id_cargo = @id_cargo,
+                id_departamento = @id_departamento,
+                id_tipo_contrato = @id_tipo_contrato,
+                salario_bruto = @salario_bruto,
+                fecha_contratacion = @fecha_contratacion,
+                fecha_culminacion = @fecha_culminacion
+            WHERE id_contrato = @id_contrato
+              AND estado = 'VIGENTE';";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@id_contrato", SqlDbType.Int).Value = idContrato;
+        cmd.Parameters.Add("@id_cargo", SqlDbType.Int).Value = idCargo;
+        cmd.Parameters.Add("@id_departamento", SqlDbType.Int).Value = idDepartamento;
+        cmd.Parameters.Add("@id_tipo_contrato", SqlDbType.Int).Value = idTipoContrato;
+        var salario = cmd.Parameters.Add("@salario_bruto", SqlDbType.Decimal);
+        salario.Precision = 10;
+        salario.Scale = 2;
+        salario.Value = salarioBruto;
+        cmd.Parameters.Add("@fecha_contratacion", SqlDbType.Date).Value = fechaContratacion.ToDateTime(TimeOnly.MinValue);
+        cmd.Parameters.Add("@fecha_culminacion", SqlDbType.Date).Value =
+            (object?)fechaCulminacion?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value;
+
+        conexionSql.Open();
+        if (cmd.ExecuteNonQuery() != 1)
+        {
+            throw new InvalidOperationException("El contrato no existe o ya no está vigente.");
+        }
+    }
+
+    public void Finalizar(int idContrato)
+    {
+        const string consulta = @"
+            SET XACT_ABORT ON;
+            BEGIN TRY
+                BEGIN TRANSACTION;
+
+                DECLARE @id_empleado INT;
+
+                SELECT @id_empleado = id_empleado
+                FROM dbo.CONTRATO WITH (UPDLOCK, HOLDLOCK)
+                WHERE id_contrato = @id_contrato
+                  AND estado = 'VIGENTE';
+
+                IF @id_empleado IS NULL
+                    THROW 51030, N'El contrato no existe o ya fue finalizado', 1;
+
+                UPDATE dbo.CONTRATO
+                SET estado = 'FINALIZADO'
+                WHERE id_empleado = @id_empleado
+                  AND estado = 'VIGENTE';
+
+                UPDATE dbo.EMPLEADO
+                SET estado = 'INACTIVO'
+                WHERE id_empleado = @id_empleado;
+
+                IF @@ROWCOUNT <> 1
+                    THROW 51031, N'No se pudo inactivar al empleado asociado', 1;
+
+                COMMIT TRANSACTION;
+            END TRY
+            BEGIN CATCH
+                IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+                THROW;
+            END CATCH;";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@id_contrato", SqlDbType.Int).Value = idContrato;
+
+        conexionSql.Open();
+        cmd.ExecuteNonQuery();
+    }
+
     private static ContratoListado MapearContrato(SqlDataReader dr)
     {
         var diasRestantes = dr["dias_restantes"] == DBNull.Value
@@ -178,6 +431,9 @@ public class DAOContrato
         {
             IdContrato = Convert.ToInt32(dr["id_contrato"]),
             IdEmpleado = Convert.ToInt32(dr["id_empleado"]),
+            IdCargo = Convert.ToInt32(dr["id_cargo"]),
+            IdDepartamento = Convert.ToInt32(dr["id_departamento"]),
+            IdTipoContrato = Convert.ToInt32(dr["id_tipo_contrato"]),
             NombreEmpleado = Convert.ToString(dr["nombre_empleado"]) ?? string.Empty,
             NombreCargo = Convert.ToString(dr["nombre_cargo"]) ?? string.Empty,
             NombreTipoContrato = Convert.ToString(dr["nombre_tipo_contrato"]) ?? string.Empty,

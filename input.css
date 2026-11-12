@@ -339,6 +339,92 @@
     list-style: disc;
     margin: .35rem 0 0 1.1rem;
   }
+
+  .bemo-notifications {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    position: fixed;
+    right: 1.25rem;
+    top: 6.75rem;
+    width: min(27rem, calc(100vw - 2.5rem));
+    z-index: 70;
+  }
+
+  .bemo-notification {
+    border-radius: .75rem;
+    box-shadow: 0 1rem 2.5rem rgb(56 31 18 / 18%);
+    overflow: hidden;
+    transform: translateX(0);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+
+  .bemo-notification.is-closing {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+
+  .bemo-notification-success {
+    background: #e4f6d8;
+    border: 1px solid #b8df9f;
+    color: #246b1c;
+  }
+
+  .bemo-notification-error {
+    background: #fff0ef;
+    border: 1px solid #e7aaa6;
+    color: #8f1d18;
+  }
+
+  .bemo-notification-body {
+    align-items: flex-start;
+    display: flex;
+    gap: .7rem;
+    padding: .9rem 1rem .75rem;
+  }
+
+  .bemo-notification-body p {
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  .bemo-notification-countdown {
+    display: block;
+    font-size: .75rem;
+    font-weight: 500;
+    margin-top: .35rem;
+    opacity: .8;
+  }
+
+  .bemo-notification-close {
+    border-radius: .35rem;
+    font-size: 1.4rem;
+    line-height: 1;
+    margin: -.2rem -.35rem 0 0;
+    padding: .15rem .35rem;
+  }
+
+  .bemo-notification-close:hover {
+    background: rgb(56 31 18 / 10%);
+  }
+
+  .bemo-notification-progress {
+    background: currentColor;
+    height: .2rem;
+    opacity: .65;
+    transition: width 1s linear;
+    width: var(--notification-progress, 100%);
+  }
+
+  @media (max-width: 640px) {
+    .bemo-notifications {
+      right: .75rem;
+      top: 5.75rem;
+      width: calc(100vw - 1.5rem);
+    }
+  }
+
   .bemo-validation-message:not(:empty) {
     display: block;
     margin-top: .3rem;

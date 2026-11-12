@@ -27,6 +27,97 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.querySelectorAll("[data-notification]").forEach((notification) => {
+        const closeButton = notification.querySelector("[data-notification-close]");
+        const countdownElement = notification.querySelector("[data-notification-countdown]");
+        const progressElement = notification.querySelector("[data-notification-progress]");
+        const seconds = Math.max(Number(notification.dataset.notificationSeconds) || 5, 1);
+        let remaining = seconds;
+        let timer;
+        let closed = false;
+
+        const closeNotification = () => {
+            if (closed) return;
+            closed = true;
+            window.clearInterval(timer);
+            notification.classList.add("is-closing");
+            window.setTimeout(() => notification.remove(), 220);
+        };
+
+        const updateCountdown = () => {
+            if (countdownElement) {
+                countdownElement.textContent = `Se cerrará en ${remaining} ${remaining === 1 ? "segundo" : "segundos"}`;
+            }
+
+            if (progressElement) {
+                progressElement.style.setProperty("--notification-progress", `${(remaining / seconds) * 100}%`);
+            }
+        };
+
+        updateCountdown();
+        timer = window.setInterval(() => {
+            remaining -= 1;
+            if (remaining <= 0) {
+                closeNotification();
+                return;
+            }
+            updateCountdown();
+        }, 1000);
+
+        closeButton?.addEventListener("click", closeNotification);
+    });
+
+    const confirmationModal = document.querySelector("[data-confirm-modal]");
+    if (confirmationModal) {
+        const messageElement = confirmationModal.querySelector("[data-confirm-message]");
+        const acceptButton = confirmationModal.querySelector("[data-confirm-accept]");
+        const cancelButtons = confirmationModal.querySelectorAll("[data-confirm-cancel]");
+        let pendingForm = null;
+
+        const closeConfirmationModal = () => {
+            confirmationModal.classList.add("hidden");
+            confirmationModal.setAttribute("aria-hidden", "true");
+            pendingForm = null;
+        };
+
+        document.querySelectorAll("form[data-confirm]").forEach((form) => {
+            form.addEventListener("submit", (event) => {
+                if (form.dataset.confirmed === "true") {
+                    delete form.dataset.confirmed;
+                    return;
+                }
+
+                event.preventDefault();
+                pendingForm = form;
+                if (messageElement) {
+                    messageElement.textContent = form.dataset.confirm || "¿Deseas continuar con esta operación?";
+                }
+                confirmationModal.classList.remove("hidden");
+                confirmationModal.setAttribute("aria-hidden", "false");
+                acceptButton?.focus();
+            });
+        });
+
+        acceptButton?.addEventListener("click", () => {
+            const form = pendingForm;
+            closeConfirmationModal();
+            if (form) {
+                form.dataset.confirmed = "true";
+                form.submit();
+            }
+        });
+
+        cancelButtons.forEach((button) => button.addEventListener("click", closeConfirmationModal));
+        confirmationModal.addEventListener("click", (event) => {
+            if (event.target === confirmationModal) closeConfirmationModal();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !confirmationModal.classList.contains("hidden")) {
+                closeConfirmationModal();
+            }
+        });
+    }
+
     const employeeModal = document.querySelector("[data-employee-modal]");
     if (employeeModal) {
         const closeButton = employeeModal.querySelector("[data-employee-modal-close]");
@@ -168,6 +259,60 @@ document.addEventListener("DOMContentLoaded", () => {
         updateEndDateState();
     });
 
+    const employeeLookup = document.querySelector("[data-employee-lookup]");
+    if (employeeLookup) {
+        const searchInput = employeeLookup.querySelector("[data-employee-search]");
+        const employeeIdInput = employeeLookup.querySelector("#id-empleado");
+        const employeeOptions = employeeLookup.querySelectorAll("[data-employee-option]");
+        const result = employeeLookup.querySelector("[data-employee-result]");
+        const message = employeeLookup.querySelector("[data-employee-search-message]");
+        const codeElement = result?.querySelector("[data-employee-code]");
+        const nameElement = result?.querySelector("[data-employee-name]");
+        const statusElement = result?.querySelector("[data-employee-status]");
+        const options = Array.from(employeeOptions).map((option) => ({
+            dui: option.dataset.employeeDui?.trim() || "",
+            id: option.dataset.employeeId || "",
+            name: option.dataset.employeeName || ""
+        }));
+
+        const updateEmployee = () => {
+            if (!searchInput || !employeeIdInput) return;
+
+            const dui = searchInput.value.trim();
+            const employee = options.find((option) => option.dui === dui);
+            if (employee) {
+                employeeIdInput.value = employee.id;
+                result?.classList.remove("hidden");
+                if (codeElement) codeElement.textContent = employee.id;
+                if (nameElement) nameElement.textContent = employee.name;
+                if (statusElement) statusElement.textContent = "ACTIVO";
+                if (message) message.textContent = "";
+                searchInput.setCustomValidity("");
+                return;
+            }
+
+            employeeIdInput.value = "";
+            result?.classList.add("hidden");
+            if (message) {
+                message.textContent = dui.length > 0
+                    ? "No se encontró un empleado activo sin contrato vigente con ese DUI."
+                    : "";
+            }
+            searchInput.setCustomValidity(dui.length > 0
+                ? "El DUI no corresponde a un empleado activo sin contrato vigente."
+                : "");
+        };
+
+        const employeeFromModel = options.find((option) => option.id === employeeIdInput?.value);
+        if (searchInput && employeeFromModel && !searchInput.value) {
+            searchInput.value = employeeFromModel.dui;
+        }
+
+        searchInput?.addEventListener("input", updateEmployee);
+        searchInput?.addEventListener("change", updateEmployee);
+        updateEmployee();
+    }
+
     document.querySelectorAll("[data-contract-start]").forEach((startDate) => {
         const form = startDate.closest("form");
         const endDate = form?.querySelector("[data-contract-end]");
@@ -204,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
         validateContractDates();
     });
 
-    document.querySelectorAll("form[data-employee-form]").forEach((form) => {
+    document.querySelectorAll("form[data-employee-form], form[data-contract-form]").forEach((form) => {
         const fields = Array.from(form.querySelectorAll("input:not([type='hidden']), select, textarea"));
         const clientMessage = form.querySelector("[data-client-validation-message]");
 
@@ -227,10 +372,10 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const markField = (field) => {
-            const conservaValidacionDeFecha = field.matches("[data-contract-end]");
-            if (!conservaValidacionDeFecha) field.setCustomValidity("");
+            const conservaValidacionPersonalizada = field.matches("[data-contract-end], [data-employee-search]");
+            if (!conservaValidacionPersonalizada) field.setCustomValidity("");
             const invalid = !field.checkValidity();
-            if (invalid && !conservaValidacionDeFecha) {
+            if (invalid && !conservaValidacionPersonalizada) {
                 field.setCustomValidity(mensajeDeValidacion(field));
             }
             field.classList.toggle("bemo-input-error", invalid);
@@ -249,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
         form.addEventListener("invalid", (event) => {
             if (event.target instanceof HTMLElement) {
                 const field = event.target;
-                if (!field.matches("[data-contract-end]")) {
+                if (!field.matches("[data-contract-end], [data-employee-search]")) {
                     field.setCustomValidity(mensajeDeValidacion(field));
                 }
                 event.target.classList.add("bemo-input-error");

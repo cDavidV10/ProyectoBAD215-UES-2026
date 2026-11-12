@@ -4,8 +4,11 @@
 
 @{
     ViewData["Title"] = "Contratos";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+    var mensajeNotificacion = TempData["Mensaje"] as string;
+    var errorNotificacion = TempData["Error"] as string;
 
     string UrlPagina(int pagina)
     {
@@ -70,6 +73,41 @@
             </div>
         </div>
     </header>
+
+    @if (!string.IsNullOrWhiteSpace(mensajeNotificacion) || !string.IsNullOrWhiteSpace(errorNotificacion))
+    {
+        <div class="bemo-notifications" aria-live="polite" aria-atomic="true">
+            @if (!string.IsNullOrWhiteSpace(mensajeNotificacion))
+            {
+                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5" role="status">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@mensajeNotificacion</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(errorNotificacion))
+            {
+                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7" role="alert">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@errorNotificacion</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+        </div>
+    }
 
     <form method="get" asp-action="Index" data-server-search class="bemo-card grid gap-4 p-4 md:grid-cols-4">
         <div class="relative md:col-span-2">
@@ -167,12 +205,22 @@
                                                 </svg>
                                                 Ver
                                             </button>
-                                            <button class="bemo-button bemo-button-ghost" type="button">
+                                            <a asp-area="@areaActual" asp-controller="Contratos" asp-action="Editar"
+                                               asp-route-id="@contrato.IdContrato" class="bemo-button bemo-button-ghost">
                                                 <svg class="bemo-icon-sm" viewBox="0 0 24 24">
                                                     <use href="#icon-edit"></use>
                                                 </svg>
                                                 Editar
-                                            </button>
+                                            </a>
+                                            <form asp-area="@areaActual" asp-controller="Contratos" asp-action="Finalizar"
+                                                  method="post" class="inline" data-confirm="¿Deseas finalizar este contrato? El empleado quedará inactivo y sus contratos vigentes serán finalizados.">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@contrato.IdContrato" />
+                                                <button class="bemo-button bemo-button-ghost text-red-700" type="submit">
+                                                    <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-close"></use></svg>
+                                                    Finalizar
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 }
@@ -277,6 +325,28 @@
                             <dd class="mt-1 font-semibold" data-contract-field="end"></dd>
                         </div>
                     </dl>
+                </section>
+            </div>
+
+            <div class="fixed inset-0 z-[60] hidden bg-black/50 p-4" data-confirm-modal aria-hidden="true">
+                <section class="relative mx-auto mt-20 max-w-lg rounded-xl bg-white p-6 shadow-2xl"
+                         role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+                    <button type="button"
+                            class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                            data-confirm-cancel aria-label="Cerrar confirmación">&times;</button>
+                    <div class="flex items-start gap-4 pr-8">
+                        <div class="bemo-stat-icon shrink-0">
+                            <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
+                        </div>
+                        <div>
+                            <h2 id="confirm-modal-title" class="text-xl font-extrabold">Confirmar finalización</h2>
+                            <p class="mt-2 text-[#684026]" data-confirm-message></p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" class="bemo-button bemo-button-secondary" data-confirm-cancel>Cancelar</button>
+                        <button type="button" class="bemo-button bemo-button-primary" data-confirm-accept>Finalizar contrato</button>
+                    </div>
                 </section>
             </div>
         </div>

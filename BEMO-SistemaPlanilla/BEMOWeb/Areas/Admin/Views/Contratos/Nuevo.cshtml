@@ -1,22 +1,152 @@
+@model BEMOWeb.Models.NuevoContratoModel
+
 @{
     ViewData["Title"] = "Nuevo contrato";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
 }
 
 <div class="space-y-5">
-    <div><p class="bemo-breadcrumb">Contratos <span class="mx-2">›</span> Nuevo contrato</p><h1 class="bemo-title mt-3">Nuevo contrato</h1></div>
-    <form class="bemo-card space-y-5 p-5 md:p-8" data-demo-form>
-        <section><h2 class="mb-2 text-xl font-extrabold">Empleado</h2><label class="bemo-label bemo-required">Buscar empleado por código o nombre</label><select class="bemo-select max-w-2xl" required><option>Seleccione un empleado</option><option>EMP-001 - Carlos Andrés Martínez López</option><option>EMP-002 - María Elena Hernández Rivera</option></select></section>
-        <div class="bemo-divider"></div>
-        <section><h2 class="mb-3 text-xl font-extrabold">Condiciones laborales</h2><div class="grid gap-4 md:grid-cols-3">
-            <div><label class="bemo-label bemo-required">Departamento</label><select class="bemo-select" required><option>Seleccione un departamento</option><option>Producción</option><option>Administración</option></select></div>
-            <div><label class="bemo-label bemo-required">Cargo</label><select class="bemo-select" required><option>Seleccione un cargo</option><option>Operario de producción</option><option>Analista de Recursos Humanos</option></select></div>
-            <div><label class="bemo-label bemo-required">Tipo de contrato</label><select class="bemo-select" required><option>Seleccione un tipo de contrato</option><option>Indefinido</option><option>Temporal</option></select></div>
-            <div><label class="bemo-label bemo-required">Fecha de inicio</label><input class="bemo-input" type="date" required /></div>
-            <div><label class="bemo-label">Fecha de finalización</label><input class="bemo-input" type="date" /><p class="mt-1 text-xs italic text-[#684026]">Solo para contratos con fecha de término.</p></div>
-            <div><label class="bemo-label bemo-required">Salario mensual ($)</label><input class="bemo-input" type="number" placeholder="Ingrese el salario" required /></div>
-            <div><label class="bemo-label">Jornada laboral</label><select class="bemo-select"><option>Seleccione una jornada</option><option>Tiempo completo</option><option>Medio tiempo</option></select></div>
-            <div class="md:col-span-2"><label class="bemo-label">Observaciones</label><textarea class="bemo-textarea" placeholder="Ingrese observaciones"></textarea></div>
-        </div></section>
-        <div class="flex flex-wrap gap-3"><button class="bemo-button bemo-button-primary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>Guardar contrato</button><a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a></div>
+    <div>
+        <p class="bemo-breadcrumb">Administración <span class="mx-2">›</span> Contratos</p>
+        <h1 class="bemo-title mt-3">Nuevo contrato</h1>
+    </div>
+
+    <form asp-area="@areaActual" asp-controller="Contratos" asp-action="Nuevo" method="post"
+          class="bemo-card space-y-3 p-4 md:p-5" data-contract-form>
+        @Html.AntiForgeryToken()
+
+        <div class="bemo-alert bemo-alert-error" data-client-validation-message role="alert" hidden>
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+            <span>Revisa los campos marcados antes de guardar.</span>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="bemo-alert bemo-alert-error" role="alert">
+                <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                <div>
+                    <strong>Corrige los campos marcados antes de guardar.</strong>
+                    <div asp-validation-summary="All" class="text-sm"></div>
+                </div>
+            </div>
+        }
+
+        <div class="bemo-section-bar">Empleado</div>
+        <div data-employee-lookup>
+            <input type="hidden" id="id-empleado" name="IdEmpleado" value="@(Model.IdEmpleado?.ToString() ?? "")" />
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="bemo-label bemo-required" for="dui-empleado">Buscar empleado por DUI</label>
+                    <input class="bemo-input" id="dui-empleado" name="DuiBusqueda" value="@Model.DuiBusqueda"
+                           placeholder="00000000-0" maxlength="10" pattern="[0-9]{8}-[0-9]"
+                           title="El DUI debe tener el formato 00000000-0."
+                           inputmode="numeric" autocomplete="off"
+                           data-employee-search required />
+                    <div class="hidden" data-employee-options aria-hidden="true">
+                        @foreach (var empleado in Model.EmpleadosDisponibles)
+                        {
+                            <span data-employee-option
+                                  data-employee-dui="@empleado.Dui"
+                                  data-employee-id="@empleado.IdEmpleado"
+                                  data-employee-name="@empleado.Nombre"></span>
+                        }
+                    </div>
+                    <span asp-validation-for="DuiBusqueda" class="bemo-validation-message text-sm text-red-700"></span>
+                    <span asp-validation-for="IdEmpleado" class="bemo-validation-message text-sm text-red-700"></span>
+                    <p class="mt-1 text-xs italic text-[#684026]">Solo se pueden buscar empleados activos sin contrato vigente.</p>
+                    <p class="mt-1 text-sm text-red-700" data-employee-search-message role="status"></p>
+                </div>
+
+                <div class="bemo-info hidden" data-employee-result aria-live="polite">
+                    <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                    <div>
+                        <p class="font-extrabold">Empleado encontrado</p>
+                        <p class="mt-1">Código: <span data-employee-code></span></p>
+                        <p>Nombre: <span data-employee-name></span></p>
+                        <p>Estado: <span data-employee-status>ACTIVO</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bemo-divider pt-2"><div class="bemo-section-bar">Condiciones laborales</div></div>
+        <div class="grid gap-4 md:grid-cols-3">
+            <div>
+                <label class="bemo-label bemo-required" for="departamento-laboral">Departamento laboral</label>
+                <select class="bemo-select" id="departamento-laboral" name="IdDepartamento" required>
+                    <option value="">Seleccione departamento</option>
+                    @foreach (var departamento in Model.Departamentos)
+                    {
+                        <option value="@departamento.IdDepartamento" selected="@(Model.IdDepartamento == departamento.IdDepartamento ? "selected" : null)">
+                            @departamento.NombreDepartamento
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="IdDepartamento" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+
+            <div>
+                <label class="bemo-label bemo-required" for="cargo">Cargo</label>
+                <select class="bemo-select" id="cargo" name="IdCargo" required>
+                    <option value="">Seleccione cargo</option>
+                    @foreach (var cargo in Model.Cargos)
+                    {
+                        <option value="@cargo.IdCargo" selected="@(Model.IdCargo == cargo.IdCargo ? "selected" : null)">
+                            @cargo.NombreCargo ($@cargo.RangoMinimoCargo.ToString("N2") - $@cargo.RangoMaximoCargo.ToString("N2"))
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="IdCargo" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+
+            <div>
+                <label class="bemo-label bemo-required" for="tipo-contrato">Tipo de contrato</label>
+                <select class="bemo-select" id="tipo-contrato" name="IdTipoContrato" data-contract-type required>
+                    <option value="">Seleccione tipo de contrato</option>
+                    @foreach (var tipo in Model.TiposContrato)
+                    {
+                        <option value="@tipo.IdTipoContrato" selected="@(Model.IdTipoContrato == tipo.IdTipoContrato ? "selected" : null)">
+                            @tipo.NombreTipoContrato
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="IdTipoContrato" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+
+            <div>
+                <label class="bemo-label bemo-required" for="salario">Salario bruto</label>
+                <input class="bemo-input" id="salario" name="SalarioBruto" value="@Model.SalarioBruto"
+                       type="number" min="0.01" max="99999999.99" step="0.01" placeholder="Ingrese salario" required />
+                <span asp-validation-for="SalarioBruto" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+
+            <div>
+                <label class="bemo-label bemo-required" for="fecha-contratacion">Fecha de contratación</label>
+                <input class="bemo-input" id="fecha-contratacion" name="FechaContratacion"
+                       value="@(Model.FechaContratacion?.ToString("yyyy-MM-dd"))" type="date" data-contract-start required />
+                <span asp-validation-for="FechaContratacion" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+
+            <div>
+                <label class="bemo-label" for="fecha-culminacion">Fecha de culminación</label>
+                <input class="bemo-input" id="fecha-culminacion" name="FechaCulminacion"
+                       value="@(Model.FechaCulminacion?.ToString("yyyy-MM-dd"))" type="date" data-contract-end />
+                <p class="mt-1 text-xs italic text-[#684026]">Para contratos permanentes debe quedar vacía.</p>
+                <span asp-validation-for="FechaCulminacion" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+        </div>
+
+        <div class="bemo-info">
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
+            El contrato se registrará inicialmente como VIGENTE.
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+            <button class="bemo-button bemo-button-primary" type="submit">
+                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>
+                Guardar contrato
+            </button>
+            <a asp-area="@areaActual" asp-controller="Contratos" asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a>
+        </div>
     </form>
 </div>

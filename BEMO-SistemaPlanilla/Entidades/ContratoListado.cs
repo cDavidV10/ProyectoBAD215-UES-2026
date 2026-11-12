@@ -4,6 +4,9 @@ public class ContratoListado
 {
     public int IdContrato { get; init; }
     public int IdEmpleado { get; init; }
+    public int IdCargo { get; init; }
+    public int IdDepartamento { get; init; }
+    public int IdTipoContrato { get; init; }
     public string NombreEmpleado { get; init; } = string.Empty;
     public string NombreCargo { get; init; } = string.Empty;
     public string NombreTipoContrato { get; init; } = string.Empty;
