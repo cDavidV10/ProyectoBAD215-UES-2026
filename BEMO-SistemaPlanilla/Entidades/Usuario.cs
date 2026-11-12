@@ -27,6 +27,11 @@ public class Usuario
     [Column("password_hash")]
     public string PasswordHash { get; set; } = string.Empty;
 
+    [Required]
+    [StringLength(20)]
+    [Column("estado")]
+    public string Estado { get; set; } = "ACTIVO";
+
     [ForeignKey(nameof(IdEmpleado))]
     public Empleado Empleado { get; set; } = null!;
 

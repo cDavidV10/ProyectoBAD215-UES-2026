@@ -33,6 +33,11 @@ namespace BEMO.Negocio
             return _metodos.ListarActivosSinContrato();
         }
 
+        public List<Empleado> ListarActivosSinUsuarioDeRecursosHumanos()
+        {
+            return _metodos.ListarActivosSinUsuarioDeRecursosHumanos();
+        }
+
         public (List<Empleado> Empleados, int Total) ListarPaginado(
             int pagina,
             int tamanoPagina,
