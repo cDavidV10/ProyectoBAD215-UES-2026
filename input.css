@@ -219,6 +219,11 @@
   .bemo-icon-sm {
     height: 1.15rem;
     width: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
   }
 
   .bemo-stat {

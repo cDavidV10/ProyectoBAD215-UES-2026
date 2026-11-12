@@ -26,44 +26,119 @@
 }
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BEMO</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+
 <body class="bemo-page h-screen overflow-hidden text-[#381F12]">
     <svg aria-hidden="true" class="hidden">
-        <symbol id="icon-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z" /></symbol>
-        <symbol id="icon-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></symbol>
-        <symbol id="icon-document" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8" /></symbol>
-        <symbol id="icon-organization" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="5" rx="1" /><rect x="2" y="17" width="6" height="5" rx="1" /><rect x="16" y="17" width="6" height="5" rx="1" /><path d="M12 7v5M5 17v-5h14v5M19 12v5" /></symbol>
-        <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></symbol>
-        <symbol id="icon-scale" viewBox="0 0 24 24"><path d="M12 3v18M5 6h14M7 6l-4 8h8L7 6ZM17 6l-4 8h8l-4-8ZM8 21h8" /></symbol>
-        <symbol id="icon-coins" viewBox="0 0 24 24"><ellipse cx="9" cy="5" rx="7" ry="3" /><path d="M2 5v5c0 1.66 3.13 3 7 3s7-1.34 7-3V5M2 10v5c0 1.66 3.13 3 7 3 1.15 0 2.24-.13 3.2-.36M16 8.5c3.39.25 6 1.53 6 3.04v9c0 1.66-3.13 3-7 3-2.08 0-3.95-.4-5.22-1.03" /><path d="M16 14.5c-1.55 0-2.94-.22-4-.59" /></symbol>
-        <symbol id="icon-education" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5zM6 11v6c3.5 3 8.5 3 12 0v-6M22 9v6" /></symbol>
-        <symbol id="icon-user-settings" viewBox="0 0 24 24"><path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /><path d="m19.4 15.6.4.4 1.2-.2.8 1.4-.8 1 .1.5 1 .8-.5 1.5-1.3.1-.4.4.2 1.2-1.4.8-1-.8-.5.1-.8 1-1.5-.5-.1-1.3-.4-.4-1.2.2-.8-1.4.8-1-.1-.5-1-.8.5-1.5 1.3-.1.4-.4-.2-1.2 1.4-.8 1 .8.5-.1.8-1 1.5.5zM18 18.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" /></symbol>
-        <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></symbol>
-        <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
-        <symbol id="icon-edit" viewBox="0 0 24 24"><path d="m4 16-.8 4.8L8 20l11.4-11.4a2.1 2.1 0 0 0-3-3zM14.8 7.2l2 2M4 12v-2a2 2 0 0 1 2-2h2" /></symbol>
-        <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" /><circle cx="12" cy="12" r="2.5" /></symbol>
-        <symbol id="icon-save" viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5zM8 3v6h8V3M8 21v-6h8v6" /></symbol>
-        <symbol id="icon-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="m8 12 2.7 2.7L16.5 9" /></symbol>
-        <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></symbol>
-        <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 10v6M12 7h.01" /></symbol>
-        <symbol id="icon-alert" viewBox="0 0 24 24"><path d="m12 3 10 18H2z" /><path d="M12 9v5M12 18h.01" /></symbol>
-        <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" /></symbol>
-        <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z" /></symbol>
-        <symbol id="icon-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="m6 6 12 12" /></symbol>
-        <symbol id="icon-user-plus" viewBox="0 0 24 24"><path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M16 11h6" /></symbol>
-        <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M4 5h16M7 12h10M10 19h4" /></symbol>
-        <symbol id="icon-calculator" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M7 6h10M7 10h2M11 10h2M15 10h2M7 14h2M11 14h2M15 14h2M7 18h2M11 18h6" /></symbol>
-        <symbol id="icon-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+        <symbol id="icon-home" viewBox="0 0 24 24">
+            <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z" />
+        </symbol>
+        <symbol id="icon-users" viewBox="0 0 24 24">
+            <path
+            d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+        </symbol>
+        <symbol id="icon-document" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8" />
+        </symbol>
+        <symbol id="icon-organization" viewBox="0 0 24 24">
+            <rect x="9" y="2" width="6" height="5" rx="1" />
+            <rect x="2" y="17" width="6" height="5" rx="1" />
+            <rect x="16" y="17" width="6" height="5" rx="1" />
+            <path d="M12 7v5M5 17v-5h14v5M19 12v5" />
+        </symbol>
+        <symbol id="icon-calendar" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="17" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+        </symbol>
+        <symbol id="icon-scale" viewBox="0 0 24 24">
+            <path d="M12 3v18M5 6h14M7 6l-4 8h8L7 6ZM17 6l-4 8h8l-4-8ZM8 21h8" />
+        </symbol>
+        <symbol id="icon-coins" viewBox="0 0 24 24">
+            <ellipse cx="9" cy="5" rx="7" ry="3" />
+            <path
+            d="M2 5v5c0 1.66 3.13 3 7 3s7-1.34 7-3V5M2 10v5c0 1.66 3.13 3 7 3 1.15 0 2.24-.13 3.2-.36M16 8.5c3.39.25 6 1.53 6 3.04v9c0 1.66-3.13 3-7 3-2.08 0-3.95-.4-5.22-1.03" />
+            <path d="M16 14.5c-1.55 0-2.94-.22-4-.59" />
+        </symbol>
+        <symbol id="icon-education" viewBox="0 0 24 24">
+            <path d="m2 9 10-5 10 5-10 5zM6 11v6c3.5 3 8.5 3 12 0v-6M22 9v6" />
+        </symbol>
+        <symbol id="icon-user-settings" viewBox="0 0 24 24">
+            <path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+            <path
+            d="m19.4 15.6.4.4 1.2-.2.8 1.4-.8 1 .1.5 1 .8-.5 1.5-1.3.1-.4.4.2 1.2-1.4.8-1-.8-.5.1-.8 1-1.5-.5-.1-1.3-.4-.4-1.2.2-.8-1.4.8-1-.1-.5-1-.8.5-1.5 1.3-.1.4-.4-.2-1.2 1.4-.8 1 .8.5-.1.8-1 1.5.5zM18 18.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+        </symbol>
+        <symbol id="icon-search" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+        </symbol>
+        <symbol id="icon-plus" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14" />
+        </symbol>
+        <symbol id="icon-edit" viewBox="0 0 24 24">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+            <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
+            <path d="M16 5l3 3" />
+        </symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M10 12a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+            <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+        </symbol>
+        <symbol id="icon-save" viewBox="0 0 24 24">
+            <path d="M5 3h12l2 2v16H5zM8 3v6h8V3M8 21v-6h8v6" />
+        </symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <path d="m8 12 2.7 2.7L16.5 9" />
+        </symbol>
+        <symbol id="icon-lock" viewBox="0 0 24 24">
+            <rect x="4" y="10" width="16" height="11" rx="2" />
+            <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+        </symbol>
+        <symbol id="icon-info" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 10v6M12 7h.01" />
+        </symbol>
+        <symbol id="icon-alert" viewBox="0 0 24 24">
+            <path d="m12 3 10 18H2z" />
+            <path d="M12 9v5M12 18h.01" />
+        </symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24">
+            <path d="m6 6 12 12M18 6 6 18" />
+        </symbol>
+        <symbol id="icon-play" viewBox="0 0 24 24">
+            <path d="m8 5 11 7-11 7z" />
+        </symbol>
+        <symbol id="icon-ban" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <path d="m6 6 12 12" />
+        </symbol>
+        <symbol id="icon-user-plus" viewBox="0 0 24 24">
+            <path d="M15 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M16 11h6" />
+        </symbol>
+        <symbol id="icon-filter" viewBox="0 0 24 24">
+            <path d="M4 5h16M7 12h10M10 19h4" />
+        </symbol>
+        <symbol id="icon-calculator" viewBox="0 0 24 24">
+            <rect x="4" y="2" width="16" height="20" rx="2" />
+            <path d="M7 6h10M7 10h2M11 10h2M15 10h2M7 14h2M11 14h2M15 14h2M7 18h2M11 18h6" />
+        </symbol>
+        <symbol id="icon-chevron" viewBox="0 0 24 24">
+            <path d="m6 9 6 6 6-6" />
+        </symbol>
     </svg>
     <header class="fixed inset-x-0 top-0 z-40 h-[5.6rem] bg-[#9F5F2F] text-white shadow-md">
         <div class="flex h-full items-center justify-between gap-4 px-6 md:px-7">
             <a asp-area="@areaName" asp-controller="Home" asp-action="Index" class="flex items-center gap-3">
-                <img src="~/Images/logo_blanco.webp" asp-append-version="true" alt="BEMO" class="size-14 rounded-xl bg-[#381F12]/30 object-contain p-1" />
+                <img src="~/Images/logo_blanco.webp" asp-append-version="true" alt="BEMO"
+                     class="size-14 rounded-xl bg-[#381F12]/30 object-contain p-1" />
                 <span>
                     <span class="block text-xl font-extrabold tracking-tight">BEMO</span>
                     <span class="block text-sm uppercase tracking-[0.16em] text-[#F5E8D2]">Sistema de planilla</span>
@@ -73,7 +148,8 @@
                 <span class="hidden text-base text-[#F5E8D2] sm:inline">@(User.Identity?.Name ?? "vr24001")</span>
                 <form asp-area="" asp-controller="Login" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="cursor-pointer rounded-lg border border-white/50 px-4 py-2 text-base font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white">
+                    <button type="submit"
+                            class="cursor-pointer rounded-lg border border-white/50 px-4 py-2 text-base font-semibold transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white">
                         Cerrar sesión
                     </button>
                 </form>
@@ -82,40 +158,45 @@
     </header>
 
     <div class="flex h-screen min-h-0 flex-col pt-[5.6rem] md:flex-row">
-        <aside class="flex shrink-0 flex-col border-b border-[#E3D2AE] bg-[#FBF8F1] md:fixed md:bottom-0 md:left-0 md:top-[5.6rem] md:w-72 md:overflow-hidden md:border-b-0 md:border-r">
-            <p class="hidden px-6 pb-4 pt-7 text-base font-semibold uppercase tracking-[0.18em] text-[#9F5F2F] md:block">Módulos</p>
-            <nav aria-label="Módulos" class="flex gap-2 overflow-x-auto px-2 py-2 md:flex-1 md:flex-col md:overflow-visible md:px-2 md:py-0">
-                @foreach (var module in modules)
-                {
-                    var isActive = string.Equals(
-                        ViewContext.RouteData.Values["controller"]?.ToString(),
-                        module.Controller,
-                        StringComparison.OrdinalIgnoreCase);
-                    <a asp-area="@areaName" asp-controller="@module.Controller" asp-action="Index"
-                       aria-current="@(isActive ? "page" : null)"
-                       class="flex shrink-0 items-center gap-4 rounded-lg px-5 py-3 text-base font-semibold transition @(isActive ? "bg-[#9F5F2F] text-white shadow-sm" : "text-[#381F12] hover:bg-[#F1E4D0]")">
-                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24">
-                            <use href="#icon-@module.Icon"></use>
-                        </svg>
-                        <span>@module.Text</span>
-                    </a>
-                }
-            </nav>
-            <p class="hidden border-t border-[#E3D2AE] px-6 py-6 text-base text-[#684026] md:block">@roleName</p>
-        </aside>
+        <aside
+            class="flex shrink-0 flex-col border-b border-[#E3D2AE] bg-[#FBF8F1] md:fixed md:bottom-0 md:left-0 md:top-[5.6rem] md:w-72 md:overflow-hidden md:border-b-0 md:border-r">
+            <p
+                class="hidden px-6 pb-4 pt-7 text-base font-semibold uppercase tracking-[0.18em] text-[#9F5F2F] md:block">
+                Módulos</p>
+                <nav aria-label="Módulos"
+                     class="flex gap-2 overflow-x-auto px-2 py-2 md:flex-1 md:flex-col md:overflow-visible md:px-2 md:py-0">
+                    @foreach (var module in modules)
+                    {
+                        var isActive = string.Equals(
+                            ViewContext.RouteData.Values["controller"]?.ToString(),
+                            module.Controller,
+                            StringComparison.OrdinalIgnoreCase);
+                        <a asp-area="@areaName" asp-controller="@module.Controller" asp-action="Index"
+                           aria-current="@(isActive ? "page" : null)"
+                           class="flex shrink-0 items-center gap-4 rounded-lg px-5 py-3 text-base font-semibold transition @(isActive ? "bg-[#9F5F2F] text-white shadow-sm" : "text-[#381F12] hover:bg-[#F1E4D0]")">
+                            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24">
+                                <use href="#icon-@module.Icon"></use>
+                            </svg>
+                            <span>@module.Text</span>
+                        </a>
+                    }
+                </nav>
+                <p class="hidden border-t border-[#E3D2AE] px-6 py-6 text-base text-[#684026] md:block">@roleName</p>
+            </aside>
 
-        <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto md:ml-72">
-            <main class="flex-1 px-5 py-7 md:px-10 md:py-8">
-                @RenderBody()
-            </main>
-            <footer class="border-t border-[#E3D2AE] bg-white/70">
-                <div class="px-5 py-4 text-sm text-[#804C2C] md:px-10">
-                    <p>&copy; 2026 BEMO - Corporación Textil Salvadoreña</p>
-                </div>
-            </footer>
+            <div class="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto md:ml-72">
+                <main class="flex-1 px-5 py-7 md:px-10 md:py-8">
+                    @RenderBody()
+                </main>
+                <footer class="border-t border-[#E3D2AE] bg-white/70">
+                    <div class="px-5 py-4 text-sm text-[#804C2C] md:px-10">
+                        <p>&copy; 2026 BEMO - Corporación Textil Salvadoreña</p>
+                    </div>
+                </footer>
+            </div>
         </div>
-    </div>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
+
 </html>

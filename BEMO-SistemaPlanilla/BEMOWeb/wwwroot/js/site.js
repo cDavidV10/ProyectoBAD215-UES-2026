@@ -16,6 +16,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.querySelectorAll("form[data-server-search]").forEach((form) => {
+        const input = form.querySelector("input[name='busqueda']");
+        if (!input) return;
+
+        let timer;
+        input.addEventListener("input", () => {
+            window.clearTimeout(timer);
+            timer = window.setTimeout(() => form.submit(), 700);
+        });
+    });
+
     document.querySelectorAll("[data-tab]").forEach((tab) => {
         tab.addEventListener("click", () => {
             const group = tab.closest("div");

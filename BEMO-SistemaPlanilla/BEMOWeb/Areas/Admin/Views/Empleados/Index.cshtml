@@ -38,142 +38,186 @@
             <h1 class="bemo-title mt-2">Empleados</h1>
             <p class="bemo-subtitle mt-2">Administra la información del personal.</p>
         </div>
-        <a asp-area="@areaActual" asp-controller="Empleados" asp-action="Nuevo" class="bemo-button bemo-button-primary self-start">
-            <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+        <a asp-area="@areaActual" asp-controller="Empleados" asp-action="Nuevo"
+           class="bemo-button bemo-button-primary self-start">
+            <svg class="bemo-icon" viewBox="0 0 24 24">
+                <use href="#icon-plus"></use>
+            </svg>
             Nuevo empleado
         </a>
     </header>
 
     @if (TempData["Mensaje"] is string mensaje)
     {
-        <div class="bemo-alert bemo-alert-success" role="status"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg><span>@mensaje</span></div>
+        <div class="bemo-alert bemo-alert-success" role="status"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24">
+            <use href="#icon-check"></use>
+        </svg><span>@mensaje</span></div>
     }
 
     <section class="grid gap-4 lg:grid-cols-3">
         <div class="bemo-stat">
-            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-users"></use></svg></div>
-            <div><p class="bemo-stat-label">Total de empleados</p><p class="bemo-stat-value">@Model.EmpleadosTotales</p></div>
+            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                <use href="#icon-users"></use>
+            </svg></div>
+            <div>
+                <p class="bemo-stat-label">Total de empleados</p>
+                <p class="bemo-stat-value">@Model.EmpleadosTotales</p>
+            </div>
         </div>
         <div class="bemo-stat">
-            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div>
-            <div><p class="bemo-stat-label">Activos</p><p class="bemo-stat-value">@Model.EmpleadosActivos</p></div>
+            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                <use href="#icon-check"></use>
+            </svg></div>
+            <div>
+                <p class="bemo-stat-label">Activos</p>
+                <p class="bemo-stat-value">@Model.EmpleadosActivos</p>
+            </div>
         </div>
         <div class="bemo-stat">
-            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg></div>
-            <div><p class="bemo-stat-label">Inactivos</p><p class="bemo-stat-value">@Model.EmpleadosInactivos</p></div>
+            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                <use href="#icon-ban"></use>
+            </svg></div>
+            <div>
+                <p class="bemo-stat-label">Inactivos</p>
+                <p class="bemo-stat-value">@Model.EmpleadosInactivos</p>
+            </div>
         </div>
     </section>
 
-    <form method="get" class="grid gap-4 lg:grid-cols-[1.25fr_1fr_1fr]">
+    <form method="get" class="grid gap-4 lg:grid-cols-[1.25fr_1fr_1fr]" data-server-search>
         <div class="relative">
-            <svg class="bemo-icon absolute left-4 top-3 text-[#381F12]" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>
-            <input class="bemo-input pl-12" type="search" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por DUI o nombre..." data-filter-input="employees" onkeydown="if (event.key === 'Enter') this.form.submit()" />
+            <button class="absolute left-3 top-2.5 z-10 rounded-md p-1 text-[#381F12]" type="submit"
+                    aria-label="Buscar empleados">
+                <svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-search"></use>
+                </svg>
+            </button>
+            <input class="bemo-input pl-12" type="search" name="busqueda" value="@Model.Busqueda"
+                   placeholder="Buscar por DUI o nombre..." />
         </div>
-        <select class="bemo-select" name="departamento" aria-label="Filtrar por departamento" onchange="this.form.submit()">
-            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.DepartamentoSeleccionado) ? "selected" : null)">Todos los departamentos</option>
-            @foreach (var departamento in Model.Departamentos)
-            {
-                <option value="@departamento.NombreDepartamento" selected="@(departamento.NombreDepartamento == Model.DepartamentoSeleccionado ? "selected" : null)">@departamento.NombreDepartamento</option>
-            }
-        </select>
-        <select class="bemo-select" name="estado" aria-label="Filtrar por estado" onchange="this.form.submit()">
-            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.EstadoSeleccionado) ? "selected" : null)">Todos los estados</option>
-            <option value="ACTIVO" selected="@(Model.EstadoSeleccionado == "ACTIVO" ? "selected" : null)">Activo</option>
-            <option value="INACTIVO" selected="@(Model.EstadoSeleccionado == "INACTIVO" ? "selected" : null)">Inactivo</option>
-        </select>
-    </form>
-
-    <section class="bemo-card overflow-hidden">
-        <div class="bemo-table-wrap">
-            <table class="bemo-table" data-filter-table="employees">
-                <thead>
-                    <tr>
-                        <th>DUI</th>
-                        <th>Nombre</th>
-                        <th>Departamento</th>
-                        <th>Cargo</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.ListaEmpleados.Count == 0)
-                    {
-                        <tr><td colspan="6" class="text-center">No hay empleados para mostrar.</td></tr>
+        <select class="bemo-select" name="departamento" aria-label="Filtrar por departamento"
+                onchange="this.form.submit()">
+            <option value=""
+                    selected="@(string.IsNullOrWhiteSpace(Model.DepartamentoSeleccionado) ? "selected" : null)">Todos los
+                departamentos</option>
+                @foreach (var departamento in Model.Departamentos)
+                {
+                    <option value="@departamento.NombreDepartamento"
+                            selected="@(departamento.NombreDepartamento == Model.DepartamentoSeleccionado ? "selected" : null)">
+                        @departamento.NombreDepartamento</option>
                     }
-                    else
-                    {
-                        foreach (var empleado in Model.ListaEmpleados)
+                </select>
+                <select class="bemo-select" name="estado" aria-label="Filtrar por estado" onchange="this.form.submit()">
+                    <option value="" selected="@(string.IsNullOrWhiteSpace(Model.EstadoSeleccionado) ? "selected" : null)">Todos
+                        los estados</option>
+                        <option value="ACTIVO" selected="@(Model.EstadoSeleccionado == "ACTIVO" ? "selected" : null)">Activo
+                        </option>
+                        <option value="INACTIVO" selected="@(Model.EstadoSeleccionado == "INACTIVO" ? "selected" : null)">Inactivo
+                        </option>
+                    </select>
+                </form>
+
+                <section class="bemo-card overflow-hidden">
+                    <div class="bemo-table-wrap">
+                        <table class="bemo-table" data-filter-table="employees">
+                            <thead>
+                                <tr>
+                                    <th>DUI</th>
+                                    <th>Nombre</th>
+                                    <th>Departamento</th>
+                                    <th>Cargo</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.ListaEmpleados.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center">No hay empleados para mostrar.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var empleado in Model.ListaEmpleados)
+                                    {
+                                        var contrato = empleado.Contratos.FirstOrDefault();
+                                        var departamento = contrato?.Departamento?.NombreDepartamento ?? "Sin departamento";
+                                        var cargo = contrato?.Cargo?.NombreCargo ?? "Sin cargo";
+                                        var activo = string.Equals(empleado.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase);
+                                        var claseEstado = activo ? "bemo-status-green" : "bemo-status-red";
+                                        var textoEstado = activo ? "Activo" : "Inactivo";
+                                        <tr
+                                            data-filter-value="@($"{empleado.Dui} {empleado.Nombre} {empleado.Apellido} {departamento} {cargo}")">
+                                            <td>@empleado.Dui</td>
+                                            <td>@empleado.Nombre @empleado.Apellido</td>
+                                            <td>@departamento</td>
+                                            <td>@cargo</td>
+                                            <td><span class="bemo-status @claseEstado">@textoEstado</span></td>
+                                            <td>
+                                                <button class="bemo-link-action mr-3 cursor-pointer" type="button"><svg
+                                                    class="bemo-icon-sm inline" viewBox="0 0 24 24">
+                                                    <use href="#icon-eye"></use>
+                                                </svg> Ver</button>
+                                                <span class="text-[#C5A77B]">|</span>
+                                                <button class="bemo-link-action ml-3 cursor-pointer" type="button"><svg
+                                                    class="bemo-icon-sm inline" viewBox="0 0 24 24">
+                                                    <use href="#icon-edit"></use>
+                                                </svg> Editar</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de empleados">
+                    <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros empleados</p>
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if (Model.PaginaActual > 1)
                         {
-                            var contrato = empleado.Contratos.FirstOrDefault();
-                            var departamento = contrato?.Departamento?.NombreDepartamento ?? "Sin departamento";
-                            var cargo = contrato?.Cargo?.NombreCargo ?? "Sin cargo";
-                            var activo = string.Equals(empleado.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase);
-                            var claseEstado = activo ? "bemo-status-green" : "bemo-status-red";
-                            var textoEstado = activo ? "Activo" : "Inactivo";
-                            <tr data-filter-value="@($"{empleado.Dui} {empleado.Nombre} {empleado.Apellido} {departamento} {cargo}")">
-                                <td>@empleado.Dui</td>
-                                <td>@empleado.Nombre @empleado.Apellido</td>
-                                <td>@departamento</td>
-                                <td>@cargo</td>
-                                <td><span class="bemo-status @claseEstado">@textoEstado</span></td>
-                                <td>
-                                    <button class="bemo-link-action mr-3" type="button"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg> Ver</button>
-                                    <span class="text-[#C5A77B]">|</span>
-                                    <button class="bemo-link-action ml-3" type="button"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg> Editar</button>
-                                </td>
-                            </tr>
+                            <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
                         }
-                    }
-                </tbody>
-            </table>
-        </div>
-    </section>
 
-    <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de empleados">
-        <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros empleados</p>
-        <div class="flex flex-wrap items-center gap-2">
-            @if (Model.PaginaActual > 1)
-            {
-                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
-            }
+                        @if (Model.TotalPaginas <= 7)
+                        {
+                            @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                            {
+                                var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                                <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                            }
+                        }
+                        else
+                        {
+                            var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                            var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                            var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" :
+                  "bemo-button bemo-button-secondary";
 
-            @if (Model.TotalPaginas <= 7)
-            {
-                @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
-                {
-                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
-                }
-            }
-            else
-            {
-                var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
-                var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
-                var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                            @if (paginaInicio > 2)
+                            {
+                                <span class="flex items-center px-1 text-[#684026]">...</span>
+                            }
+                            @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                            {
+                                var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                                <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                            }
+                            @if (paginaFin < Model.TotalPaginas - 1)
+                            {
+                                <span class="flex items-center px-1 text-[#684026]">...</span>
+                            }
+                            <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                        }
 
-                <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
-                @if (paginaInicio > 2)
-                {
-                    <span class="flex items-center px-1 text-[#684026]">...</span>
-                }
-                @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
-                {
-                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
-                }
-                @if (paginaFin < Model.TotalPaginas - 1)
-                {
-                    <span class="flex items-center px-1 text-[#684026]">...</span>
-                }
-                <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
-            }
-
-            @if (Model.PaginaActual < Model.TotalPaginas)
-            {
-                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
-            }
-        </div>
-    </nav>
-</div>
+                        @if (Model.PaginaActual < Model.TotalPaginas)
+                        {
+                            <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                        }
+                    </div>
+                </nav>
+            </div>
