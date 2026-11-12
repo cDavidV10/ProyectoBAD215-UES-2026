@@ -1,0 +1,179 @@
+@model BEMOWeb.Models.EditarEmpleadoModel
+
+@{
+    ViewData["Title"] = "Editar empleado";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+}
+
+<div class="space-y-5">
+    <div>
+        <p class="bemo-breadcrumb">Administración <span class="mx-2">›</span> Empleados</p>
+        <h1 class="bemo-title mt-3">Editar empleado</h1>
+        <p class="bemo-subtitle mt-2">Actualiza únicamente la información personal, de contacto y dirección.</p>
+    </div>
+
+    <form asp-area="@areaActual" asp-controller="Empleados" asp-action="Editar" method="post"
+          class="bemo-card space-y-4 p-4 md:p-5" data-employee-form>
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="IdEmpleado" value="@Model.IdEmpleado" />
+
+        <div class="bemo-alert bemo-alert-error" data-client-validation-message role="alert" hidden>
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+            <span>Revisa los campos marcados antes de guardar.</span>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="bemo-alert bemo-alert-error" role="alert">
+                <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                <div>
+                    <strong>Corrige los campos marcados antes de guardar.</strong>
+                    <div asp-validation-summary="All" class="text-sm"></div>
+                </div>
+            </div>
+        }
+
+        <div class="bemo-section-bar">Datos protegidos</div>
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label class="bemo-label" for="dui">DUI</label>
+                <input class="bemo-input bg-[#F1F1F1]" id="dui" value="@Model.Dui" readonly disabled />
+                <p class="mt-1 text-sm text-[#684026]">Este dato no se puede modificar.</p>
+            </div>
+            <div>
+                <label class="bemo-label" for="fecha-nacimiento">Fecha de nacimiento</label>
+                <input class="bemo-input bg-[#F1F1F1]" id="fecha-nacimiento"
+                       value="@(Model.FechaNac == DateOnly.MinValue ? "" : Model.FechaNac.ToString("dd/MM/yyyy"))"
+                       readonly disabled />
+                <p class="mt-1 text-sm text-[#684026]">Este dato no se puede modificar.</p>
+            </div>
+        </div>
+
+        <div class="bemo-divider pt-2"><div class="bemo-section-bar">Datos personales y contacto</div></div>
+        <div class="grid gap-4 md:grid-cols-3">
+            <div>
+                <label class="bemo-label bemo-required" for="nombre">Nombres</label>
+                <input class="bemo-input" id="nombre" name="Nombre" value="@Model.Nombre" maxlength="50"
+                       pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*"
+                       title="Use únicamente letras, espacios, apóstrofes o guiones." autocomplete="given-name" required />
+                <span asp-validation-for="Nombre" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="apellido">Apellidos</label>
+                <input class="bemo-input" id="apellido" name="Apellido" value="@Model.Apellido" maxlength="20"
+                       pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:[ '\-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*"
+                       title="Use únicamente letras, espacios, apóstrofes o guiones." autocomplete="family-name" required />
+                <span asp-validation-for="Apellido" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label" for="nit">NIT</label>
+                <input class="bemo-input" id="nit" name="Nit" value="@Model.Nit" maxlength="17"
+                       pattern="(?:[0-9]{4}-[0-9]{6}-[0-9]{3}-[0-9]|[0-9]{8}-[0-9])"
+                       title="El NIT debe tener el formato 0000-000000-000-0 o 00000000-0." inputmode="numeric" autocomplete="off" />
+                <span asp-validation-for="Nit" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="isss">Número ISSS</label>
+                <input class="bemo-input" id="isss" name="NumeroIsss" value="@Model.NumeroIsss" maxlength="15"
+                       pattern="[0-9]{1,15}" title="El ISSS solo puede contener dígitos." inputmode="numeric" required />
+                <span asp-validation-for="NumeroIsss" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="telefono">Teléfono</label>
+                <input class="bemo-input" id="telefono" name="Telefono" value="@Model.Telefono" maxlength="9"
+                       pattern="[0-9]{4}-[0-9]{4}" title="El teléfono debe tener el formato 0000-0000."
+                       inputmode="tel" autocomplete="tel" required />
+                <span asp-validation-for="Telefono" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label" for="correo">Correo electrónico</label>
+                <input class="bemo-input" id="correo" name="Correo" value="@Model.Correo" type="email"
+                       maxlength="100" placeholder="correo@ejemplo.com" autocomplete="email" />
+                <span asp-validation-for="Correo" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+        </div>
+
+        <div class="bemo-divider pt-2"><div class="bemo-section-bar">Dirección</div></div>
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label class="bemo-label bemo-required" for="departamento-ubicacion">Departamento</label>
+                <select class="bemo-select" id="departamento-ubicacion" name="IdDepartamentoUbicacion"
+                        data-location-department required>
+                    <option value="">Seleccione departamento</option>
+                    @foreach (var departamento in Model.DepartamentosUbicacion)
+                    {
+                        <option value="@departamento.IdDepartamentoUbicacion"
+                                selected="@(Model.IdDepartamentoUbicacion == departamento.IdDepartamentoUbicacion ? "selected" : null)">
+                            @departamento.NombreDepartamentoUbicacion</option>
+                    }
+                </select>
+                <span asp-validation-for="IdDepartamentoUbicacion" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="municipio-ubicacion">Municipio</label>
+                <select class="bemo-select" id="municipio-ubicacion" name="IdMunicipio"
+                        data-location-municipality required disabled>
+                    <option value="">Seleccione municipio</option>
+                    @foreach (var municipio in Model.Municipios)
+                    {
+                        <option value="@municipio.IdMunicipio" data-department-id="@municipio.IdDepartamentoUbicacion"
+                                selected="@(Model.IdMunicipio == municipio.IdMunicipio ? "selected" : null)">
+                            @municipio.NombreMunicipio</option>
+                    }
+                </select>
+                <span asp-validation-for="IdMunicipio" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="nombre-calle">Calle</label>
+                <input class="bemo-input" id="nombre-calle" name="NombreCalle" value="@Model.NombreCalle" maxlength="50"
+                       pattern="[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ][A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ .,#/\-]*"
+                       title="Ingrese una calle con letras, números y signos de dirección válidos." required />
+                <span asp-validation-for="NombreCalle" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="numero-casa">Número de casa</label>
+                <input class="bemo-input" id="numero-casa" name="NumeroCasa" value="@Model.NumeroCasa" maxlength="10"
+                       pattern="[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ][A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ .#/\-]*"
+                       title="Ingrese un número de casa válido." required />
+                <span asp-validation-for="NumeroCasa" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+        </div>
+
+        <div class="bemo-divider pt-2"><div class="bemo-section-bar">Información complementaria</div></div>
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label class="bemo-label bemo-required" for="afp">AFP</label>
+                <select class="bemo-select" id="afp" name="IdAfp" required>
+                    <option value="">Seleccione AFP</option>
+                    @foreach (var afp in Model.Afps)
+                    {
+                        <option value="@afp.IdAfp" selected="@(Model.IdAfp == afp.IdAfp ? "selected" : null)">@afp.NombreAfp</option>
+                    }
+                </select>
+                <span asp-validation-for="IdAfp" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" for="estado">Estado</label>
+                <select class="bemo-select" id="estado" name="Estado" required>
+                    <option value="ACTIVO" selected="@(Model.Estado == "ACTIVO" ? "selected" : null)">Activo</option>
+                    <option value="INACTIVO" selected="@(Model.Estado == "INACTIVO" ? "selected" : null)">Inactivo</option>
+                </select>
+                <span asp-validation-for="Estado" class="bemo-validation-message text-sm text-red-700"></span>
+            </div>
+        </div>
+
+        <div class="bemo-info">
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
+            <span>El contrato no se modifica desde esta pantalla. Para cambiarlo utiliza el módulo de contratos.</span>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+            <button class="bemo-button bemo-button-primary" type="submit">
+                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>
+                Guardar cambios
+            </button>
+            <a asp-area="@areaActual" asp-controller="Empleados" asp-action="Index"
+               class="bemo-button bemo-button-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

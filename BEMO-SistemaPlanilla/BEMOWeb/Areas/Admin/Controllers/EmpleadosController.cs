@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using BEMO.Entidades;
 using BEMO.Negocio;
 using Negocio;
 using Microsoft.Data.SqlClient;
@@ -69,6 +70,57 @@ public class EmpleadosController : Controller
         }
 
     [HttpGet]
+    public IActionResult Editar(int id)
+    {
+        var empleado = _empleados.ObtenerPorId(id);
+        if (empleado is null)
+        {
+            return NotFound();
+        }
+
+        return View("~/Areas/Admin/Views/Empleados/Editar.cshtml", CrearModeloEdicion(empleado));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Editar(Models.EditarEmpleadoModel modelo)
+    {
+        CargarCatalogosEdicion(modelo);
+        ValidarEdicion(modelo);
+        RestaurarDatosProtegidos(modelo);
+
+        if (!ModelState.IsValid)
+        {
+            return View("~/Areas/Admin/Views/Empleados/Editar.cshtml", modelo);
+        }
+
+        try
+        {
+            _empleados.ActualizarDatosPersonales(
+                modelo.IdEmpleado,
+                modelo.Nombre,
+                modelo.Apellido,
+                modelo.Nit,
+                modelo.NumeroIsss,
+                modelo.Telefono,
+                modelo.Correo,
+                modelo.IdAfp,
+                modelo.IdMunicipio,
+                modelo.NombreCalle,
+                modelo.NumeroCasa,
+                modelo.Estado);
+
+            TempData["Mensaje"] = "La información del empleado fue actualizada correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
+        catch (SqlException ex)
+        {
+            AgregarMensajeDeError(ex);
+            return View("~/Areas/Admin/Views/Empleados/Editar.cshtml", modelo);
+        }
+    }
+
+    [HttpGet]
     public IActionResult Nuevo()
     {
         var modelo = new Models.NuevoEmpleadoModel
@@ -82,6 +134,87 @@ public class EmpleadosController : Controller
         };
 
         return View("~/Areas/Admin/Views/Empleados/Nuevo.cshtml", modelo);
+    }
+
+    private Models.EditarEmpleadoModel CrearModeloEdicion(Empleado empleado)
+    {
+        var departamentosUbicacion = _departamentosUbicacion.listar();
+        var municipios = _municipiosUbicacion.Listar();
+        var afps = _afps.Listar();
+        var nombreDepartamentoUbicacion = empleado.Direccion?.Distrito?.DepartamentoUbicacion?.NombreDepartamentoUbicacion;
+        var departamentoUbicacion = departamentosUbicacion.FirstOrDefault(departamento =>
+            string.Equals(departamento.NombreDepartamentoUbicacion, nombreDepartamentoUbicacion, StringComparison.OrdinalIgnoreCase));
+        var municipio = municipios.FirstOrDefault(item =>
+            item.IdDepartamentoUbicacion == departamentoUbicacion?.IdDepartamentoUbicacion
+            && string.Equals(item.NombreMunicipio, empleado.Direccion?.Distrito?.NombreDistrito, StringComparison.OrdinalIgnoreCase));
+        var afp = afps.FirstOrDefault(item =>
+            string.Equals(item.NombreAfp, empleado.Afp?.NombreAfp, StringComparison.OrdinalIgnoreCase));
+
+        return new Models.EditarEmpleadoModel
+        {
+            IdEmpleado = empleado.IdEmpleado,
+            Dui = empleado.Dui,
+            FechaNac = empleado.FechaNac,
+            Nombre = empleado.Nombre,
+            Apellido = empleado.Apellido,
+            Nit = empleado.Nit,
+            NumeroIsss = empleado.NumeroIsss,
+            Telefono = empleado.Telefono,
+            Correo = empleado.Correo,
+            IdAfp = afp?.IdAfp ?? 0,
+            IdDepartamentoUbicacion = departamentoUbicacion?.IdDepartamentoUbicacion ?? 0,
+            IdMunicipio = municipio?.IdMunicipio ?? 0,
+            NombreCalle = empleado.Direccion?.NombreCalle ?? string.Empty,
+            NumeroCasa = empleado.Direccion?.NumeroCasa ?? string.Empty,
+            Estado = empleado.Estado,
+            DepartamentosUbicacion = departamentosUbicacion,
+            Municipios = municipios,
+            Afps = afps
+        };
+    }
+
+    private void CargarCatalogosEdicion(Models.EditarEmpleadoModel modelo)
+    {
+        modelo.DepartamentosUbicacion = _departamentosUbicacion.listar();
+        modelo.Municipios = _municipiosUbicacion.Listar();
+        modelo.Afps = _afps.Listar();
+    }
+
+    private void RestaurarDatosProtegidos(Models.EditarEmpleadoModel modelo)
+    {
+        if (modelo.IdEmpleado <= 0)
+        {
+            return;
+        }
+
+        var empleado = _empleados.ObtenerPorId(modelo.IdEmpleado);
+        if (empleado is not null)
+        {
+            modelo.Dui = empleado.Dui;
+            modelo.FechaNac = empleado.FechaNac;
+        }
+    }
+
+    private void ValidarEdicion(Models.EditarEmpleadoModel modelo)
+    {
+        if (modelo.IdAfp > 0 && !modelo.Afps.Any(afp => afp.IdAfp == modelo.IdAfp))
+        {
+            ModelState.AddModelError(nameof(modelo.IdAfp), "La AFP seleccionada no es válida.");
+        }
+
+        if (modelo.IdDepartamentoUbicacion > 0
+            && !modelo.DepartamentosUbicacion.Any(departamento => departamento.IdDepartamentoUbicacion == modelo.IdDepartamentoUbicacion))
+        {
+            ModelState.AddModelError(nameof(modelo.IdDepartamentoUbicacion), "El departamento de ubicación no es válido.");
+        }
+
+        if (modelo.IdMunicipio > 0
+            && !modelo.Municipios.Any(municipio =>
+                municipio.IdMunicipio == modelo.IdMunicipio
+                && municipio.IdDepartamentoUbicacion == modelo.IdDepartamentoUbicacion))
+        {
+            ModelState.AddModelError(nameof(modelo.IdMunicipio), "El municipio no corresponde al departamento seleccionado.");
+        }
     }
 
     [HttpPost]

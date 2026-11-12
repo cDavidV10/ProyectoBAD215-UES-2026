@@ -198,10 +198,12 @@
                                                     <use href="#icon-eye"></use>
                                                 </svg> Ver</button>
                                                 <span class="text-[#C5A77B]">|</span>
-                                                <button class="bemo-link-action ml-3 cursor-pointer" type="button"><svg
+                                                <a asp-area="@areaActual" asp-controller="Empleados" asp-action="Editar"
+                                                   asp-route-id="@empleado.IdEmpleado"
+                                                   class="bemo-link-action ml-3 cursor-pointer"><svg
                                                     class="bemo-icon-sm inline" viewBox="0 0 24 24">
                                                     <use href="#icon-edit"></use>
-                                                </svg> Editar</button>
+                                                </svg> Editar</a>
                                             </td>
                                         </tr>
                                     }

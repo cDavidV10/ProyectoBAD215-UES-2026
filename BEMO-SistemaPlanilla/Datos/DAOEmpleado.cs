@@ -210,47 +210,147 @@ public class DAOEmpleado
                 total = Convert.ToInt32(dr["total_registros"]);
             }
 
-            var empleado = new Empleado
-            {
-                IdEmpleado = Convert.ToInt32(dr["id_empleado"]),
-                Dui = Texto(dr, "dui")?.Trim() ?? string.Empty,
-                Nit = Texto(dr, "nit"),
-                NumeroIsss = Texto(dr, "numero_isss") ?? string.Empty,
-                Nombre = Texto(dr, "nombre") ?? string.Empty,
-                Apellido = Texto(dr, "apellido") ?? string.Empty,
-                Telefono = Texto(dr, "telefono") ?? string.Empty,
-                Correo = Texto(dr, "correo"),
-                FechaNac = DateOnly.FromDateTime(Convert.ToDateTime(dr["fecha_nac"])),
-                Estado = Texto(dr, "estado") ?? string.Empty,
-                Afp = new Afp
-                {
-                    NombreAfp = Texto(dr, "nombre_afp") ?? string.Empty
-                },
-                Direccion = new Direccion
-                {
-                    NombreCalle = Texto(dr, "nombre_calle") ?? string.Empty,
-                    NumeroCasa = Texto(dr, "numero_casa") ?? string.Empty,
-                    Distrito = new DistritoUbicacion
-                    {
-                        NombreDistrito = Texto(dr, "nombre_municipio") ?? string.Empty,
-                        DepartamentoUbicacion = new DepartamentoUbicacion
-                        {
-                            NombreDepartamentoUbicacion = Texto(dr, "departamento_ubicacion") ?? string.Empty
-                        }
-                    }
-                }
-            };
-
-            var contrato = CrearContrato(dr, empleado.IdEmpleado);
-            if (contrato is not null)
-            {
-                empleado.Contratos.Add(contrato);
-            }
-
-            empleados.Add(empleado);
+            empleados.Add(MapearEmpleado(dr));
         }
 
         return (empleados, total);
+    }
+
+    public Empleado? ObtenerPorId(int idEmpleado)
+    {
+        const string consulta = @"
+            SELECT TOP (1)
+                id_empleado,
+                dui,
+                nit,
+                numero_isss,
+                nombre,
+                apellido,
+                telefono,
+                correo,
+                fecha_nac,
+                estado,
+                nombre_afp,
+                nombre_calle,
+                numero_casa,
+                nombre_municipio,
+                departamento_ubicacion,
+                id_contrato,
+                nombre_tipo_contrato,
+                nombre_cargo,
+                nombre_departamento,
+                salario_bruto,
+                fecha_contratacion,
+                fecha_culminacion,
+                estado_contrato
+            FROM dbo.VW_Empleados_General
+            WHERE id_empleado = @id_empleado
+            ORDER BY id_contrato DESC;";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+
+        conexionSql.Open();
+        using var dr = cmd.ExecuteReader();
+        return dr.Read() ? MapearEmpleado(dr) : null;
+    }
+
+    public void ActualizarDatosPersonales(
+        int idEmpleado,
+        string nombre,
+        string apellido,
+        string? nit,
+        string numeroIsss,
+        string telefono,
+        string? correo,
+        int idAfp,
+        int idMunicipio,
+        string nombreCalle,
+        string numeroCasa,
+        string estado)
+    {
+        const string obtenerDireccion = @"
+            SELECT id_direccion
+            FROM dbo.EMPLEADO
+            WHERE id_empleado = @id_empleado;";
+
+        const string actualizarEmpleado = @"
+            UPDATE dbo.EMPLEADO
+            SET id_afp = @id_afp,
+                nombre = @nombre,
+                apellido = @apellido,
+                nit = @nit,
+                numero_isss = @numero_isss,
+                telefono = @telefono,
+                correo = @correo,
+                estado = @estado
+            WHERE id_empleado = @id_empleado;";
+
+        const string actualizarDireccion = @"
+            UPDATE dbo.DIRECCION
+            SET id_municipio = @id_municipio,
+                nombre_calle = @nombre_calle,
+                numero_casa = @numero_casa
+            WHERE id_direccion = @id_direccion;";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        conexionSql.Open();
+        using var transaccion = conexionSql.BeginTransaction();
+
+        try
+        {
+            int idDireccion;
+            using (var cmdDireccion = new SqlCommand(obtenerDireccion, conexionSql, transaccion))
+            {
+                cmdDireccion.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+                var resultado = cmdDireccion.ExecuteScalar();
+                if (resultado is null || resultado == DBNull.Value)
+                {
+                    throw new InvalidOperationException("El empleado no existe o no tiene una dirección asociada.");
+                }
+
+                idDireccion = Convert.ToInt32(resultado);
+            }
+
+            using (var cmdEmpleado = new SqlCommand(actualizarEmpleado, conexionSql, transaccion))
+            {
+                cmdEmpleado.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+                cmdEmpleado.Parameters.Add("@id_afp", SqlDbType.Int).Value = idAfp;
+                cmdEmpleado.Parameters.Add("@nombre", SqlDbType.VarChar, 50).Value = nombre.Trim();
+                cmdEmpleado.Parameters.Add("@apellido", SqlDbType.VarChar, 20).Value = apellido.Trim();
+                cmdEmpleado.Parameters.Add("@nit", SqlDbType.VarChar, 17).Value = ValorOpcional(nit);
+                cmdEmpleado.Parameters.Add("@numero_isss", SqlDbType.VarChar, 15).Value = numeroIsss.Trim();
+                cmdEmpleado.Parameters.Add("@telefono", SqlDbType.VarChar, 12).Value = telefono.Trim();
+                cmdEmpleado.Parameters.Add("@correo", SqlDbType.VarChar, 100).Value = ValorOpcional(correo);
+                cmdEmpleado.Parameters.Add("@estado", SqlDbType.VarChar, 20).Value = estado.Trim();
+
+                if (cmdEmpleado.ExecuteNonQuery() != 1)
+                {
+                    throw new InvalidOperationException("No se pudo actualizar el empleado.");
+                }
+            }
+
+            using (var cmdDireccion = new SqlCommand(actualizarDireccion, conexionSql, transaccion))
+            {
+                cmdDireccion.Parameters.Add("@id_direccion", SqlDbType.Int).Value = idDireccion;
+                cmdDireccion.Parameters.Add("@id_municipio", SqlDbType.Int).Value = idMunicipio;
+                cmdDireccion.Parameters.Add("@nombre_calle", SqlDbType.VarChar, 50).Value = nombreCalle.Trim();
+                cmdDireccion.Parameters.Add("@numero_casa", SqlDbType.VarChar, 10).Value = numeroCasa.Trim();
+
+                if (cmdDireccion.ExecuteNonQuery() != 1)
+                {
+                    throw new InvalidOperationException("No se pudo actualizar la dirección del empleado.");
+                }
+            }
+
+            transaccion.Commit();
+        }
+        catch
+        {
+            transaccion.Rollback();
+            throw;
+        }
     }
 
     public int Registrar(
@@ -350,6 +450,48 @@ public class DAOEmpleado
     private static object ValorOpcional(string? valor)
     {
         return string.IsNullOrWhiteSpace(valor) ? DBNull.Value : valor.Trim();
+    }
+
+    private static Empleado MapearEmpleado(SqlDataReader dr)
+    {
+        var empleado = new Empleado
+        {
+            IdEmpleado = Convert.ToInt32(dr["id_empleado"]),
+            Dui = Texto(dr, "dui")?.Trim() ?? string.Empty,
+            Nit = Texto(dr, "nit"),
+            NumeroIsss = Texto(dr, "numero_isss") ?? string.Empty,
+            Nombre = Texto(dr, "nombre") ?? string.Empty,
+            Apellido = Texto(dr, "apellido") ?? string.Empty,
+            Telefono = Texto(dr, "telefono") ?? string.Empty,
+            Correo = Texto(dr, "correo"),
+            FechaNac = DateOnly.FromDateTime(Convert.ToDateTime(dr["fecha_nac"])),
+            Estado = Texto(dr, "estado") ?? string.Empty,
+            Afp = new Afp
+            {
+                NombreAfp = Texto(dr, "nombre_afp") ?? string.Empty
+            },
+            Direccion = new Direccion
+            {
+                NombreCalle = Texto(dr, "nombre_calle") ?? string.Empty,
+                NumeroCasa = Texto(dr, "numero_casa") ?? string.Empty,
+                Distrito = new DistritoUbicacion
+                {
+                    NombreDistrito = Texto(dr, "nombre_municipio") ?? string.Empty,
+                    DepartamentoUbicacion = new DepartamentoUbicacion
+                    {
+                        NombreDepartamentoUbicacion = Texto(dr, "departamento_ubicacion") ?? string.Empty
+                    }
+                }
+            }
+        };
+
+        var contrato = CrearContrato(dr, empleado.IdEmpleado);
+        if (contrato is not null)
+        {
+            empleado.Contratos.Add(contrato);
+        }
+
+        return empleado;
     }
 
     private static Contrato? CrearContrato(SqlDataReader dr, int idEmpleado)

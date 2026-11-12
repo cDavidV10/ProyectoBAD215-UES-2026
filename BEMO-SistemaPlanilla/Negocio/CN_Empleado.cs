@@ -39,6 +39,40 @@ namespace BEMO.Negocio
             return _metodos.ListarPaginado(pagina, tamanoPagina, busqueda, departamento, estado, totalSinFiltros);
         }
 
+        public Empleado? ObtenerPorId(int idEmpleado)
+        {
+            return _metodos.ObtenerPorId(idEmpleado);
+        }
+
+        public void ActualizarDatosPersonales(
+            int idEmpleado,
+            string nombre,
+            string apellido,
+            string? nit,
+            string numeroIsss,
+            string telefono,
+            string? correo,
+            int idAfp,
+            int idMunicipio,
+            string nombreCalle,
+            string numeroCasa,
+            string estado)
+        {
+            _metodos.ActualizarDatosPersonales(
+                idEmpleado,
+                nombre,
+                apellido,
+                nit,
+                numeroIsss,
+                telefono,
+                correo,
+                idAfp,
+                idMunicipio,
+                nombreCalle,
+                numeroCasa,
+                estado);
+        }
+
         public int Registrar(
             Empleado empleado,
             int idMunicipio,
