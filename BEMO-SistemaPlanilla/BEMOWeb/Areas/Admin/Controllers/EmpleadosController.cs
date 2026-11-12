@@ -268,6 +268,7 @@ public class EmpleadosController : Controller
             51008 => "El cargo seleccionado no está disponible.",
             51009 => "El salario ingresado no está dentro del rango permitido para el cargo.",
             51010 => "La fecha de culminación no puede ser anterior a la fecha de contratación.",
+            51011 => "La fecha de culminación debe ser posterior a la fecha actual.",
             _ when ex.Message.Contains("PK_Empleado", StringComparison.OrdinalIgnoreCase)
                 => "No se pudo generar el identificador del empleado porque ya existe. Es necesario revisar la secuencia de empleados en la base de datos.",
             _ when ex.Message.Contains("PK_Direccion", StringComparison.OrdinalIgnoreCase)
@@ -371,6 +372,7 @@ public class EmpleadosController : Controller
 
     private void ValidarRegistro(Models.NuevoEmpleadoModel modelo)
     {
+        var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
         var fechaMinimaNacimiento = DateOnly.FromDateTime(DateTime.Today).AddYears(-18);
 
         if (modelo.Empleado.FechaNac == DateOnly.MinValue)
@@ -450,7 +452,11 @@ public class EmpleadosController : Controller
             ModelState.AddModelError(nameof(modelo.FechaContratacion), "La fecha de contratación es obligatoria.");
         }
 
-        if (modelo.FechaCulminacion.HasValue && modelo.FechaContratacion.HasValue && modelo.FechaCulminacion < modelo.FechaContratacion)
+        if (modelo.FechaCulminacion.HasValue && modelo.FechaCulminacion.Value <= fechaHoy)
+        {
+            ModelState.AddModelError(nameof(modelo.FechaCulminacion), "La fecha de culminación debe ser posterior a la fecha actual.");
+        }
+        else if (modelo.FechaCulminacion.HasValue && modelo.FechaContratacion.HasValue && modelo.FechaCulminacion < modelo.FechaContratacion)
         {
             ModelState.AddModelError(nameof(modelo.FechaCulminacion), "La fecha de culminación no puede ser anterior a la contratación.");
         }

@@ -144,18 +144,59 @@ document.addEventListener("DOMContentLoaded", () => {
         updateMunicipalities();
     });
 
+    document.querySelectorAll("[data-contract-type]").forEach((typeSelect) => {
+        const form = typeSelect.closest("form");
+        const endDate = form?.querySelector("[data-contract-end]");
+        if (!endDate) return;
+
+        const updateEndDateState = () => {
+            const tipo = typeSelect.selectedOptions[0]?.textContent.trim().toLocaleUpperCase() || "";
+            const esPermanente = tipo === "PERMANENTE";
+
+            endDate.disabled = esPermanente;
+            endDate.required = !esPermanente && typeSelect.value.length > 0;
+
+            if (esPermanente) {
+                endDate.value = "";
+                endDate.setCustomValidity("");
+                endDate.classList.remove("bemo-input-error");
+                endDate.setAttribute("aria-invalid", "false");
+            }
+        };
+
+        typeSelect.addEventListener("change", updateEndDateState);
+        updateEndDateState();
+    });
+
     document.querySelectorAll("[data-contract-start]").forEach((startDate) => {
         const form = startDate.closest("form");
         const endDate = form?.querySelector("[data-contract-end]");
         if (!endDate) return;
 
         const validateContractDates = () => {
-            endDate.min = startDate.value || "";
-            endDate.setCustomValidity(
-                startDate.value && endDate.value && endDate.value < startDate.value
-                    ? "La fecha de culminación no puede ser anterior a la fecha de contratación."
-                    : ""
-            );
+            const formatDate = (date) => [
+                date.getFullYear(),
+                String(date.getMonth() + 1).padStart(2, "0"),
+                String(date.getDate()).padStart(2, "0")
+            ].join("-");
+            const tomorrow = new Date();
+            tomorrow.setHours(0, 0, 0, 0);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const fechaMinima = formatDate(tomorrow);
+            const fechaMinimaContrato = startDate.value && startDate.value > fechaMinima
+                ? startDate.value
+                : fechaMinima;
+
+            endDate.min = fechaMinimaContrato;
+
+            let mensaje = "";
+            if (endDate.value && endDate.value < fechaMinima) {
+                mensaje = "La fecha de culminación debe ser posterior a la fecha actual.";
+            } else if (startDate.value && endDate.value && endDate.value < startDate.value) {
+                mensaje = "La fecha de culminación no puede ser anterior a la fecha de contratación.";
+            }
+
+            endDate.setCustomValidity(mensaje);
         };
 
         startDate.addEventListener("change", validateContractDates);
