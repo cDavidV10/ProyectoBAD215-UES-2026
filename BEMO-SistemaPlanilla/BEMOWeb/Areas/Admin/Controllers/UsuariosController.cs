@@ -9,5 +9,6 @@ public class UsuariosController : Controller
 {
     public IActionResult Index() => View();
 
-    public IActionResult Nuevo() => View();
+    [HttpGet]
+    public IActionResult Nuevo() => View("~/Areas/Admin/Views/Usuarios/Nuevo.cshtml");
 }

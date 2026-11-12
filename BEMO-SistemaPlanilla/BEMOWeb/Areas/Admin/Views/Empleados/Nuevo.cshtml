@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Nuevo empleado";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
 }
 
 <div class="space-y-5">
@@ -27,6 +28,6 @@
             <div><label class="bemo-label">AFP</label><select class="bemo-select"><option>Seleccione AFP</option><option>AFP Crecer</option><option>AFP Confía</option></select></div>
             <div><label class="bemo-label">Estado</label><select class="bemo-select"><option>Seleccione estado</option><option>Activo</option><option>Inactivo</option></select></div>
         </div>
-        <div class="flex flex-wrap gap-3 pt-2"><button class="bemo-button bemo-button-primary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>Guardar empleado</button><a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a></div>
+        <div class="flex flex-wrap gap-3 pt-2"><button class="bemo-button bemo-button-primary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>Guardar empleado</button><a asp-area="@areaActual" asp-controller="Empleados" asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a></div>
     </form>
 </div>

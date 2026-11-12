@@ -4,6 +4,7 @@
 
 @{
     ViewData["Title"] = "Empleados";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
 
@@ -37,7 +38,7 @@
             <h1 class="bemo-title mt-2">Empleados</h1>
             <p class="bemo-subtitle mt-2">Administra la información del personal.</p>
         </div>
-        <a asp-controller="Empleados" asp-action="Nuevo" class="bemo-button bemo-button-primary self-start">
+        <a asp-area="@areaActual" asp-controller="Empleados" asp-action="Nuevo" class="bemo-button bemo-button-primary self-start">
             <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
             Nuevo empleado
         </a>

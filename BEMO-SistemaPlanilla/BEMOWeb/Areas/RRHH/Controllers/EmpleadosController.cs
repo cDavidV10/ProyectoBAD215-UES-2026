@@ -50,5 +50,6 @@ public class EmpleadosController : Controller
         return View("~/Areas/Admin/Views/Empleados/Index.cshtml", modelo);
     }
 
+    [HttpGet]
     public IActionResult Nuevo() => View("~/Areas/Admin/Views/Empleados/Nuevo.cshtml");
 }

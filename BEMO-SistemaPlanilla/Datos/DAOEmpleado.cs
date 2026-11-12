@@ -42,12 +42,33 @@ public class DAOEmpleado
         const string consulta = @"
             WITH EmpleadosUnicos AS
             (
-                SELECT *,
-                       ROW_NUMBER() OVER
-                       (
-                           PARTITION BY id_empleado
-                           ORDER BY id_contrato DESC
-                       ) AS fila
+                SELECT
+                    id_empleado,
+                    dui,
+                    nit,
+                    numero_isss,
+                    nombre,
+                    apellido,
+                    telefono,
+                    correo,
+                    fecha_nac,
+                    estado,
+                    nombre_afp,
+                    nombre_calle,
+                    numero_casa,
+                    id_contrato,
+                    nombre_tipo_contrato,
+                    nombre_cargo,
+                    nombre_departamento,
+                    salario_bruto,
+                    fecha_contratacion,
+                    fecha_culminacion,
+                    estado_contrato,
+                    ROW_NUMBER() OVER
+                    (
+                        PARTITION BY id_empleado
+                        ORDER BY id_contrato DESC
+                    ) AS fila
                 FROM dbo.VW_Empleados_General
                 WHERE (@busqueda IS NULL
                        OR dui LIKE '%' + @busqueda + '%'
@@ -57,12 +78,35 @@ public class DAOEmpleado
                   AND (@departamento IS NULL OR nombre_departamento = @departamento)
                   AND (@estado IS NULL OR estado = @estado)
             )
-            SELECT *, COUNT(*) OVER() AS total_registros
+            SELECT
+                id_empleado,
+                dui,
+                nit,
+                numero_isss,
+                nombre,
+                apellido,
+                telefono,
+                correo,
+                fecha_nac,
+                estado,
+                nombre_afp,
+                nombre_calle,
+                numero_casa,
+                id_contrato,
+                nombre_tipo_contrato,
+                nombre_cargo,
+                nombre_departamento,
+                salario_bruto,
+                fecha_contratacion,
+                fecha_culminacion,
+                estado_contrato,
+                COUNT(*) OVER() AS total_registros
             FROM EmpleadosUnicos
             WHERE fila = 1
             ORDER BY id_empleado
             OFFSET @desplazamiento ROWS
-            FETCH NEXT @tamanoPagina ROWS ONLY;";
+            FETCH NEXT @tamanoPagina ROWS ONLY
+            OPTION (RECOMPILE);";
 
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand(consulta, conexionSql);
