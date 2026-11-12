@@ -1,26 +1,211 @@
+@using System
+@using System.Collections.Generic
+@model BEMOWeb.Models.ContratosModel
+
 @{
     ViewData["Title"] = "Contratos";
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+
+    string UrlPagina(int pagina)
+    {
+        var parametros = new List<string> { $"pagina={pagina}" };
+
+        if (!string.IsNullOrWhiteSpace(Model.Busqueda))
+        {
+            parametros.Add($"busqueda={Uri.EscapeDataString(Model.Busqueda)}");
+        }
+
+        if (Model.EmpleadoSeleccionado.HasValue)
+        {
+            parametros.Add($"empleado={Model.EmpleadoSeleccionado.Value}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.TipoSeleccionado))
+        {
+            parametros.Add($"tipo={Uri.EscapeDataString(Model.TipoSeleccionado)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.EstadoSeleccionado))
+        {
+            parametros.Add($"estado={Uri.EscapeDataString(Model.EstadoSeleccionado)}");
+        }
+
+        return "?" + string.Join("&", parametros);
+    }
 }
 
 <div class="space-y-6">
     <header class="grid gap-5 lg:grid-cols-[1fr_auto]">
-        <div><p class="bemo-kicker">Administración</p><h1 class="bemo-title mt-2">Contratos</h1><p class="bemo-subtitle mt-2">Gestiona las condiciones laborales del personal.</p><a asp-action="Nuevo" class="bemo-button bemo-button-primary mt-5"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>Nuevo contrato</a></div>
+        <div>
+            <p class="bemo-kicker">Administración</p>
+            <h1 class="bemo-title mt-2">Contratos</h1>
+            <p class="bemo-subtitle mt-2">Gestiona las condiciones laborales del personal.</p>
+            <a asp-action="Nuevo" class="bemo-button bemo-button-primary mt-5">
+                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+                Nuevo contrato
+            </a>
+        </div>
         <div class="grid gap-4 sm:grid-cols-2 lg:min-w-[38rem]">
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg></div><div><p class="bemo-stat-label">Vigentes</p><p class="bemo-stat-value">122</p></div></div>
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Por vencer</p><p class="bemo-stat-value">8</p></div></div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg></div>
+                <div>
+                    <p class="bemo-stat-label">Vigentes</p>
+                    <p class="bemo-stat-value">@Model.ContratosVigentes</p>
+                </div>
+            </div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div>
+                <div>
+                    <p class="bemo-stat-label">Por vencer</p>
+                    <p class="bemo-stat-value">@Model.ContratosPorVencer</p>
+                    <p class="text-xs text-[#684026]">Próximos 30 días</p>
+                </div>
+            </div>
         </div>
     </header>
 
-    <section class="bemo-card grid gap-4 p-4 md:grid-cols-3">
-        <div><label class="bemo-label">Empleado</label><select class="bemo-select"><option>Todos los empleados</option><option>Ana Lucía Martínez</option><option>Carlos Ernesto Rivas</option></select></div>
-        <div><label class="bemo-label">Tipo de contrato</label><select class="bemo-select"><option>Todos los tipos</option><option>Indefinido</option><option>Temporal</option></select></div>
-        <div><label class="bemo-label">Estado</label><select class="bemo-select"><option>Todos los estados</option><option>Vigente</option><option>Por vencer</option></select></div>
+    <form method="get" asp-action="Index" data-server-search class="bemo-card grid gap-4 p-4 md:grid-cols-4">
+        <div class="relative md:col-span-2">
+            <label class="bemo-label" for="busqueda">Buscar</label>
+            <button class="absolute left-3 top-8 z-10 rounded-md p-1 text-[#381F12]" type="submit"
+                    aria-label="Buscar contratos">
+                <svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-search"></use>
+                </svg>
+            </button>
+            <input class="bemo-input pl-12" id="busqueda" type="search" name="busqueda"
+                   value="@Model.Busqueda" placeholder="Nombre, DUI o código de empleado..." autocomplete="off" />
+        </div>
+        <div>
+            <label class="bemo-label" for="tipo">Tipo de contrato</label>
+            <select class="bemo-select" id="tipo" name="tipo" onchange="this.form.submit()">
+                <option value="">Todos los tipos</option>
+                @foreach (var tipo in Model.TiposContrato)
+                {
+                    <option value="@tipo" selected="@(string.Equals(Model.TipoSeleccionado, tipo, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                        @tipo
+                    </option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="bemo-label" for="estado">Estado</label>
+            <select class="bemo-select" id="estado" name="estado" onchange="this.form.submit()">
+                <option value="">Todos los estados</option>
+                <option value="VIGENTE" selected="@(string.Equals(Model.EstadoSeleccionado, "VIGENTE", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Vigente</option>
+                <option value="POR VENCER" selected="@(string.Equals(Model.EstadoSeleccionado, "POR VENCER", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Por vencer</option>
+            </select>
+        </div>
+        <div class="flex justify-end md:col-span-4">
+            <button class="bemo-button bemo-button-secondary" type="submit">
+                <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-filter"></use></svg>
+                Aplicar filtros
+            </button>
+        </div>
+    </form>
+
+    <section class="bemo-card overflow-hidden">
+        <div class="bemo-table-wrap">
+            <table class="bemo-table">
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>Cargo</th>
+                        <th>Tipo</th>
+                        <th>Salario mensual</th>
+                        <th>Inicio</th>
+                        <th>Finalización</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Contratos.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center">No hay contratos que coincidan con los filtros.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var contrato in Model.Contratos)
+                        {
+                            var porVencer = contrato.Situacion == "POR VENCER";
+                            var claseEstado = porVencer ? "bemo-status-yellow" : "bemo-status-green";
+                            var textoEstado = porVencer ? "Por vencer" : "Vigente";
+                            var fechaCulminacion = contrato.FechaCulminacion?.ToString("dd/MM/yyyy") ?? "Indefinido";
+                            var dias = contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" : string.Empty;
+                            <tr>
+                                <td>@contrato.NombreEmpleado</td>
+                                <td>@contrato.NombreCargo</td>
+                                <td>@contrato.NombreTipoContrato</td>
+                                <td>$@contrato.SalarioBruto.ToString("N2")</td>
+                                <td>@contrato.FechaContratacion.ToString("dd/MM/yyyy")</td>
+                                <td>@fechaCulminacion</td>
+                                <td><span class="bemo-status @claseEstado">@textoEstado@dias</span></td>
+                                <td>
+                                    <button class="bemo-button bemo-button-ghost" type="button">
+                                        <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>
+                                        Ver
+                                    </button>
+                                    <button class="bemo-button bemo-button-ghost" type="button">
+                                        <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>
+                                        Editar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </section>
 
-    <section class="bemo-card overflow-hidden"><div class="bemo-table-wrap"><table class="bemo-table"><thead><tr><th>N.º</th><th>Empleado</th><th>Cargo</th><th>Tipo</th><th>Salario mensual</th><th>Inicio</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-        <tr><td>0001</td><td>Ana Lucía Martínez</td><td>Analista de Recursos Humanos</td><td>Indefinido</td><td>$1,250.00</td><td>15/01/2024</td><td><span class="bemo-status bemo-status-green">Vigente</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
-        <tr><td>0002</td><td>Carlos Ernesto Rivas</td><td>Supervisor de Producción</td><td>Temporal</td><td>$1,100.00</td><td>01/03/2025</td><td><span class="bemo-status bemo-status-yellow">Por vencer</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
-        <tr><td>0003</td><td>María Fernanda Gómez</td><td>Auxiliar Contable</td><td>Indefinido</td><td>$900.00</td><td>10/06/2023</td><td><span class="bemo-status bemo-status-green">Vigente</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
-        <tr><td>0004</td><td>José Alberto Perdomo</td><td>Operario de Producción</td><td>Temporal</td><td>$750.00</td><td>01/02/2025</td><td><span class="bemo-status bemo-status-green">Vigente</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>Editar</button></td></tr>
-    </tbody></table></div></section>
+    <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de contratos">
+        <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros contratos</p>
+        <div class="flex flex-wrap items-center gap-2">
+            @if (Model.PaginaActual > 1)
+            {
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+            }
+
+            @if (Model.TotalPaginas <= 7)
+            {
+                @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                }
+            }
+            else
+            {
+                var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+
+                <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                @if (paginaInicio > 2)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                }
+                @if (paginaFin < Model.TotalPaginas - 1)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+            }
+
+            @if (Model.PaginaActual < Model.TotalPaginas)
+            {
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+            }
+        </div>
+    </nav>
 </div>
