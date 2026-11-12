@@ -37,7 +37,6 @@ public class DAOContrato
             INNER JOIN dbo.TIPO_CONTRATO tc ON tc.id_tipo_contrato = c.id_tipo_contrato
             INNER JOIN dbo.DEPARTAMENTO d ON d.id_departamento = c.id_departamento
             WHERE c.estado = 'VIGENTE'
-              AND c.fecha_contratacion <= CAST(GETDATE() AS DATE)
               AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= CAST(GETDATE() AS DATE))
             ORDER BY
                 CASE WHEN c.fecha_culminacion IS NULL THEN 1 ELSE 0 END,
@@ -98,7 +97,6 @@ public class DAOContrato
                 INNER JOIN dbo.TIPO_CONTRATO tc ON tc.id_tipo_contrato = c.id_tipo_contrato
                 INNER JOIN dbo.DEPARTAMENTO d ON d.id_departamento = c.id_departamento
                 WHERE c.estado = 'VIGENTE'
-                  AND c.fecha_contratacion <= CAST(GETDATE() AS DATE)
                   AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= CAST(GETDATE() AS DATE))
                   AND (@busqueda IS NULL
                        OR CAST(e.id_empleado AS VARCHAR(20)) LIKE '%' + @busqueda + '%'

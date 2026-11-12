@@ -294,6 +294,12 @@ public class DAOEmpleado
                 numero_casa = @numero_casa
             WHERE id_direccion = @id_direccion;";
 
+        const string finalizarContratos = @"
+            UPDATE dbo.CONTRATO
+            SET estado = 'FINALIZADO'
+            WHERE id_empleado = @id_empleado
+              AND estado = 'VIGENTE';";
+
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         conexionSql.Open();
         using var transaccion = conexionSql.BeginTransaction();
@@ -329,6 +335,13 @@ public class DAOEmpleado
                 {
                     throw new InvalidOperationException("No se pudo actualizar el empleado.");
                 }
+            }
+
+            if (string.Equals(estado.Trim(), "INACTIVO", StringComparison.OrdinalIgnoreCase))
+            {
+                using var cmdContratos = new SqlCommand(finalizarContratos, conexionSql, transaccion);
+                cmdContratos.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+                cmdContratos.ExecuteNonQuery();
             }
 
             using (var cmdDireccion = new SqlCommand(actualizarDireccion, conexionSql, transaccion))

@@ -9,10 +9,12 @@ namespace BEMOWeb.Areas.Admin.Controllers;
 public class ContratosController : Controller
 {
     private readonly CN_Contrato _contratos;
+    private readonly CN_TipoContrato _tiposContrato;
 
-    public ContratosController(CN_Contrato contratos)
+    public ContratosController(CN_Contrato contratos, CN_TipoContrato tiposContrato)
     {
         _contratos = contratos;
+        _tiposContrato = tiposContrato;
     }
 
     public IActionResult Index(
@@ -61,8 +63,8 @@ public class ContratosController : Controller
                     Nombre = grupo.Key.NombreEmpleado
                 })
                 .ToList(),
-            TiposContrato = todosLosContratos
-                .Select(contrato => contrato.NombreTipoContrato)
+            TiposContrato = _tiposContrato.Listar()
+                .Select(tipoContrato => tipoContrato.NombreTipoContrato)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(tipoContrato => tipoContrato)
                 .ToList(),
