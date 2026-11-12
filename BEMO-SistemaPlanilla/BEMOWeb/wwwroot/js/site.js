@@ -65,6 +65,44 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const contractModal = document.querySelector("[data-contract-modal]");
+    if (contractModal) {
+        const closeButton = contractModal.querySelector("[data-contract-modal-close]");
+
+        const closeContractModal = () => {
+            contractModal.classList.add("hidden");
+            contractModal.setAttribute("aria-hidden", "true");
+        };
+
+        document.querySelectorAll("[data-contract-view]").forEach((button) => {
+            button.addEventListener("click", () => {
+                contractModal.querySelectorAll("[data-contract-field]").forEach((field) => {
+                    const fieldName = field.dataset.contractField || "";
+                    const dataName = fieldName
+                        .split("-")
+                        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join("");
+                    const value = button.dataset[`contract${dataName}`];
+                    field.textContent = value || "No registrado";
+                });
+
+                contractModal.classList.remove("hidden");
+                contractModal.setAttribute("aria-hidden", "false");
+                closeButton?.focus();
+            });
+        });
+
+        closeButton?.addEventListener("click", closeContractModal);
+        contractModal.addEventListener("click", (event) => {
+            if (event.target === contractModal) closeContractModal();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !contractModal.classList.contains("hidden")) {
+                closeContractModal();
+            }
+        });
+    }
+
     document.querySelectorAll("[data-tab]").forEach((tab) => {
         tab.addEventListener("click", () => {
             const group = tab.closest("div");

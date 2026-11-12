@@ -135,7 +135,10 @@
                             var claseEstado = porVencer ? "bemo-status-yellow" : "bemo-status-green";
                             var textoEstado = porVencer ? "Por vencer" : "Vigente";
                             var fechaCulminacion = contrato.FechaCulminacion?.ToString("dd/MM/yyyy") ?? "Indefinido";
+                            var fechaContratacion = contrato.FechaContratacion.ToString("dd/MM/yyyy");
+                            var salario = contrato.SalarioBruto.ToString("N2");
                             var dias = contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" : string.Empty;
+                            var estadoDetalle = $"{textoEstado}{dias}";
                             <tr>
                                 <td>@contrato.NombreEmpleado</td>
                                 <td>@contrato.NombreCargo</td>
@@ -145,7 +148,17 @@
                                 <td>@fechaCulminacion</td>
                                 <td><span class="bemo-status @claseEstado">@textoEstado@dias</span></td>
                                 <td>
-                                    <button class="bemo-button bemo-button-ghost" type="button">
+                                    <button class="bemo-button bemo-button-ghost" type="button"
+                                            data-contract-view
+                                            data-contract-employee="@contrato.NombreEmpleado"
+                                            data-contract-position="@contrato.NombreCargo"
+                                            data-contract-type="@contrato.NombreTipoContrato"
+                                            data-contract-department="@contrato.NombreDepartamento"
+                                            data-contract-salary="@salario"
+                                            data-contract-start="@fechaContratacion"
+                                            data-contract-end="@fechaCulminacion"
+                                            data-contract-status="@estadoDetalle"
+                                            aria-label="Ver contrato de @contrato.NombreEmpleado">
                                         <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>
                                         Ver
                                     </button>
@@ -208,4 +221,29 @@
             }
         </div>
     </nav>
+
+    <div class="fixed inset-0 z-50 hidden bg-black/50 p-4" data-contract-modal aria-hidden="true">
+        <section class="relative mx-auto max-h-full max-w-3xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl md:p-8"
+                 role="dialog" aria-modal="true" aria-labelledby="contract-modal-title">
+            <button type="button" class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                    data-contract-modal-close aria-label="Cerrar detalle">&times;</button>
+
+            <div class="pr-10">
+                <p class="bemo-kicker">Detalle del contrato</p>
+                <h2 id="contract-modal-title" class="bemo-title mt-2" data-contract-field="employee">Contrato</h2>
+                <p class="bemo-subtitle mt-2">Información laboral y condiciones del contrato.</p>
+            </div>
+
+            <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+                <div class="bemo-card p-4"><dt class="bemo-label">Empleado</dt><dd class="mt-1 font-semibold" data-contract-field="employee"></dd></div>
+                <div class="bemo-card p-4"><dt class="bemo-label">Cargo</dt><dd class="mt-1 font-semibold" data-contract-field="position"></dd></div>
+                <div class="bemo-card p-4"><dt class="bemo-label">Tipo de contrato</dt><dd class="mt-1 font-semibold" data-contract-field="type"></dd></div>
+                <div class="bemo-card p-4"><dt class="bemo-label">Departamento</dt><dd class="mt-1 font-semibold" data-contract-field="department"></dd></div>
+                <div class="bemo-card p-4"><dt class="bemo-label">Salario mensual</dt><dd class="mt-1 font-semibold">$<span data-contract-field="salary"></span></dd></div>
+                <div class="bemo-card p-4"><dt class="bemo-label">Estado</dt><dd class="mt-1 font-semibold" data-contract-field="status"></dd></div>
+                <div class="bemo-card p-4"><dt class="bemo-label">Fecha de contratación</dt><dd class="mt-1 font-semibold" data-contract-field="start"></dd></div>
+                <div class="bemo-card p-4"><dt class="bemo-label">Fecha de finalización</dt><dd class="mt-1 font-semibold" data-contract-field="end"></dd></div>
+            </dl>
+        </section>
+    </div>
 </div>
