@@ -27,6 +27,44 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const employeeModal = document.querySelector("[data-employee-modal]");
+    if (employeeModal) {
+        const closeButton = employeeModal.querySelector("[data-employee-modal-close]");
+
+        const closeEmployeeModal = () => {
+            employeeModal.classList.add("hidden");
+            employeeModal.setAttribute("aria-hidden", "true");
+        };
+
+        document.querySelectorAll("[data-employee-view]").forEach((button) => {
+            button.addEventListener("click", () => {
+                employeeModal.querySelectorAll("[data-employee-field]").forEach((field) => {
+                    const fieldName = field.dataset.employeeField || "";
+                    const dataName = fieldName
+                        .split("-")
+                        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join("");
+                    const value = button.dataset[`employee${dataName}`];
+                    field.textContent = value || "No registrado";
+                });
+
+                employeeModal.classList.remove("hidden");
+                employeeModal.setAttribute("aria-hidden", "false");
+                closeButton?.focus();
+            });
+        });
+
+        closeButton?.addEventListener("click", closeEmployeeModal);
+        employeeModal.addEventListener("click", (event) => {
+            if (event.target === employeeModal) closeEmployeeModal();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !employeeModal.classList.contains("hidden")) {
+                closeEmployeeModal();
+            }
+        });
+    }
+
     document.querySelectorAll("[data-tab]").forEach((tab) => {
         tab.addEventListener("click", () => {
             const group = tab.closest("div");

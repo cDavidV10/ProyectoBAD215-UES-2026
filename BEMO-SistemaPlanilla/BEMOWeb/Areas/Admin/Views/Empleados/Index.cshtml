@@ -144,6 +144,20 @@
                                         var contrato = empleado.Contratos.FirstOrDefault();
                                         var departamento = contrato?.Departamento?.NombreDepartamento ?? "Sin departamento";
                                         var cargo = contrato?.Cargo?.NombreCargo ?? "Sin cargo";
+                                        var nombreCompleto = $"{empleado.Nombre} {empleado.Apellido}".Trim();
+                                        var afp = empleado.Afp?.NombreAfp ?? "No registrado";
+                                        var municipio = empleado.Direccion?.Distrito?.NombreDistrito ?? "No registrado";
+                                        var departamentoUbicacion = empleado.Direccion?.Distrito?.DepartamentoUbicacion?.NombreDepartamentoUbicacion ?? "No registrado";
+                                        var salarioBruto = contrato is null ? "No registrado" : contrato.SalarioBruto.ToString("N2");
+                                        var fechaNacimiento = empleado.FechaNac == DateOnly.MinValue
+                                            ? "No registrado"
+                                            : empleado.FechaNac.ToString("dd/MM/yyyy");
+                                        var fechaContratacion = contrato is null
+                                            ? "No registrado"
+                                            : contrato.FechaContratacion.ToString("dd/MM/yyyy");
+                                        var fechaCulminacion = contrato?.FechaCulminacion is DateOnly fechaFin
+                                            ? fechaFin.ToString("dd/MM/yyyy")
+                                            : "No registrada";
                                         var activo = string.Equals(empleado.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase);
                                         var claseEstado = activo ? "bemo-status-green" : "bemo-status-red";
                                         var textoEstado = activo ? "Activo" : "Inactivo";
@@ -155,7 +169,31 @@
                                             <td>@cargo</td>
                                             <td><span class="bemo-status @claseEstado">@textoEstado</span></td>
                                             <td>
-                                                <button class="bemo-link-action mr-3 cursor-pointer" type="button"><svg
+                                                <button class="bemo-link-action mr-3 cursor-pointer" type="button"
+                                                        data-employee-view
+                                                        data-employee-id="@empleado.IdEmpleado"
+                                                        data-employee-dui="@empleado.Dui"
+                                                        data-employee-name="@nombreCompleto"
+                                                        data-employee-nit="@(empleado.Nit ?? "No registrado")"
+                                                        data-employee-isss="@empleado.NumeroIsss"
+                                                        data-employee-phone="@empleado.Telefono"
+                                                        data-employee-email="@(empleado.Correo ?? "No registrado")"
+                                                        data-employee-birth-date="@fechaNacimiento"
+                                                        data-employee-status="@textoEstado"
+                                                        data-employee-afp="@afp"
+                                                        data-employee-street="@(empleado.Direccion?.NombreCalle ?? "No registrada")"
+                                                        data-employee-house-number="@(empleado.Direccion?.NumeroCasa ?? "No registrado")"
+                                                        data-employee-municipality="@municipio"
+                                                        data-employee-location-department="@departamentoUbicacion"
+                                                        data-employee-contract-id="@(contrato?.IdContrato.ToString() ?? "No registrado")"
+                                                        data-employee-contract-type="@(contrato?.TipoContrato?.NombreTipoContrato ?? "No registrado")"
+                                                        data-employee-position="@cargo"
+                                                        data-employee-department="@departamento"
+                                                        data-employee-salary="@salarioBruto"
+                                                        data-employee-contract-start="@fechaContratacion"
+                                                        data-employee-contract-end="@fechaCulminacion"
+                                                        data-employee-contract-status="@(contrato?.Estado ?? "No registrado")">
+                                                    <svg
                                                     class="bemo-icon-sm inline" viewBox="0 0 24 24">
                                                     <use href="#icon-eye"></use>
                                                 </svg> Ver</button>
@@ -221,3 +259,58 @@
                     </div>
                 </nav>
             </div>
+
+        <div class="fixed inset-0 z-50 hidden bg-black/50 p-4" data-employee-modal aria-hidden="true">
+            <section class="relative mx-auto max-h-full max-w-5xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl md:p-8"
+                     role="dialog" aria-modal="true" aria-labelledby="employee-modal-title">
+                <button type="button" class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                        data-employee-modal-close aria-label="Cerrar detalle">&times;</button>
+
+                <div class="pr-10">
+                    <p class="bemo-kicker">Ficha del empleado</p>
+                    <h2 id="employee-modal-title" class="bemo-title mt-2" data-employee-field="name">Detalle del empleado</h2>
+                    <p class="bemo-subtitle mt-2">Información personal, de contacto, ubicación y contrato.</p>
+                </div>
+
+                <div class="mt-6 grid gap-5 lg:grid-cols-2">
+                    <section class="bemo-card p-5">
+                        <h3 class="text-lg font-extrabold">Datos personales</h3>
+                        <dl class="mt-4 grid gap-3 sm:grid-cols-2">
+                            <div><dt class="bemo-label">Código</dt><dd data-employee-field="id"></dd></div>
+                            <div><dt class="bemo-label">Estado</dt><dd data-employee-field="status"></dd></div>
+                            <div><dt class="bemo-label">DUI</dt><dd data-employee-field="dui"></dd></div>
+                            <div><dt class="bemo-label">NIT</dt><dd data-employee-field="nit"></dd></div>
+                            <div><dt class="bemo-label">ISSS</dt><dd data-employee-field="isss"></dd></div>
+                            <div><dt class="bemo-label">Fecha de nacimiento</dt><dd data-employee-field="birth-date"></dd></div>
+                            <div><dt class="bemo-label">Teléfono</dt><dd data-employee-field="phone"></dd></div>
+                            <div><dt class="bemo-label">Correo electrónico</dt><dd data-employee-field="email"></dd></div>
+                            <div><dt class="bemo-label">AFP</dt><dd data-employee-field="afp"></dd></div>
+                        </dl>
+                    </section>
+
+                    <section class="bemo-card p-5">
+                        <h3 class="text-lg font-extrabold">Dirección</h3>
+                        <dl class="mt-4 grid gap-3 sm:grid-cols-2">
+                            <div><dt class="bemo-label">Calle</dt><dd data-employee-field="street"></dd></div>
+                            <div><dt class="bemo-label">Número de casa</dt><dd data-employee-field="house-number"></dd></div>
+                            <div><dt class="bemo-label">Municipio</dt><dd data-employee-field="municipality"></dd></div>
+                            <div><dt class="bemo-label">Departamento</dt><dd data-employee-field="location-department"></dd></div>
+                        </dl>
+                    </section>
+                </div>
+
+                <section class="bemo-card mt-5 p-5">
+                    <h3 class="text-lg font-extrabold">Contrato actual</h3>
+                    <dl class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <div><dt class="bemo-label">Código de contrato</dt><dd data-employee-field="contract-id"></dd></div>
+                        <div><dt class="bemo-label">Tipo de contrato</dt><dd data-employee-field="contract-type"></dd></div>
+                        <div><dt class="bemo-label">Estado</dt><dd data-employee-field="contract-status"></dd></div>
+                        <div><dt class="bemo-label">Cargo</dt><dd data-employee-field="position"></dd></div>
+                        <div><dt class="bemo-label">Departamento laboral</dt><dd data-employee-field="department"></dd></div>
+                        <div><dt class="bemo-label">Salario bruto</dt><dd data-employee-field="salary"></dd></div>
+                        <div><dt class="bemo-label">Fecha de contratación</dt><dd data-employee-field="contract-start"></dd></div>
+                        <div><dt class="bemo-label">Fecha de culminación</dt><dd data-employee-field="contract-end"></dd></div>
+                    </dl>
+                </section>
+            </section>
+        </div>

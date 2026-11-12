@@ -64,6 +64,8 @@ public class DAOEmpleado
                     nombre_afp,
                     nombre_calle,
                     numero_casa,
+                    nombre_municipio,
+                    departamento_ubicacion,
                     id_contrato,
                     nombre_tipo_contrato,
                     nombre_cargo,
@@ -100,6 +102,8 @@ public class DAOEmpleado
                 nombre_afp,
                 nombre_calle,
                 numero_casa,
+                nombre_municipio,
+                departamento_ubicacion,
                 id_contrato,
                 nombre_tipo_contrato,
                 nombre_cargo,
@@ -133,6 +137,8 @@ public class DAOEmpleado
                     nombre_afp,
                     nombre_calle,
                     numero_casa,
+                    nombre_municipio,
+                    departamento_ubicacion,
                     id_contrato,
                     nombre_tipo_contrato,
                     nombre_cargo,
@@ -169,6 +175,8 @@ public class DAOEmpleado
                 nombre_afp,
                 nombre_calle,
                 numero_casa,
+                nombre_municipio,
+                departamento_ubicacion,
                 id_contrato,
                 nombre_tipo_contrato,
                 nombre_cargo,
@@ -221,7 +229,15 @@ public class DAOEmpleado
                 Direccion = new Direccion
                 {
                     NombreCalle = Texto(dr, "nombre_calle") ?? string.Empty,
-                    NumeroCasa = Texto(dr, "numero_casa") ?? string.Empty
+                    NumeroCasa = Texto(dr, "numero_casa") ?? string.Empty,
+                    Distrito = new DistritoUbicacion
+                    {
+                        NombreDistrito = Texto(dr, "nombre_municipio") ?? string.Empty,
+                        DepartamentoUbicacion = new DepartamentoUbicacion
+                        {
+                            NombreDepartamentoUbicacion = Texto(dr, "departamento_ubicacion") ?? string.Empty
+                        }
+                    }
                 }
             };
 
