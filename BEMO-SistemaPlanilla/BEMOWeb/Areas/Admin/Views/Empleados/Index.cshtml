@@ -103,16 +103,44 @@
 
     <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de empleados">
         <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros empleados</p>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             @if (Model.PaginaActual > 1)
             {
                 <a class="bemo-button bemo-button-secondary" href="?pagina=@(Model.PaginaActual - 1)">Anterior</a>
             }
-            @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+
+            @if (Model.TotalPaginas <= 7)
             {
-                var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                <a class="@clasePagina" href="?pagina=@pagina">@pagina</a>
+                @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="?pagina=@pagina">@pagina</a>
+                }
             }
+            else
+            {
+                var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+
+                <a class="@clasePrimera" href="?pagina=1">1</a>
+                @if (paginaInicio > 2)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="?pagina=@pagina">@pagina</a>
+                }
+                @if (paginaFin < Model.TotalPaginas - 1)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                <a class="@claseUltima" href="?pagina=@Model.TotalPaginas">@Model.TotalPaginas</a>
+            }
+
             @if (Model.PaginaActual < Model.TotalPaginas)
             {
                 <a class="bemo-button bemo-button-secondary" href="?pagina=@(Model.PaginaActual + 1)">Siguiente</a>
