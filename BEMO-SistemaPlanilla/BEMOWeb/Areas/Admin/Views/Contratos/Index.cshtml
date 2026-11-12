@@ -42,20 +42,26 @@
             <h1 class="bemo-title mt-2">Contratos</h1>
             <p class="bemo-subtitle mt-2">Gestiona las condiciones laborales del personal.</p>
             <a asp-action="Nuevo" class="bemo-button bemo-button-primary mt-5">
-                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+                <svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-plus"></use>
+                </svg>
                 Nuevo contrato
             </a>
         </div>
         <div class="grid gap-4 sm:grid-cols-2 lg:min-w-[38rem]">
             <div class="bemo-stat">
-                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg></div>
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-document"></use>
+                </svg></div>
                 <div>
                     <p class="bemo-stat-label">Vigentes</p>
                     <p class="bemo-stat-value">@Model.ContratosVigentes</p>
                 </div>
             </div>
             <div class="bemo-stat">
-                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div>
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-calendar"></use>
+                </svg></div>
                 <div>
                     <p class="bemo-stat-label">Por vencer</p>
                     <p class="bemo-stat-value">@Model.ContratosPorVencer</p>
@@ -74,8 +80,8 @@
                     <use href="#icon-search"></use>
                 </svg>
             </button>
-            <input class="bemo-input pl-12" id="busqueda" type="search" name="busqueda"
-                   value="@Model.Busqueda" placeholder="Nombre, DUI o código de empleado..." autocomplete="off" />
+            <input class="bemo-input pl-12" id="busqueda" type="search" name="busqueda" value="@Model.Busqueda"
+                   placeholder="Nombre, DUI o código de empleado..." autocomplete="off" />
         </div>
         <div>
             <label class="bemo-label" for="tipo">Tipo de contrato</label>
@@ -83,7 +89,8 @@
                 <option value="">Todos los tipos</option>
                 @foreach (var tipo in Model.TiposContrato)
                 {
-                    <option value="@tipo" selected="@(string.Equals(Model.TipoSeleccionado, tipo, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                    <option value="@tipo"
+                            selected="@(string.Equals(Model.TipoSeleccionado, tipo, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
                         @tipo
                     </option>
                 }
@@ -93,157 +100,183 @@
             <label class="bemo-label" for="estado">Estado</label>
             <select class="bemo-select" id="estado" name="estado" onchange="this.form.submit()">
                 <option value="">Todos los estados</option>
-                <option value="VIGENTE" selected="@(string.Equals(Model.EstadoSeleccionado, "VIGENTE", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Vigente</option>
-                <option value="POR VENCER" selected="@(string.Equals(Model.EstadoSeleccionado, "POR VENCER", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">Por vencer</option>
-            </select>
-        </div>
-        <div class="flex justify-end md:col-span-4">
-            <button class="bemo-button bemo-button-secondary" type="submit">
-                <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-filter"></use></svg>
-                Aplicar filtros
-            </button>
-        </div>
-    </form>
+                <option value="VIGENTE"
+                        selected="@(string.Equals(Model.EstadoSeleccionado, "VIGENTE", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                    Vigente</option>
+                    <option value="POR VENCER"
+                            selected="@(string.Equals(Model.EstadoSeleccionado, "POR VENCER", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                        Por vencer</option>
+                    </select>
+                </div>
+        
+            </form>
 
-    <section class="bemo-card overflow-hidden">
-        <div class="bemo-table-wrap">
-            <table class="bemo-table">
-                <thead>
-                    <tr>
-                        <th>Empleado</th>
-                        <th>Cargo</th>
-                        <th>Tipo</th>
-                        <th>Salario mensual</th>
-                        <th>Inicio</th>
-                        <th>Finalización</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Contratos.Count == 0)
+            <section class="bemo-card overflow-hidden">
+                <div class="bemo-table-wrap">
+                    <table class="bemo-table">
+                        <thead>
+                            <tr>
+                                <th>Empleado</th>
+                                <th>Cargo</th>
+                                <th>Tipo</th>
+                                <th>Salario mensual</th>
+                                <th>Inicio</th>
+                                <th>Finalización</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Contratos.Count == 0)
+                            {
+                                <tr>
+                                    <td colspan="8" class="text-center">No hay contratos que coincidan con los filtros.</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var contrato in Model.Contratos)
+                                {
+                                    var porVencer = contrato.Situacion == "POR VENCER";
+                                    var claseEstado = porVencer ? "bemo-status-yellow" : "bemo-status-green";
+                                    var textoEstado = porVencer ? "Por vencer" : "Vigente";
+                                    var fechaCulminacion = contrato.FechaCulminacion?.ToString("dd/MM/yyyy") ?? "Indefinido";
+                                    var fechaContratacion = contrato.FechaContratacion.ToString("dd/MM/yyyy");
+                                    var salario = contrato.SalarioBruto.ToString("N2");
+                                    var dias = contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" : string.Empty;
+                                    var estadoDetalle = $"{textoEstado}{dias}";
+                                    <tr>
+                                        <td>@contrato.NombreEmpleado</td>
+                                        <td>@contrato.NombreCargo</td>
+                                        <td>@contrato.NombreTipoContrato</td>
+                                        <td>$@contrato.SalarioBruto.ToString("N2")</td>
+                                        <td>@contrato.FechaContratacion.ToString("dd/MM/yyyy")</td>
+                                        <td>@fechaCulminacion</td>
+                                        <td><span class="bemo-status @claseEstado">@textoEstado@dias</span></td>
+                                        <td>
+                                            <button class="bemo-button bemo-button-ghost" type="button" data-contract-view
+                                                    data-contract-employee="@contrato.NombreEmpleado"
+                                                    data-contract-position="@contrato.NombreCargo"
+                                                    data-contract-type="@contrato.NombreTipoContrato"
+                                                    data-contract-department="@contrato.NombreDepartamento" data-contract-salary="@salario"
+                                                    data-contract-start="@fechaContratacion" data-contract-end="@fechaCulminacion"
+                                                    data-contract-status="@estadoDetalle"
+                                                    aria-label="Ver contrato de @contrato.NombreEmpleado">
+                                                <svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                    <use href="#icon-eye"></use>
+                                                </svg>
+                                                Ver
+                                            </button>
+                                            <button class="bemo-button bemo-button-ghost" type="button">
+                                                <svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                    <use href="#icon-edit"></use>
+                                                </svg>
+                                                Editar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de contratos">
+                <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros contratos</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if (Model.PaginaActual > 1)
                     {
-                        <tr>
-                            <td colspan="8" class="text-center">No hay contratos que coincidan con los filtros.</td>
-                        </tr>
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                    }
+
+                    @if (Model.TotalPaginas <= 7)
+                    {
+                        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
                     }
                     else
                     {
-                        foreach (var contrato in Model.Contratos)
+                        var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                        var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                        var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                        var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" :
+              "bemo-button bemo-button-secondary";
+
+                        <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                        @if (paginaInicio > 2)
                         {
-                            var porVencer = contrato.Situacion == "POR VENCER";
-                            var claseEstado = porVencer ? "bemo-status-yellow" : "bemo-status-green";
-                            var textoEstado = porVencer ? "Por vencer" : "Vigente";
-                            var fechaCulminacion = contrato.FechaCulminacion?.ToString("dd/MM/yyyy") ?? "Indefinido";
-                            var fechaContratacion = contrato.FechaContratacion.ToString("dd/MM/yyyy");
-                            var salario = contrato.SalarioBruto.ToString("N2");
-                            var dias = contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" : string.Empty;
-                            var estadoDetalle = $"{textoEstado}{dias}";
-                            <tr>
-                                <td>@contrato.NombreEmpleado</td>
-                                <td>@contrato.NombreCargo</td>
-                                <td>@contrato.NombreTipoContrato</td>
-                                <td>$@contrato.SalarioBruto.ToString("N2")</td>
-                                <td>@contrato.FechaContratacion.ToString("dd/MM/yyyy")</td>
-                                <td>@fechaCulminacion</td>
-                                <td><span class="bemo-status @claseEstado">@textoEstado@dias</span></td>
-                                <td>
-                                    <button class="bemo-button bemo-button-ghost" type="button"
-                                            data-contract-view
-                                            data-contract-employee="@contrato.NombreEmpleado"
-                                            data-contract-position="@contrato.NombreCargo"
-                                            data-contract-type="@contrato.NombreTipoContrato"
-                                            data-contract-department="@contrato.NombreDepartamento"
-                                            data-contract-salary="@salario"
-                                            data-contract-start="@fechaContratacion"
-                                            data-contract-end="@fechaCulminacion"
-                                            data-contract-status="@estadoDetalle"
-                                            aria-label="Ver contrato de @contrato.NombreEmpleado">
-                                        <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>
-                                        Ver
-                                    </button>
-                                    <button class="bemo-button bemo-button-ghost" type="button">
-                                        <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>
-                                        Editar
-                                    </button>
-                                </td>
-                            </tr>
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
                         }
+                        @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                        @if (paginaFin < Model.TotalPaginas - 1)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
                     }
-                </tbody>
-            </table>
-        </div>
-    </section>
 
-    <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de contratos">
-        <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros contratos</p>
-        <div class="flex flex-wrap items-center gap-2">
-            @if (Model.PaginaActual > 1)
-            {
-                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
-            }
+                    @if (Model.PaginaActual < Model.TotalPaginas)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                    }
+                </div>
+            </nav>
 
-            @if (Model.TotalPaginas <= 7)
-            {
-                @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
-                {
-                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
-                }
-            }
-            else
-            {
-                var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
-                var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
-                var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+            <div class="fixed inset-0 z-50 hidden bg-black/50 p-4" data-contract-modal aria-hidden="true">
+                <section class="relative mx-auto max-h-full max-w-3xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl md:p-8"
+                         role="dialog" aria-modal="true" aria-labelledby="contract-modal-title">
+                    <button type="button"
+                            class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                            data-contract-modal-close aria-label="Cerrar detalle">&times;</button>
 
-                <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
-                @if (paginaInicio > 2)
-                {
-                    <span class="flex items-center px-1 text-[#684026]">...</span>
-                }
-                @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
-                {
-                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
-                }
-                @if (paginaFin < Model.TotalPaginas - 1)
-                {
-                    <span class="flex items-center px-1 text-[#684026]">...</span>
-                }
-                <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
-            }
+                    <div class="pr-10">
+                        <p class="bemo-kicker">Detalle del contrato</p>
+                        <h2 id="contract-modal-title" class="bemo-title mt-2" data-contract-field="employee">Contrato</h2>
+                        <p class="bemo-subtitle mt-2">Información laboral y condiciones del contrato.</p>
+                    </div>
 
-            @if (Model.PaginaActual < Model.TotalPaginas)
-            {
-                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
-            }
-        </div>
-    </nav>
-
-    <div class="fixed inset-0 z-50 hidden bg-black/50 p-4" data-contract-modal aria-hidden="true">
-        <section class="relative mx-auto max-h-full max-w-3xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl md:p-8"
-                 role="dialog" aria-modal="true" aria-labelledby="contract-modal-title">
-            <button type="button" class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
-                    data-contract-modal-close aria-label="Cerrar detalle">&times;</button>
-
-            <div class="pr-10">
-                <p class="bemo-kicker">Detalle del contrato</p>
-                <h2 id="contract-modal-title" class="bemo-title mt-2" data-contract-field="employee">Contrato</h2>
-                <p class="bemo-subtitle mt-2">Información laboral y condiciones del contrato.</p>
+                    <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Empleado</dt>
+                            <dd class="mt-1 font-semibold" data-contract-field="employee"></dd>
+                        </div>
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Cargo</dt>
+                            <dd class="mt-1 font-semibold" data-contract-field="position"></dd>
+                        </div>
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Tipo de contrato</dt>
+                            <dd class="mt-1 font-semibold" data-contract-field="type"></dd>
+                        </div>
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Departamento</dt>
+                            <dd class="mt-1 font-semibold" data-contract-field="department"></dd>
+                        </div>
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Salario mensual</dt>
+                            <dd class="mt-1 font-semibold">$<span data-contract-field="salary"></span></dd>
+                        </div>
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Estado</dt>
+                            <dd class="mt-1 font-semibold" data-contract-field="status"></dd>
+                        </div>
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Fecha de contratación</dt>
+                            <dd class="mt-1 font-semibold" data-contract-field="start"></dd>
+                        </div>
+                        <div class="bemo-card p-4">
+                            <dt class="bemo-label">Fecha de finalización</dt>
+                            <dd class="mt-1 font-semibold" data-contract-field="end"></dd>
+                        </div>
+                    </dl>
+                </section>
             </div>
-
-            <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-                <div class="bemo-card p-4"><dt class="bemo-label">Empleado</dt><dd class="mt-1 font-semibold" data-contract-field="employee"></dd></div>
-                <div class="bemo-card p-4"><dt class="bemo-label">Cargo</dt><dd class="mt-1 font-semibold" data-contract-field="position"></dd></div>
-                <div class="bemo-card p-4"><dt class="bemo-label">Tipo de contrato</dt><dd class="mt-1 font-semibold" data-contract-field="type"></dd></div>
-                <div class="bemo-card p-4"><dt class="bemo-label">Departamento</dt><dd class="mt-1 font-semibold" data-contract-field="department"></dd></div>
-                <div class="bemo-card p-4"><dt class="bemo-label">Salario mensual</dt><dd class="mt-1 font-semibold">$<span data-contract-field="salary"></span></dd></div>
-                <div class="bemo-card p-4"><dt class="bemo-label">Estado</dt><dd class="mt-1 font-semibold" data-contract-field="status"></dd></div>
-                <div class="bemo-card p-4"><dt class="bemo-label">Fecha de contratación</dt><dd class="mt-1 font-semibold" data-contract-field="start"></dd></div>
-                <div class="bemo-card p-4"><dt class="bemo-label">Fecha de finalización</dt><dd class="mt-1 font-semibold" data-contract-field="end"></dd></div>
-            </dl>
-        </section>
-    </div>
-</div>
+        </div>
