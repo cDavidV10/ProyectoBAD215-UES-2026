@@ -1,3 +1,4 @@
+@using System
 @using System.Linq
 @model BEMOWeb.Models.EmpleadoModel
 
@@ -5,6 +6,28 @@
     ViewData["Title"] = "Empleados";
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+
+    string UrlPagina(int pagina)
+    {
+        var parametros = new List<string> { $"pagina={pagina}" };
+
+        if (!string.IsNullOrWhiteSpace(Model.Busqueda))
+        {
+            parametros.Add($"busqueda={Uri.EscapeDataString(Model.Busqueda)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.DepartamentoSeleccionado))
+        {
+            parametros.Add($"departamento={Uri.EscapeDataString(Model.DepartamentoSeleccionado)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.EstadoSeleccionado))
+        {
+            parametros.Add($"estado={Uri.EscapeDataString(Model.EstadoSeleccionado)}");
+        }
+
+        return "?" + string.Join("&", parametros);
+    }
 }
 
 <div class="space-y-6">
@@ -35,24 +58,24 @@
         </div>
     </section>
 
-    <section class="grid gap-4 lg:grid-cols-[1.25fr_1fr_1fr]">
+    <form method="get" class="grid gap-4 lg:grid-cols-[1.25fr_1fr_1fr]">
         <div class="relative">
             <svg class="bemo-icon absolute left-4 top-3 text-[#381F12]" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>
-            <input class="bemo-input pl-12" type="search" placeholder="Buscar por nombre o código..." data-filter-input="employees" />
+            <input class="bemo-input pl-12" type="search" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por DUI o nombre..." data-filter-input="employees" onkeydown="if (event.key === 'Enter') this.form.submit()" />
         </div>
-        <select class="bemo-select" aria-label="Filtrar por departamento" data-filter-select="employees">
-            <option value="">Todos los departamentos</option>
+        <select class="bemo-select" name="departamento" aria-label="Filtrar por departamento" onchange="this.form.submit()">
+            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.DepartamentoSeleccionado) ? "selected" : null)">Todos los departamentos</option>
             @foreach (var departamento in Model.Departamentos)
             {
-                <option value="@departamento.NombreDepartamento">@departamento.NombreDepartamento</option>
+                <option value="@departamento.NombreDepartamento" selected="@(departamento.NombreDepartamento == Model.DepartamentoSeleccionado ? "selected" : null)">@departamento.NombreDepartamento</option>
             }
         </select>
-        <select class="bemo-select" aria-label="Filtrar por estado">
-            <option value="">Todos los estados</option>
-            <option value="ACTIVO">Activo</option>
-            <option value="INACTIVO">Inactivo</option>
+        <select class="bemo-select" name="estado" aria-label="Filtrar por estado" onchange="this.form.submit()">
+            <option value="" selected="@(string.IsNullOrWhiteSpace(Model.EstadoSeleccionado) ? "selected" : null)">Todos los estados</option>
+            <option value="ACTIVO" selected="@(Model.EstadoSeleccionado == "ACTIVO" ? "selected" : null)">Activo</option>
+            <option value="INACTIVO" selected="@(Model.EstadoSeleccionado == "INACTIVO" ? "selected" : null)">Inactivo</option>
         </select>
-    </section>
+    </form>
 
     <section class="bemo-card overflow-hidden">
         <div class="bemo-table-wrap">
@@ -106,7 +129,7 @@
         <div class="flex flex-wrap items-center gap-2">
             @if (Model.PaginaActual > 1)
             {
-                <a class="bemo-button bemo-button-secondary" href="?pagina=@(Model.PaginaActual - 1)">Anterior</a>
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
             }
 
             @if (Model.TotalPaginas <= 7)
@@ -114,7 +137,7 @@
                 @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
                 {
                     var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                    <a class="@clasePagina" href="?pagina=@pagina">@pagina</a>
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
                 }
             }
             else
@@ -124,7 +147,7 @@
                 var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
                 var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
 
-                <a class="@clasePrimera" href="?pagina=1">1</a>
+                <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
                 @if (paginaInicio > 2)
                 {
                     <span class="flex items-center px-1 text-[#684026]">...</span>
@@ -132,18 +155,18 @@
                 @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
                 {
                     var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                    <a class="@clasePagina" href="?pagina=@pagina">@pagina</a>
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
                 }
                 @if (paginaFin < Model.TotalPaginas - 1)
                 {
                     <span class="flex items-center px-1 text-[#684026]">...</span>
                 }
-                <a class="@claseUltima" href="?pagina=@Model.TotalPaginas">@Model.TotalPaginas</a>
+                <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
             }
 
             @if (Model.PaginaActual < Model.TotalPaginas)
             {
-                <a class="bemo-button bemo-button-secondary" href="?pagina=@(Model.PaginaActual + 1)">Siguiente</a>
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
             }
         </div>
     </nav>

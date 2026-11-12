@@ -28,14 +28,14 @@ namespace BEMO.Negocio
             return _metodos.EmpleadosTotales();
         }
 
-        public List<Empleado> Listar(int pagina, int tamanoPagina)
+        public (List<Empleado> Empleados, int Total) ListarPaginado(int pagina, int tamanoPagina, string? busqueda, string? departamento, string? estado)
         {
-            return _metodos.Listar(pagina, tamanoPagina);
+            return _metodos.ListarPaginado(pagina, tamanoPagina, busqueda, departamento, estado);
         }
 
-        public int TotalEmpleadosGeneral()
+        public (int Activos, int Inactivos, int Total) ObtenerResumen()
         {
-            return _metodos.TotalEmpleadosGeneral();
+            return _metodos.ObtenerResumen();
         }
     }
 }

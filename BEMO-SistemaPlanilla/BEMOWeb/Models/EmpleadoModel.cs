@@ -21,4 +21,10 @@ public class EmpleadoModel
     public int TotalRegistros { get; init; }
 
     public int TamanoPagina { get; init; } = 5;
+
+    public string? DepartamentoSeleccionado { get; init; }
+
+    public string? EstadoSeleccionado { get; init; }
+
+    public string? Busqueda { get; init; }
 }

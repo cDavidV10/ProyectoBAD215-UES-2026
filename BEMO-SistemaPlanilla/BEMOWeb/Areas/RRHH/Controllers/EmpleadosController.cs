@@ -17,24 +17,34 @@ public class EmpleadosController : Controller
         _departamento = departamento;
     }
 
-    public IActionResult Index(int pagina = 1)
+    public IActionResult Index(int pagina = 1, string? busqueda = null, string? departamento = null, string? estado = null)
     {
-        const int tamanoPagina = 10;
-        var totalRegistros = _empleados.TotalEmpleadosGeneral();
+        const int tamanoPagina = 5;
+        pagina = Math.Max(1, pagina);
+        var resumen = _empleados.ObtenerResumen();
+        var resultado = _empleados.ListarPaginado(pagina, tamanoPagina, busqueda, departamento, estado);
+        var totalRegistros = resultado.Total;
         var totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (double)tamanoPagina));
-        pagina = Math.Clamp(pagina, 1, totalPaginas);
+        if (pagina > totalPaginas)
+        {
+            pagina = totalPaginas;
+            resultado = _empleados.ListarPaginado(pagina, tamanoPagina, busqueda, departamento, estado);
+        }
 
         var modelo = new BEMOWeb.Models.EmpleadoModel
         {
-            EmpleadosActivos = _empleados.UsuariosActivos(),
-            EmpleadosInactivos = _empleados.EmpleadosInactivos(),
-            EmpleadosTotales = _empleados.EmpladosTotales(),
+            EmpleadosActivos = resumen.Activos,
+            EmpleadosInactivos = resumen.Inactivos,
+            EmpleadosTotales = resumen.Total,
             Departamentos = _departamento.Listar(),
-            ListaEmpleados = _empleados.Listar(pagina, tamanoPagina),
+            ListaEmpleados = resultado.Empleados,
             PaginaActual = pagina,
             TotalPaginas = totalPaginas,
             TotalRegistros = totalRegistros,
-            TamanoPagina = tamanoPagina
+            TamanoPagina = tamanoPagina,
+            DepartamentoSeleccionado = departamento,
+            EstadoSeleccionado = estado,
+            Busqueda = busqueda
         };
 
         return View("~/Areas/Admin/Views/Empleados/Index.cshtml", modelo);
