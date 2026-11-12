@@ -395,7 +395,11 @@ public class DAOContrato
                     THROW 51030, N'El contrato no existe o ya fue finalizado', 1;
 
                 UPDATE dbo.CONTRATO
-                SET estado = 'FINALIZADO'
+                SET estado = 'FINALIZADO',
+                    fecha_culminacion = CASE
+                        WHEN fecha_contratacion > CAST(GETDATE() AS DATE) THEN fecha_contratacion
+                        ELSE CAST(GETDATE() AS DATE)
+                    END
                 WHERE id_empleado = @id_empleado
                   AND estado = 'VIGENTE';
 
