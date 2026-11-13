@@ -192,6 +192,7 @@ public class EmpleadosController : Controller
         {
             modelo.Dui = empleado.Dui;
             modelo.FechaNac = empleado.FechaNac;
+            modelo.NumeroIsss = empleado.NumeroIsss;
         }
     }
 

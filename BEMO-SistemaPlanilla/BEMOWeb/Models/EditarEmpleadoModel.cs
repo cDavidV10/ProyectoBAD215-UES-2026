@@ -25,7 +25,6 @@ public class EditarEmpleadoModel
     [RegularExpression(@"^(?:\d{4}-\d{6}-\d{3}-\d|\d{8}-\d)$", ErrorMessage = "El NIT debe tener el formato 0000-000000-000-0 o 00000000-0.")]
     public string? Nit { get; set; }
 
-    [Required(ErrorMessage = "El número ISSS es obligatorio.")]
     [StringLength(15, ErrorMessage = "El ISSS no puede superar 15 caracteres.")]
     [RegularExpression(@"^\d{1,15}$", ErrorMessage = "El ISSS solo puede contener entre 1 y 15 dígitos.")]
     public string NumeroIsss { get; set; } = string.Empty;
