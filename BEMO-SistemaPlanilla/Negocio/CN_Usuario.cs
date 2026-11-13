@@ -36,4 +36,19 @@ public class CN_Usuario
     {
         return _metodos.Crear(idEmpleado, idRol, password);
     }
+
+    public void Desactivar(int idUsuario)
+    {
+        _metodos.Desactivar(idUsuario);
+    }
+
+    public void Activar(int idUsuario)
+    {
+        _metodos.Activar(idUsuario);
+    }
+
+    public void CambiarPasswordAdministrador(int idUsuario, string passwordNueva)
+    {
+        _metodos.CambiarPasswordAdministrador(idUsuario, passwordNueva);
+    }
 }

@@ -110,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (confirmationModal) {
         const messageElement = confirmationModal.querySelector("[data-confirm-message]");
         const acceptButton = confirmationModal.querySelector("[data-confirm-accept]");
+        const titleElement = confirmationModal.querySelector("#confirm-user-title");
         const cancelButtons = confirmationModal.querySelectorAll("[data-confirm-cancel]");
         let pendingForm = null;
 
@@ -130,6 +131,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 pendingForm = form;
                 if (messageElement) {
                     messageElement.textContent = form.dataset.confirm || "¿Deseas continuar con esta operación?";
+                }
+                if (titleElement) {
+                    titleElement.textContent = form.dataset.confirmTitle || "Confirmar desactivacion";
+                }
+                if (acceptButton) {
+                    acceptButton.textContent = form.dataset.confirmAcceptText || "Desactivar usuario";
                 }
                 confirmationModal.classList.remove("hidden");
                 confirmationModal.setAttribute("aria-hidden", "false");
@@ -177,6 +184,56 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         userCreatedModal.querySelector("[data-user-created-close]")?.focus();
+    }
+
+    const userPasswordModal = document.querySelector("[data-user-password-modal]");
+    if (userPasswordModal) {
+        const closeButtons = userPasswordModal.querySelectorAll("[data-user-password-close]");
+        const form = userPasswordModal.querySelector("[data-user-password-form]");
+        const idInput = userPasswordModal.querySelector("[data-user-password-id]");
+        const nameElement = userPasswordModal.querySelector("[data-user-password-name]");
+        const passwordInput = userPasswordModal.querySelector("#UsuarioPasswordNueva");
+        const confirmationInput = userPasswordModal.querySelector("#UsuarioPasswordConfirmar");
+
+        const clearPasswordState = () => {
+            [passwordInput, confirmationInput].forEach((input) => {
+                if (!input) return;
+                input.value = "";
+                input.setCustomValidity("");
+                input.classList.remove("bemo-input-error", "bemo-input-success");
+            });
+        };
+
+        const closeUserPasswordModal = () => {
+            userPasswordModal.classList.add("hidden");
+            userPasswordModal.setAttribute("aria-hidden", "true");
+            clearPasswordState();
+        };
+
+        document.querySelectorAll("[data-user-password-edit]").forEach((button) => {
+            button.addEventListener("click", () => {
+                if (idInput) idInput.value = button.dataset.userId || "";
+                if (nameElement) nameElement.textContent = button.dataset.userName || "Usuario seleccionado";
+                clearPasswordState();
+                userPasswordModal.classList.remove("hidden");
+                userPasswordModal.setAttribute("aria-hidden", "false");
+                passwordInput?.focus();
+            });
+        });
+
+        closeButtons.forEach((button) => button.addEventListener("click", closeUserPasswordModal));
+        userPasswordModal.addEventListener("click", (event) => {
+            if (event.target === userPasswordModal) closeUserPasswordModal();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !userPasswordModal.classList.contains("hidden")) {
+                closeUserPasswordModal();
+            }
+        });
+
+        form?.addEventListener("submit", (event) => {
+            if (!form.checkValidity()) event.preventDefault();
+        });
     }
 
     const employeeModal = document.querySelector("[data-employee-modal]");

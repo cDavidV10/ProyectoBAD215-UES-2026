@@ -154,6 +154,87 @@ public class DAOUsuario
         return Convert.ToString(nombreUsuario.Value) ?? string.Empty;
     }
 
+    public void Desactivar(int idUsuario)
+    {
+        const string consulta = @"
+            UPDATE dbo.USUARIO
+            SET estado = 'INACTIVO'
+            WHERE id_usuario = @id_usuario
+              AND estado = 'ACTIVO';";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@id_usuario", SqlDbType.Int).Value = idUsuario;
+
+        conexionSql.Open();
+        if (cmd.ExecuteNonQuery() != 1)
+        {
+            throw new InvalidOperationException("El usuario no existe o ya está inactivo.");
+        }
+    }
+
+    public void Activar(int idUsuario)
+    {
+        const string obtenerEstados = @"
+            SELECT u.estado AS estado_usuario, e.estado AS estado_empleado
+            FROM dbo.USUARIO u
+            INNER JOIN dbo.EMPLEADO e ON e.id_empleado = u.id_empleado
+            WHERE u.id_usuario = @id_usuario;";
+
+        const string activarUsuario = @"
+            UPDATE dbo.USUARIO
+            SET estado = 'ACTIVO'
+            WHERE id_usuario = @id_usuario
+              AND estado = 'INACTIVO';";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        conexionSql.Open();
+
+        using (var cmdEstados = new SqlCommand(obtenerEstados, conexionSql))
+        {
+            cmdEstados.Parameters.Add("@id_usuario", SqlDbType.Int).Value = idUsuario;
+            using var dr = cmdEstados.ExecuteReader();
+            if (!dr.Read())
+            {
+                throw new InvalidOperationException("El usuario no existe.");
+            }
+
+            var estadoUsuario = Convert.ToString(dr["estado_usuario"]);
+            var estadoEmpleado = Convert.ToString(dr["estado_empleado"]);
+            if (!string.Equals(estadoEmpleado, "ACTIVO", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("No se puede activar el usuario porque el empleado asociado está inactivo.");
+            }
+
+            if (!string.Equals(estadoUsuario, "INACTIVO", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("El usuario no existe o ya está activo.");
+            }
+        }
+
+        using var cmdActivar = new SqlCommand(activarUsuario, conexionSql);
+        cmdActivar.Parameters.Add("@id_usuario", SqlDbType.Int).Value = idUsuario;
+        if (cmdActivar.ExecuteNonQuery() != 1)
+        {
+            throw new InvalidOperationException("No se pudo activar el usuario.");
+        }
+    }
+
+    public void CambiarPasswordAdministrador(int idUsuario, string passwordNueva)
+    {
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand("dbo.sp_Administrador_Cambiar_Password", conexionSql)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        cmd.Parameters.Add("@id_usuario", SqlDbType.Int).Value = idUsuario;
+        cmd.Parameters.Add("@password_nueva", SqlDbType.VarChar, 255).Value = passwordNueva;
+
+        conexionSql.Open();
+        cmd.ExecuteNonQuery();
+    }
+
     private static string? NormalizarFiltro(string? filtro)
     {
         return string.IsNullOrWhiteSpace(filtro) ? null : filtro.Trim();
