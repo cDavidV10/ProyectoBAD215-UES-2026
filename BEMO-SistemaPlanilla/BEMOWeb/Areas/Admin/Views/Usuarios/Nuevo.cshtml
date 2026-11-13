@@ -1,4 +1,4 @@
-@model IReadOnlyList<BEMO.Entidades.Empleado>
+@model BEMOWeb.Models.NuevoUsuarioModel
 
 @{
     ViewData["Title"] = "Nuevo usuario";
@@ -10,29 +10,37 @@
         <h1 class="bemo-title mt-3">Nuevo usuario</h1>
     </div>
 
-    <form class="bemo-card space-y-5 p-5 md:p-8" data-demo-form>
+    <form asp-area="Admin" asp-controller="Usuarios" asp-action="Nuevo" method="post"
+          class="bemo-card space-y-5 p-5 md:p-8" data-user-form>
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="bemo-validation-summary"></div>
+
         <div class="grid gap-5 md:grid-cols-3">
             <div>
-                <label class="bemo-label bemo-required" for="empleado">Empleado</label>
-                <select id="empleado" name="idEmpleado" class="bemo-select" required>
+                <label class="bemo-label bemo-required" asp-for="IdEmpleado">Empleado</label>
+                <select asp-for="IdEmpleado" class="bemo-select">
                     <option value="">Seleccione un empleado</option>
-                    @foreach (var empleado in Model)
+                    @foreach (var empleado in Model.EmpleadosDisponibles)
                     {
                         <option value="@empleado.IdEmpleado">
                             @empleado.Nombre @empleado.Apellido - DUI: @empleado.Dui
                         </option>
                     }
                 </select>
+                <span asp-validation-for="IdEmpleado" class="bemo-validation-message text-sm text-red-700"></span>
                 <p class="mt-1 text-sm italic text-[#684026]">Solo se muestran empleados activos sin usuario de Recursos Humanos.</p>
             </div>
 
             <div>
-                <label class="bemo-label bemo-required">Rol</label>
-                <select class="bemo-select" required>
-                    <option>Seleccionar rol</option>
-                    <option>ADMINISTRADOR NOMINA</option>
-                    <option>RECURSOS HUMANOS</option>
+                <label class="bemo-label bemo-required" asp-for="IdRol">Rol</label>
+                <select asp-for="IdRol" class="bemo-select">
+                    <option value="">Seleccione un rol</option>
+                    @foreach (var rol in Model.Roles)
+                    {
+                        <option value="@rol.IdRol">@rol.NombreRol</option>
+                    }
                 </select>
+                <span asp-validation-for="IdRol" class="bemo-validation-message text-sm text-red-700"></span>
             </div>
 
             <div>
@@ -40,25 +48,36 @@
                 <input class="bemo-input" value="Se generará al guardar" disabled />
             </div>
             <div>
-                <label class="bemo-label bemo-required">Contraseña inicial</label>
-                <input class="bemo-input" type="password" placeholder="••••••••" required />
+                <label class="bemo-label bemo-required" asp-for="Password">Contraseña inicial</label>
+                <div class="relative">
+                    <input asp-for="Password" class="bemo-input pr-20" placeholder="••••••••"
+                           autocomplete="new-password" data-password-field />
+                    <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-[#804C2C] hover:text-[#381F12]"
+                            data-password-toggle data-password-target="Password" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">
+                        <svg class="bemo-icon-sm" viewBox="0 0 24 24" data-password-icon><use href="#icon-eye"></use></svg>
+                        <span class="sr-only" data-password-label>Mostrar contraseña</span>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="bemo-validation-message text-sm text-red-700"></span>
             </div>
             <div>
-                <label class="bemo-label bemo-required">Confirmar contraseña</label>
-                <input class="bemo-input" type="password" placeholder="••••••••" required />
-            </div>
-            <div>
-                <label class="bemo-label">Estado</label>
-                <select class="bemo-select">
-                    <option>Activo</option>
-                    <option>Inactivo</option>
-                </select>
+                <label class="bemo-label bemo-required" asp-for="ConfirmarPassword">Confirmar contraseña</label>
+                <div class="relative">
+                    <input asp-for="ConfirmarPassword" class="bemo-input pr-20" placeholder="••••••••"
+                           autocomplete="new-password" data-password-field data-password-confirmation />
+                    <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-[#804C2C] hover:text-[#381F12]"
+                            data-password-toggle data-password-target="ConfirmarPassword" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">
+                        <svg class="bemo-icon-sm" viewBox="0 0 24 24" data-password-icon><use href="#icon-eye"></use></svg>
+                        <span class="sr-only" data-password-label>Mostrar contraseña</span>
+                    </button>
+                </div>
+                <span asp-validation-for="ConfirmarPassword" class="bemo-validation-message text-sm text-red-700"></span>
             </div>
         </div>
 
         <div class="bemo-info">
             <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
-            El nombre de usuario se genera automáticamente y no se puede modificar.
+            El nombre de usuario se genera automáticamente y la cuenta se crea inicialmente como ACTIVA.
         </div>
         <div class="flex flex-wrap gap-3">
             <button class="bemo-button bemo-button-primary" type="submit">Crear usuario</button>
@@ -66,3 +85,7 @@
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

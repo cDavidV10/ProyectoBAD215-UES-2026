@@ -4,6 +4,7 @@
 
 @{
     ViewData["Title"] = "Usuarios y roles";
+    var usuarioCreado = TempData["UsuarioCreado"] as string;
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
 
@@ -188,3 +189,27 @@
         </aside>
     </div>
 </div>
+
+@if (!string.IsNullOrWhiteSpace(usuarioCreado))
+{
+    <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4"
+         data-user-created-modal aria-hidden="false">
+        <section class="relative w-full max-w-md rounded-xl bg-white p-6 shadow-2xl"
+                 role="dialog" aria-modal="true" aria-labelledby="user-created-title">
+            <button type="button"
+                    class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                    data-user-created-close aria-label="Cerrar confirmación">&times;</button>
+            <div class="pr-8">
+                <p class="bemo-kicker">Usuario creado</p>
+                <h2 id="user-created-title" class="bemo-title mt-2">Registro completado</h2>
+                <p class="mt-3 text-[#684026]">El nombre de usuario generado es:</p>
+                <p class="mt-2 rounded-lg bg-[#F7F0E2] px-4 py-3 text-center text-xl font-extrabold tracking-wide text-[#9F5F2F]">
+                    @usuarioCreado
+                </p>
+            </div>
+            <button type="button" class="bemo-button bemo-button-primary mt-6 w-full" data-user-created-close>
+                Aceptar
+            </button>
+        </section>
+    </div>
+}

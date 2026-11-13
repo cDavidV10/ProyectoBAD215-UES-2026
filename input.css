@@ -132,6 +132,15 @@
     border-color: #bd231c !important;
     box-shadow: 0 0 0 3px rgba(189, 35, 28, .18);
   }
+  .bemo-input-success {
+    border-color: #2f8f46 !important;
+    background: #f3fff5;
+    box-shadow: 0 0 0 2px rgba(47, 143, 70, .14);
+  }
+  .bemo-input-success:focus {
+    border-color: #2f8f46 !important;
+    box-shadow: 0 0 0 3px rgba(47, 143, 70, .2);
+  }
   div:has(> .bemo-validation-message:not(:empty)) > .bemo-input,
   div:has(> .bemo-validation-message:not(:empty)) > .bemo-select {
     border-color: #bd231c;

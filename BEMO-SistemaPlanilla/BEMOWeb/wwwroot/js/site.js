@@ -2,6 +2,45 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+        const targetId = button.dataset.passwordTarget;
+        const input = targetId ? document.getElementById(targetId) : null;
+        if (!input) return;
+
+        button.addEventListener("click", () => {
+            const mostrar = input.type === "password";
+            input.type = mostrar ? "text" : "password";
+            const icon = button.querySelector("[data-password-icon]");
+            const label = mostrar ? "Ocultar contraseña" : "Mostrar contraseña";
+            icon?.querySelector("use")?.setAttribute("href", mostrar ? "#icon-eye-closed" : "#icon-eye");
+            if (icon) icon.setAttribute("aria-label", label);
+            const labelElement = button.querySelector("[data-password-label]");
+            if (labelElement) labelElement.textContent = label;
+            button.setAttribute("aria-label", label);
+            button.setAttribute("title", label);
+            button.setAttribute("aria-pressed", mostrar ? "true" : "false");
+        });
+    });
+
+    document.querySelectorAll("form[data-user-form]").forEach((form) => {
+        const password = form.querySelector("[data-password-field]:not([data-password-confirmation])");
+        const confirmation = form.querySelector("[data-password-confirmation]");
+        if (!password || !confirmation) return;
+
+        const updatePasswordMatch = () => {
+            const hasValues = password.value.length > 0 && confirmation.value.length > 0;
+            const matches = hasValues && password.value === confirmation.value;
+
+            confirmation.classList.toggle("bemo-input-success", matches);
+            confirmation.classList.toggle("bemo-input-error", hasValues && !matches);
+            confirmation.setCustomValidity(hasValues && !matches ? "Las contraseñas no coinciden." : "");
+        };
+
+        password.addEventListener("input", updatePasswordMatch);
+        confirmation.addEventListener("input", updatePasswordMatch);
+        updatePasswordMatch();
+    });
+
     document.querySelectorAll("[data-filter-input]").forEach((input) => {
         const key = input.dataset.filterInput;
         const table = document.querySelector(`[data-filter-table="${key}"]`);
@@ -116,6 +155,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 closeConfirmationModal();
             }
         });
+    }
+
+    const userCreatedModal = document.querySelector("[data-user-created-modal]");
+    if (userCreatedModal) {
+        const closeButtons = userCreatedModal.querySelectorAll("[data-user-created-close]");
+
+        const closeUserCreatedModal = () => {
+            userCreatedModal.classList.add("hidden");
+            userCreatedModal.setAttribute("aria-hidden", "true");
+        };
+
+        closeButtons.forEach((button) => button.addEventListener("click", closeUserCreatedModal));
+        userCreatedModal.addEventListener("click", (event) => {
+            if (event.target === userCreatedModal) closeUserCreatedModal();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !userCreatedModal.classList.contains("hidden")) {
+                closeUserCreatedModal();
+            }
+        });
+
+        userCreatedModal.querySelector("[data-user-created-close]")?.focus();
     }
 
     const employeeModal = document.querySelector("[data-employee-modal]");

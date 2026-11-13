@@ -109,6 +109,51 @@ public class DAOUsuario
         return roles;
     }
 
+    public List<Rol> ListarRolesDisponibles()
+    {
+        const string consulta = @"
+            SELECT id_rol, nombre_rol
+            FROM dbo.ROL
+            ORDER BY nombre_rol;";
+
+        var roles = new List<Rol>();
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+
+        conexionSql.Open();
+        using var dr = cmd.ExecuteReader();
+        while (dr.Read())
+        {
+            roles.Add(new Rol
+            {
+                IdRol = Convert.ToInt32(dr["id_rol"]),
+                NombreRol = Convert.ToString(dr["nombre_rol"]) ?? string.Empty
+            });
+        }
+
+        return roles;
+    }
+
+    public string Crear(int idEmpleado, int idRol, string password)
+    {
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand("dbo.sp_Crear_Usuario", conexionSql)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        cmd.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+        cmd.Parameters.Add("@id_rol", SqlDbType.Int).Value = idRol;
+        cmd.Parameters.Add("@password_normal", SqlDbType.VarChar, 255).Value = password;
+        var nombreUsuario = cmd.Parameters.Add("@nombre_usuario", SqlDbType.VarChar, 50);
+        nombreUsuario.Direction = ParameterDirection.Output;
+
+        conexionSql.Open();
+        cmd.ExecuteNonQuery();
+
+        return Convert.ToString(nombreUsuario.Value) ?? string.Empty;
+    }
+
     private static string? NormalizarFiltro(string? filtro)
     {
         return string.IsNullOrWhiteSpace(filtro) ? null : filtro.Trim();

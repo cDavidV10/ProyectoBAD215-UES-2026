@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using BEMO.Negocio;
 
 namespace BEMOWeb.Areas.Admin.Controllers;
@@ -64,7 +65,98 @@ public class UsuariosController : Controller
     [HttpGet]
     public IActionResult Nuevo()
     {
-        var empleadosDisponibles = _empleado.ListarActivosSinUsuarioDeRecursosHumanos();
-        return View("~/Areas/Admin/Views/Usuarios/Nuevo.cshtml", empleadosDisponibles);
+        return View("~/Areas/Admin/Views/Usuarios/Nuevo.cshtml", CargarModeloNuevoUsuario());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Nuevo(Models.NuevoUsuarioModel modelo)
+    {
+        CargarCatalogosNuevoUsuario(modelo);
+        ValidarNuevoUsuario(modelo);
+
+        if (!ModelState.IsValid)
+        {
+            return View("~/Areas/Admin/Views/Usuarios/Nuevo.cshtml", modelo);
+        }
+
+        try
+        {
+            var nombreUsuario = _usuarios.Crear(
+                modelo.IdEmpleado!.Value,
+                modelo.IdRol!.Value,
+                modelo.Password);
+
+            TempData["UsuarioCreado"] = nombreUsuario;
+            return RedirectToAction(nameof(Index));
+        }
+        catch (SqlException ex)
+        {
+            ModelState.AddModelError(string.Empty, MensajeErrorNuevoUsuario(ex));
+            return View("~/Areas/Admin/Views/Usuarios/Nuevo.cshtml", modelo);
+        }
+    }
+
+    private Models.NuevoUsuarioModel CargarModeloNuevoUsuario()
+    {
+        var modelo = new Models.NuevoUsuarioModel();
+        return CargarCatalogosNuevoUsuario(modelo);
+    }
+
+    private Models.NuevoUsuarioModel CargarCatalogosNuevoUsuario(Models.NuevoUsuarioModel modelo)
+    {
+        modelo.EmpleadosDisponibles = _empleado.ListarActivosSinUsuarioDeRecursosHumanos();
+        modelo.Roles = CargarRoles();
+        return modelo;
+    }
+
+    private List<BEMO.Entidades.Rol> CargarRoles()
+    {
+        return _usuarios.ListarRolesDisponibles();
+    }
+
+    private void ValidarNuevoUsuario(Models.NuevoUsuarioModel modelo)
+    {
+        if (modelo.IdEmpleado.HasValue
+            && !modelo.EmpleadosDisponibles.Any(empleado => empleado.IdEmpleado == modelo.IdEmpleado.Value))
+        {
+            ModelState.AddModelError(nameof(modelo.IdEmpleado), "Seleccione un empleado activo sin usuario.");
+        }
+
+        if (modelo.IdRol.HasValue
+            && !modelo.Roles.Any(rol => rol.IdRol == modelo.IdRol.Value))
+        {
+            ModelState.AddModelError(nameof(modelo.IdRol), "Seleccione un rol válido.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(modelo.Password)
+            && (modelo.Password.Length < 8
+                || !modelo.Password.Any(char.IsUpper)
+                || !modelo.Password.Any(char.IsLower)
+                || !modelo.Password.Any(char.IsDigit)
+                || modelo.Password.All(char.IsLetterOrDigit)))
+        {
+            ModelState.AddModelError(nameof(modelo.Password), "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.");
+        }
+    }
+
+    private static string MensajeErrorNuevoUsuario(SqlException ex)
+    {
+        if (ex.Message.Contains("ya posee una cuenta", StringComparison.OrdinalIgnoreCase))
+        {
+            return "El empleado seleccionado ya posee una cuenta.";
+        }
+
+        if (ex.Message.Contains("contraseña no cumple", StringComparison.OrdinalIgnoreCase))
+        {
+            return "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.";
+        }
+
+        if (ex.Number is 2627 or 2601)
+        {
+            return "No se pudo crear el usuario porque ya existe un registro con esos datos.";
+        }
+
+        return "No se pudo crear el usuario. Verifica la información ingresada.";
     }
 }

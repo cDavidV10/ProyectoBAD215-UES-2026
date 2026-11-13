@@ -26,4 +26,14 @@ public class CN_Usuario
     {
         return _metodos.ListarRoles();
     }
+
+    public List<Rol> ListarRolesDisponibles()
+    {
+        return _metodos.ListarRolesDisponibles();
+    }
+
+    public string Crear(int idEmpleado, int idRol, string password)
+    {
+        return _metodos.Crear(idEmpleado, idRol, password);
+    }
 }

@@ -15,6 +15,21 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="min-h-screen bg-[#F7F1E5] px-4 py-8 text-[#381F12]">
+    <svg aria-hidden="true" class="hidden">
+        <symbol id="icon-eye" viewBox="0 0 24 24">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+            <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+        </symbol>
+        <symbol id="icon-eye-closed" viewBox="0 0 24 24">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M21 9c-2.4 2.667 -5.4 4 -9 4c-3.6 0 -6.6 -1.333 -9 -4" />
+            <path d="M3 15l2.5 -3.8" />
+            <path d="M21 14.976l-2.492 -3.776" />
+            <path d="M9 17l.5 -4" />
+            <path d="M15 17l-.5 -4" />
+        </symbol>
+    </svg>
     <main class="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center justify-center">
         <section class="grid w-full overflow-hidden rounded-[28px] border border-[#E3D2AE] bg-white shadow-[0_24px_70px_rgba(104,64,38,0.16)] md:grid-cols-[1.05fr_0.95fr]">
             <article class="relative flex min-h-[360px] flex-col justify-between overflow-hidden bg-[#9F5F2F] px-8 py-10 text-white md:min-h-[560px] md:px-12 md:py-12">
@@ -87,12 +102,20 @@
                             <label asp-for="Clave" class="mb-2 block text-sm font-semibold text-[#684026]">
                                 Contraseña
                             </label>
-                            <input asp-for="Clave"
-                                   type="password"
-                                   autocomplete="current-password"
-                                   placeholder="Ingresa tu contraseña"
-                                   class="block w-full rounded-xl border border-[#D7C49E] bg-[#FFFDF8] px-4 py-3 text-[#381F12] outline-none transition placeholder:text-[#B8A88A] focus:border-[#9F5F2F] focus:ring-4 focus:ring-[#CE8E41]/20"
-                                   required>
+                            <div class="relative">
+                                <input asp-for="Clave"
+                                       type="password"
+                                       autocomplete="current-password"
+                                       placeholder="Ingresa tu contraseña"
+                                       class="block w-full rounded-xl border border-[#D7C49E] bg-[#FFFDF8] px-4 py-3 pr-20 text-[#381F12] outline-none transition placeholder:text-[#B8A88A] focus:border-[#9F5F2F] focus:ring-4 focus:ring-[#CE8E41]/20"
+                                       data-password-field required>
+                                <button type="button"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-[#804C2C] hover:text-[#381F12]"
+                                        data-password-toggle data-password-target="Clave" aria-label="Mostrar contraseña" title="Mostrar contraseña" aria-pressed="false">
+                                    <svg class="bemo-icon-sm" viewBox="0 0 24 24" data-password-icon><use href="#icon-eye"></use></svg>
+                                    <span class="sr-only" data-password-label>Mostrar contraseña</span>
+                                </button>
+                            </div>
                             <span asp-validation-for="Clave" class="mt-1 block text-sm text-red-600"></span>
                         </div>
 
@@ -105,5 +128,6 @@
             </article>
         </section>
     </main>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 </body>
 </html>
