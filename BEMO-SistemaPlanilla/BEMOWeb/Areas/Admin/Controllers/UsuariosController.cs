@@ -112,7 +112,9 @@ public class UsuariosController : Controller
 
     private List<BEMO.Entidades.Rol> CargarRoles()
     {
-        return _usuarios.ListarRolesDisponibles();
+        return _usuarios.ListarRolesDisponibles()
+            .Where(rol => rol.NombreRol.Contains("RECURSOS HUMANOS", StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     private void ValidarNuevoUsuario(Models.NuevoUsuarioModel modelo)
