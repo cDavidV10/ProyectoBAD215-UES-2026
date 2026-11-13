@@ -13,7 +13,7 @@
         <p class="bemo-subtitle mt-2">La planilla regresara a BORRADOR para corregir asistencia y volver a calcularla.</p>
     </div>
 
-    <form action="@Url.Action("ConfirmarReapertura", "Planilla", new { area = "Admin", id = Model.IdPlanilla })"
+        <form action="@Url.Action("ConfirmarReapertura", "Planilla", new { area = ViewContext.RouteData.Values["area"]?.ToString(), id = Model.IdPlanilla })"
           method="post" class="bemo-card space-y-5 p-5 md:p-8" data-reopen-form novalidate>
         @Html.AntiForgeryToken()
         <input type="hidden" name="IdPlanilla" value="@Model.IdPlanilla" />
