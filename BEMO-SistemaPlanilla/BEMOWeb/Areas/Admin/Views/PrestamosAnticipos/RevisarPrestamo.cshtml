@@ -1,15 +1,44 @@
+@model BEMO.Entidades.PrestamoListado
+
 @{
-    ViewData["Title"] = "Revisar solicitud";
+    ViewData["Title"] = "Detalle de préstamo";
+    var esActivo = Model.Estado == "ACTIVO";
+    var estado = esActivo ? "Activo" : "Pagado";
+    var estadoClase = esActivo ? "bemo-status-yellow" : "bemo-status-green";
 }
 
-<div class="space-y-5"><div><p class="bemo-breadcrumb">Préstamos y anticipos <span class="mx-2">›</span> Revisar solicitud</p><h1 class="bemo-title mt-3">Revisar solicitud</h1></div>
-    <form class="bemo-card space-y-4 p-5 md:p-6" data-demo-form>
-        <h2 class="text-xl font-extrabold">Solicitud de préstamo PRE-00118</h2>
-        <div><label class="bemo-label">Empleado</label><input class="bemo-input" value="Ana López" disabled /></div>
-        <div class="grid gap-4 md:grid-cols-3"><div><label class="bemo-label">Monto solicitado</label><input class="bemo-input" value="$600.00" disabled /></div><div><label class="bemo-label">Número de cuotas</label><input class="bemo-input" value="6" disabled /></div><div><label class="bemo-label">Cuota</label><input class="bemo-input" value="$100.00" disabled /></div></div>
-        <div class="grid gap-4 md:grid-cols-2"><div><label class="bemo-label">Primera quincena de descuento</label><input class="bemo-input" value="Noviembre 2026 · Segunda" disabled /></div><div><label class="bemo-label">Estado</label><input class="bemo-input" value="Pendiente" disabled /></div></div>
-        <div class="bemo-divider pt-2"><h2 class="text-xl font-extrabold">Validación</h2><div class="mt-2 grid gap-4 md:grid-cols-2"><div><label class="bemo-label">Límite de cuota según configuración</label><input class="bemo-input" value="$150.00" disabled /></div><div><label class="bemo-label">Resultado</label><div class="flex items-center gap-2 rounded-md border border-green-600 bg-green-100 px-4 py-2 font-bold text-green-700"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>Dentro del límite</div></div></div></div>
-        <div class="bemo-divider grid gap-4 pt-3 md:grid-cols-[1fr_1.4fr]"><div><label class="bemo-label bemo-required">Decisión</label><select class="bemo-select" required><option>Seleccione una opción</option><option>Aprobar</option><option>Rechazar</option></select></div><div><label class="bemo-label">Observaciones</label><textarea class="bemo-textarea" placeholder="Escriba sus observaciones"></textarea><p class="mt-1 text-sm text-[#684026]">Obligatorio si se rechaza.</p></div></div>
-        <div class="flex flex-wrap gap-3 pt-2"><button class="bemo-button bemo-button-primary" type="submit">Confirmar decisión</button><a asp-action="Index" class="bemo-button bemo-button-secondary">Volver</a></div>
-    </form>
+<div class="space-y-5">
+    <div>
+        <p class="bemo-breadcrumb"><a asp-action="Index">Préstamos y anticipos</a> <span class="mx-2">›</span> Detalle de préstamo</p>
+        <h1 class="bemo-title mt-3">Detalle de préstamo PRE-@Model.IdPrestamo.ToString("D6")</h1>
+    </div>
+
+    <section class="bemo-card space-y-5 p-5 md:p-7">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#E3D2AE] pb-4">
+            <div><p class="bemo-label">Empleado</p><h2 class="text-xl font-extrabold">@Model.NombreEmpleado</h2><p class="text-sm text-[#684026]">DUI: @Model.Dui</p></div>
+            <span class="bemo-status @estadoClase">@estado</span>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-3">
+            <div><p class="bemo-label">Fecha de otorgamiento</p><p class="font-bold">@Model.FechaOtorgamiento.ToString("dd/MM/yyyy")</p></div>
+            <div><p class="bemo-label">Monto original</p><p class="font-bold">@Model.Monto.ToString("C2")</p></div>
+            <div><p class="bemo-label">Saldo pendiente</p><p class="font-bold">@Model.SaldoPendiente.ToString("C2")</p></div>
+            <div><p class="bemo-label">Número de cuotas</p><p class="font-bold">@Model.NumCuotas</p></div>
+            <div><p class="bemo-label">Cuota quincenal</p><p class="font-bold">@Model.CuotaQuincenal.ToString("C2")</p></div>
+            <div><p class="bemo-label">Cuotas restantes</p><p class="font-bold">@(esActivo ? Model.CuotasRestantes : 0)</p></div>
+        </div>
+
+        @if (Model.FechaFinalizacion.HasValue)
+        {
+            <div class="rounded-lg border border-[#E3D2AE] bg-[#FBF8F1] p-4"><span class="bemo-label">Fecha de finalización</span><strong>@Model.FechaFinalizacion.Value.ToString("dd/MM/yyyy")</strong></div>
+        }
+        else
+        {
+            <div class="rounded-lg border border-[#E3D2AE] bg-[#FBF8F1] p-4 text-sm leading-6">El saldo se actualiza automáticamente cuando se cierra una planilla con una cuota de este préstamo.</div>
+        }
+
+        <div class="bemo-divider flex flex-wrap justify-end gap-3 pt-4">
+            <a asp-action="Index" class="bemo-button bemo-button-secondary">Volver al listado</a>
+        </div>
+    </section>
 </div>

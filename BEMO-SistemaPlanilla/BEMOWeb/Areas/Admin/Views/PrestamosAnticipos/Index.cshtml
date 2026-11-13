@@ -1,16 +1,174 @@
+@model BEMOWeb.Models.PrestamosAnticiposIndexModel
+
 @{
     ViewData["Title"] = "Préstamos y anticipos";
+    var esPrestamo = Model.TipoSeleccionado == "prestamos";
+    var mensaje = TempData["Mensaje"] as string;
+    var error = TempData["Error"] as string;
+    string EtiquetaEstado(string estado) => estado switch
+    {
+        "ACTIVO" => "Activo",
+        "PAGADO" => "Pagado",
+        "PENDIENTE" => "Pendiente de descuento",
+        "DESCONTADO" => "Descontado",
+        _ => estado
+    };
+    string ClaseEstado(string estado) => estado switch
+    {
+        "ACTIVO" or "PENDIENTE" => "bemo-status-yellow",
+        "PAGADO" or "DESCONTADO" => "bemo-status-green",
+        _ => "bemo-status-gray"
+    };
 }
 
 <div class="space-y-5">
-    <header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end"><div><p class="bemo-kicker">Administración</p><h1 class="bemo-title mt-2">Préstamos y anticipos</h1><p class="bemo-subtitle mt-2">Administra solicitudes y descuentos del personal.</p></div><div class="flex flex-wrap gap-3 self-start"><a asp-action="NuevoAnticipo" class="bemo-button bemo-button-secondary"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>Nuevo anticipo</a><a asp-action="NuevoPrestamo" class="bemo-button bemo-button-primary"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>Nueva solicitud</a></div></header>
-    <div class="flex border-b border-[#D7C49E]"><button class="bemo-tab active" type="button" data-tab="loans">Préstamos</button><button class="bemo-tab" type="button" data-tab="advances">Anticipos de salario</button></div>
-    <section class="grid gap-4 lg:grid-cols-3"><div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Pendientes</p><p class="bemo-stat-value">6</p></div></div><div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div><div><p class="bemo-stat-label">Aprobados</p><p class="bemo-stat-value">18</p></div></div><div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-coins"></use></svg></div><div><p class="bemo-stat-label">Saldo pendiente</p><p class="bemo-stat-value">$8,450.00</p></div></div></section>
-    <section class="grid gap-4 md:grid-cols-2"><div><label class="bemo-label">Empleado</label><select class="bemo-select"><option>Todos los empleados</option><option>Ana María López</option><option>Carlos Ernesto García</option></select></div><div><label class="bemo-label">Estado</label><select class="bemo-select"><option>Todos los estados</option><option>Pendiente</option><option>Aprobado</option><option>Finalizado</option></select></div></section>
-    <section class="bemo-card overflow-hidden"><div class="bemo-table-wrap"><table class="bemo-table"><thead><tr><th>Solicitud</th><th>Empleado</th><th>Monto</th><th>Cuota</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
-        <tr><td>PRE-000118</td><td>Ana María López</td><td>$2,000.00</td><td>$200.00</td><td>$1,600.00</td><td><span class="bemo-status bemo-status-yellow">Pendiente</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver</button> <a asp-action="RevisarPrestamo" class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-document"></use></svg>Revisar</a></td></tr>
-        <tr><td>PRE-000117</td><td>Carlos Ernesto García</td><td>$5,000.00</td><td>$500.00</td><td>$3,500.00</td><td><span class="bemo-status bemo-status-green">Aprobado</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver detalle</button></td></tr>
-        <tr><td>PRE-000116</td><td>Laura Beatriz Martínez</td><td>$1,200.00</td><td>$200.00</td><td>$0.00</td><td><span class="bemo-status bemo-status-gray">Finalizado</span></td><td><button class="bemo-button bemo-button-ghost" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Ver detalle</button></td></tr>
-    </tbody></table></div></section>
-    <section class="bemo-card flex flex-wrap items-center gap-4 p-4"><strong>Flujo de aprobación:</strong><div class="flex flex-wrap items-center gap-3 text-sm"><span class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-document"></use></svg>Solicitud</span><span class="text-2xl">→</span><span class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>Revisión</span><span class="text-2xl">→</span><span class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>Aprobación</span><span class="text-2xl">→</span><span class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg>Descuento en planilla</span></div></section>
+    <header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+            <p class="bemo-kicker">Administración</p>
+            <h1 class="bemo-title mt-2">Préstamos y anticipos</h1>
+            <p class="bemo-subtitle mt-2">Registra solicitudes y consulta los descuentos aplicados por planilla.</p>
+        </div>
+        <div class="flex flex-wrap gap-3 self-start">
+            <a asp-action="NuevoAnticipo" class="bemo-button bemo-button-secondary">
+                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+                Nuevo anticipo
+            </a>
+            <a asp-action="NuevoPrestamo" class="bemo-button bemo-button-primary">
+                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+                Nuevo préstamo
+            </a>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(mensaje))
+    {
+        <div class="bemo-alert bemo-alert-success">@mensaje</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <div class="bemo-alert bemo-alert-error">@error</div>
+    }
+
+    <div class="flex gap-6 border-b border-[#D7C49E]">
+        <a asp-action="Index" asp-route-tipo="prestamos" asp-route-busqueda="@Model.Busqueda"
+           class="bemo-tab @(esPrestamo ? "active" : "")">Préstamos</a>
+        <a asp-action="Index" asp-route-tipo="anticipos" asp-route-busqueda="@Model.Busqueda"
+           class="bemo-tab @(!esPrestamo ? "active" : "")">Anticipos de salario</a>
+    </div>
+
+    @if (esPrestamo)
+    {
+        <section class="grid gap-4 lg:grid-cols-3">
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Préstamos activos</p><p class="bemo-stat-value">@Model.Resumen.PrestamosActivos</p></div></div>
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div><div><p class="bemo-stat-label">Préstamos pagados</p><p class="bemo-stat-value">@Model.Resumen.PrestamosPagados</p></div></div>
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-coins"></use></svg></div><div><p class="bemo-stat-label">Saldo pendiente</p><p class="bemo-stat-value">@Model.Resumen.SaldoPrestamos.ToString("C2")</p></div></div>
+        </section>
+    }
+    else
+    {
+        <section class="grid gap-4 lg:grid-cols-3">
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Pendientes de descuento</p><p class="bemo-stat-value">@Model.Resumen.AnticiposPendientes</p></div></div>
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div><div><p class="bemo-stat-label">Anticipos descontados</p><p class="bemo-stat-value">@Model.Resumen.AnticiposDescontados</p></div></div>
+            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-coins"></use></svg></div><div><p class="bemo-stat-label">Monto pendiente</p><p class="bemo-stat-value">@Model.Resumen.MontoAnticiposPendientes.ToString("C2")</p></div></div>
+        </section>
+    }
+
+    <form method="get" asp-action="Index" class="bemo-card grid gap-4 p-4 md:grid-cols-[1fr_1fr_auto] md:items-end" data-server-search>
+        <input type="hidden" name="tipo" value="@Model.TipoSeleccionado" />
+        <div>
+            <label class="bemo-label" for="busqueda">Empleado</label>
+            <div class="relative">
+                <button class="absolute left-3 top-2.5 z-10 rounded-md p-1 text-[#381F12]" type="submit" aria-label="Buscar empleado">
+                    <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>
+                </button>
+                <input class="bemo-input pl-12" id="busqueda" type="search" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por DUI o nombre..." autocomplete="off" />
+            </div>
+        </div>
+        <div>
+            <label class="bemo-label" for="estado">Estado</label>
+            <select class="bemo-select" id="estado" name="estado" onchange="this.form.submit()">
+                <option value="">Todos los estados</option>
+                @if (esPrestamo)
+                {
+                    <option value="ACTIVO" selected="@(Model.EstadoSeleccionado == "ACTIVO" ? "selected" : null)">Activo</option>
+                    <option value="PAGADO" selected="@(Model.EstadoSeleccionado == "PAGADO" ? "selected" : null)">Pagado</option>
+                }
+                else
+                {
+                    <option value="PENDIENTE" selected="@(Model.EstadoSeleccionado == "PENDIENTE" ? "selected" : null)">Pendiente de descuento</option>
+                    <option value="DESCONTADO" selected="@(Model.EstadoSeleccionado == "DESCONTADO" ? "selected" : null)">Descontado</option>
+                }
+            </select>
+        </div>
+        <button class="bemo-button bemo-button-secondary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-filter"></use></svg>Filtrar</button>
+    </form>
+
+    @if (esPrestamo)
+    {
+        <section class="bemo-card overflow-hidden">
+            <div class="bemo-table-wrap">
+                <table class="bemo-table min-w-[980px]">
+                    <thead><tr><th>Préstamo</th><th>Empleado</th><th>Otorgamiento</th><th>Monto</th><th>Cuota</th><th>Cuotas restantes</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    @if (Model.Prestamos.Count == 0)
+                    {
+                        <tr><td colspan="9" class="py-8 text-center text-[#684026]">No hay préstamos para los filtros seleccionados.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var prestamo in Model.Prestamos)
+                        {
+                            <tr>
+                                <td>PRE-@prestamo.IdPrestamo.ToString("D6")</td>
+                                <td>@prestamo.NombreEmpleado<br /><small>@prestamo.Dui</small></td>
+                                <td>@prestamo.FechaOtorgamiento.ToString("dd/MM/yyyy")</td>
+                                <td>@prestamo.Monto.ToString("C2")</td>
+                                <td>@prestamo.CuotaQuincenal.ToString("C2")</td>
+                                <td>@(prestamo.Estado == "ACTIVO" ? prestamo.CuotasRestantes : 0)</td>
+                                <td>@prestamo.SaldoPendiente.ToString("C2")</td>
+                                <td><span class="bemo-status @ClaseEstado(prestamo.Estado)">@EtiquetaEstado(prestamo.Estado)</span></td>
+                                <td><a asp-action="RevisarPrestamo" asp-route-id="@prestamo.IdPrestamo" class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Detalle</a></td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="bemo-card overflow-hidden">
+            <div class="bemo-table-wrap">
+                <table class="bemo-table min-w-[800px]">
+                    <thead><tr><th>Anticipo</th><th>Empleado</th><th>Fecha</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody>
+                    @if (Model.Anticipos.Count == 0)
+                    {
+                        <tr><td colspan="6" class="py-8 text-center text-[#684026]">No hay anticipos para los filtros seleccionados.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var anticipo in Model.Anticipos)
+                        {
+                            <tr>
+                                <td>ANT-@anticipo.IdAnticipo.ToString("D6")</td>
+                                <td>@anticipo.NombreEmpleado<br /><small>@anticipo.Dui</small></td>
+                                <td>@anticipo.FechaAnticipo.ToString("dd/MM/yyyy")</td>
+                                <td>@anticipo.MontoAnticipo.ToString("C2")</td>
+                                <td><span class="bemo-status @ClaseEstado(anticipo.Estado)">@EtiquetaEstado(anticipo.Estado)</span></td>
+                                <td><a asp-action="DetalleAnticipo" asp-route-id="@anticipo.IdAnticipo" class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Detalle</a></td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
+    <section class="bemo-card p-5">
+        <h2 class="text-lg font-extrabold">Aplicación en planilla</h2>
+        <p class="mt-2 leading-7">Al calcular una planilla se agregan los descuentos de los préstamos y anticipos elegibles. Al cerrar la planilla se actualiza el saldo del préstamo y el anticipo pasa a DESCONTADO.</p>
+    </section>
 </div>

@@ -1,0 +1,27 @@
+@model BEMO.Entidades.AnticipoSalarioListado
+
+@{
+    ViewData["Title"] = "Detalle de anticipo";
+    var esPendiente = Model.Estado == "PENDIENTE";
+}
+
+<div class="space-y-5">
+    <div>
+        <p class="bemo-breadcrumb"><a asp-action="Index" asp-route-tipo="anticipos">Préstamos y anticipos</a> <span class="mx-2">›</span> Detalle de anticipo</p>
+        <h1 class="bemo-title mt-3">Detalle de anticipo ANT-@Model.IdAnticipo.ToString("D6")</h1>
+    </div>
+
+    <section class="bemo-card space-y-5 p-5 md:p-7">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#E3D2AE] pb-4">
+            <div><p class="bemo-label">Empleado</p><h2 class="text-xl font-extrabold">@Model.NombreEmpleado</h2><p class="text-sm text-[#684026]">DUI: @Model.Dui</p></div>
+            <span class="bemo-status @(esPendiente ? "bemo-status-yellow" : "bemo-status-green")">@(esPendiente ? "Pendiente de descuento" : "Descontado")</span>
+        </div>
+        <div class="grid gap-4 md:grid-cols-3">
+            <div><p class="bemo-label">Fecha del anticipo</p><p class="font-bold">@Model.FechaAnticipo.ToString("dd/MM/yyyy")</p></div>
+            <div><p class="bemo-label">Monto</p><p class="font-bold">@Model.MontoAnticipo.ToString("C2")</p></div>
+            <div><p class="bemo-label">Estado</p><p class="font-bold">@(esPendiente ? "Pendiente de descuento" : "Descontado")</p></div>
+        </div>
+        <div class="rounded-lg border border-[#E3D2AE] bg-[#FBF8F1] p-4 text-sm leading-6">@(esPendiente ? "El anticipo se incluirá al calcular una planilla cuyo periodo sea posterior a la fecha del anticipo y se marcará como DESCONTADO al cerrar esa planilla." : "Este anticipo ya fue aplicado en una planilla cerrada.")</div>
+        <div class="bemo-divider flex justify-end pt-4"><a asp-action="Index" asp-route-tipo="anticipos" class="bemo-button bemo-button-secondary">Volver al listado</a></div>
+    </section>
+</div>
