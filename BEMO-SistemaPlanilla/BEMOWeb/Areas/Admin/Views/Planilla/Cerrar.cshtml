@@ -1,5 +1,51 @@
+@using System.Globalization
+@model BEMOWeb.Models.CerrarPlanillaModel
+
 @{
-    ViewData["Title"] = "Cerrar período de planilla";
+    ViewData["Title"] = "Cerrar periodo de planilla";
+    string Fecha(DateOnly fecha) => fecha.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 }
 
-<div class="space-y-5"><div><p class="bemo-breadcrumb normal-case tracking-normal">Planilla <span class="mx-2">›</span> Cerrar período de planilla</p><h1 class="bemo-title mt-3">Cerrar período de planilla</h1></div><form class="bemo-card space-y-5 p-5 md:p-8" data-demo-form><div class="grid gap-4 md:grid-cols-3"><div><label class="bemo-label">Período</label><input class="bemo-input" value="Noviembre 2026" disabled /></div><div><label class="bemo-label">Quincena</label><input class="bemo-input" value="Primera (01–15)" disabled /></div><div><label class="bemo-label">Empleados</label><input class="bemo-input" value="3" disabled /></div></div><div class="grid gap-4 md:grid-cols-4"><div><label class="bemo-label">Ingresos</label><input class="bemo-input" value="$4,200.00" disabled /></div><div><label class="bemo-label">Deducciones</label><input class="bemo-input" value="$420.00" disabled /></div><div><label class="bemo-label">Neto a pagar</label><input class="bemo-input" value="$3,780.00" disabled /></div><div><label class="bemo-label">Estado</label><input class="bemo-input" value="Revisada" disabled /></div></div><div class="flex items-start gap-3 rounded-lg border border-[#E3C48F] bg-[#FFF4D7] p-4"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-alert"></use></svg><span>Una vez cerrado el período, la planilla quedará bloqueada para edición.</span></div><label class="flex items-center gap-3 text-lg font-bold"><input class="bemo-check" type="checkbox" data-close-check />Confirmo que revisé los importes y descuentos de la planilla.</label><div><label class="bemo-label">Observaciones</label><textarea class="bemo-textarea" placeholder="Escriba observaciones..."></textarea></div><div class="flex flex-wrap gap-3"><button class="bemo-button bemo-button-primary" type="submit" disabled data-close-submit>Confirmar cierre</button><a asp-action="Index" class="bemo-button bemo-button-secondary">Volver a revisión</a></div></form></div>
+<div class="space-y-5">
+    <div>
+        <p class="bemo-breadcrumb">Planilla <span class="mx-2">›</span> Cerrar periodo</p>
+        <h1 class="bemo-title mt-3">Cerrar periodo de planilla</h1>
+        <p class="bemo-subtitle mt-2">Confirma el cierre de la planilla #@Model.Planilla.NumeroPlanilla.</p>
+    </div>
+
+    <form asp-action="Cerrar" method="post" class="bemo-card space-y-6 p-5 md:p-8">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="IdPlanilla" />
+        <div asp-validation-summary="ModelOnly" class="bemo-validation-summary"></div>
+
+        <section class="grid gap-4 md:grid-cols-4">
+            <div><p class="bemo-label">Periodo</p><p class="text-lg font-bold">@Fecha(Model.Planilla.PeriodoInicio) - @Fecha(Model.Planilla.PeriodoFin)</p></div>
+            <div><p class="bemo-label">Fecha de pago</p><p class="text-lg font-bold">@Fecha(Model.Planilla.FechaPago)</p></div>
+            <div><p class="bemo-label">Empleados</p><p class="text-lg font-bold">@Model.Planilla.CantidadEmpleados</p></div>
+            <div><p class="bemo-label">Estado</p><p class="text-lg font-bold">@Model.Planilla.Estado</p></div>
+        </section>
+
+        <section class="grid gap-4 md:grid-cols-3">
+            <div class="bemo-stat"><div><p class="bemo-stat-label">Total bruto</p><p class="bemo-stat-value">@Model.Planilla.TotalBruto.ToString("C2")</p></div></div>
+            <div class="bemo-stat"><div><p class="bemo-stat-label">Deducciones</p><p class="bemo-stat-value">@Model.Planilla.TotalDeducciones.ToString("C2")</p></div></div>
+            <div class="bemo-stat"><div><p class="bemo-stat-label">Neto a pagar</p><p class="bemo-stat-value">@Model.Planilla.TotalLiquido.ToString("C2")</p></div></div>
+        </section>
+
+        <div class="flex items-start gap-3 rounded-lg border border-[#E3C48F] bg-[#FFF4D7] p-4">
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-alert"></use></svg>
+            <span>Al cerrar se marcaran los detalles como PAGADOS, se actualizaran prestamos y anticipos, y el periodo quedara bloqueado.</span>
+        </div>
+
+        <label class="flex items-start gap-3 text-lg font-bold">
+            <input class="bemo-check mt-1" asp-for="Confirmar" data-close-check />
+            <span>Confirmo que revise los importes y descuentos de la planilla.</span>
+        </label>
+        <span asp-validation-for="Confirmar" class="bemo-validation-message"></span>
+
+        <div class="flex flex-wrap gap-3">
+            <button class="bemo-button bemo-button-primary" type="submit" data-close-submit disabled>Confirmar cierre</button>
+            <a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a>
+            <a asp-action="Detalle" asp-route-id="@Model.IdPlanilla" class="bemo-button bemo-button-ghost">Revisar detalle</a>
+        </div>
+    </form>
+</div>

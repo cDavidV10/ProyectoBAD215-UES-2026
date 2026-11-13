@@ -1,5 +1,188 @@
+@using System.Globalization
+@model BEMOWeb.Models.CalcularPlanillaModel
+
 @{
-    ViewData["Title"] = "Calcular planilla";
+    ViewData["Title"] = Model.Planilla is null ? "Nueva planilla" : "Calcular planilla";
+    var mensaje = TempData["Mensaje"] as string;
+    var error = TempData["Error"] as string;
+    string Fecha(DateOnly fecha) => fecha.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+    string UrlPagina(int pagina) => Url.Action("Calcular", new { id = Model.Planilla?.IdPlanilla, pagina }) ?? "#";
 }
 
-<div class="space-y-5"><div><p class="bemo-breadcrumb">Administración <span class="mx-2">›</span> Planilla</p><h1 class="bemo-title mt-3">Calcular planilla</h1></div><form class="bemo-card space-y-5 p-5 md:p-6" data-demo-form><div class="grid gap-5 md:grid-cols-2"><div><label class="bemo-label bemo-required">Período</label><select class="bemo-select" required><option>Noviembre 2026</option><option>Octubre 2026</option></select></div><div><label class="bemo-label bemo-required">Quincena</label><select class="bemo-select" required><option>Primera (01–15)</option><option>Segunda (16–30)</option></select></div></div><section><h2 class="mb-3 text-xl font-extrabold">Captura previa</h2><div class="bemo-table-wrap"><table class="bemo-table min-w-[700px]"><thead><tr><th>Empleado</th><th>Días trabajados</th><th>Días no trabajados</th><th>Horas extra</th></tr></thead><tbody><tr><td>0001 - Carlos Mendoza</td><td><input class="bemo-input" value="15" /></td><td><input class="bemo-input" value="0" /></td><td><input class="bemo-input" value="0" /></td></tr><tr><td>0002 - Ana González</td><td><input class="bemo-input" value="15" /></td><td><input class="bemo-input" value="0" /></td><td><input class="bemo-input" value="0" /></td></tr><tr><td>0003 - Luis Ramírez</td><td><input class="bemo-input" value="15" /></td><td><input class="bemo-input" value="0" /></td><td><input class="bemo-input" value="0" /></td></tr></tbody></table></div></section><section><h2 class="mb-2 text-xl font-extrabold">Validaciones previas</h2><div class="space-y-2"><label class="flex items-center gap-3"><input class="bemo-check" type="checkbox" checked />Contratos vigentes</label><label class="flex items-center gap-3"><input class="bemo-check" type="checkbox" checked />Parámetros legales configurados</label><label class="flex items-center gap-3"><input class="bemo-check" type="checkbox" checked />Préstamos y anticipos aprobados</label></div></section><div class="bemo-info font-semibold"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>El cálculo generará una planilla en borrador para su revisión.</div><div class="flex flex-wrap gap-3"><button class="bemo-button bemo-button-primary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calculator"></use></svg>Calcular borrador</button><a asp-action="Index" class="bemo-button bemo-button-secondary"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-close"></use></svg>Cancelar</a></div></form></div>
+<div class="space-y-5">
+    <div>
+        <p class="bemo-breadcrumb">Administracion <span class="mx-2">›</span> Planilla</p>
+        <h1 class="bemo-title mt-3">@(Model.Planilla is null ? "Nueva planilla" : "Calcular planilla")</h1>
+        <p class="bemo-subtitle mt-2">@(Model.Planilla is null ? "Crea un periodo quincenal y carga sus empleados elegibles." : $"Planilla #{Model.Planilla.NumeroPlanilla}: captura la asistencia y calcula los importes.")</p>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(mensaje) || !string.IsNullOrWhiteSpace(error))
+    {
+        <div class="space-y-3">
+            @if (!string.IsNullOrWhiteSpace(mensaje))
+            {
+                <div class="bemo-info"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>@mensaje</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="bemo-alert bemo-alert-error"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg><span>@error</span></div>
+            }
+        </div>
+    }
+
+    @if (Model.Planilla is null)
+    {
+        <form asp-action="Crear" method="post" class="bemo-card space-y-6 p-5 md:p-8">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="bemo-alert bemo-alert-error"></div>
+            <div class="grid gap-5 md:grid-cols-3">
+                <div>
+                    <label class="bemo-label bemo-required" asp-for="PeriodoInicio">Inicio del periodo</label>
+                    <input asp-for="PeriodoInicio" type="date" class="bemo-input" />
+                    <span asp-validation-for="PeriodoInicio" class="bemo-validation-message"></span>
+                </div>
+                <div>
+                    <label class="bemo-label bemo-required" asp-for="PeriodoFin">Fin del periodo</label>
+                    <input asp-for="PeriodoFin" type="date" class="bemo-input" />
+                    <span asp-validation-for="PeriodoFin" class="bemo-validation-message"></span>
+                </div>
+                <div>
+                    <label class="bemo-label bemo-required" asp-for="FechaPago">Fecha de pago</label>
+                    <input asp-for="FechaPago" type="date" class="bemo-input" />
+                    <span asp-validation-for="FechaPago" class="bemo-validation-message"></span>
+                </div>
+            </div>
+            <div class="bemo-info">
+                <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
+                Solo se permiten quincenas del 1 al 15 o del 16 al ultimo dia del mes. La fecha de pago debe ser igual o posterior al periodo.
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <button type="submit" class="bemo-button bemo-button-primary"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calculator"></use></svg>Crear borrador</button>
+                <a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a>
+            </div>
+        </form>
+    }
+    else
+    {
+        <section class="grid gap-4 md:grid-cols-4">
+            <div class="bemo-stat"><div><p class="bemo-stat-label">Periodo</p><p class="text-lg font-extrabold">@Fecha(Model.Planilla.PeriodoInicio) - @Fecha(Model.Planilla.PeriodoFin)</p></div></div>
+            <div class="bemo-stat"><div><p class="bemo-stat-label">Fecha de pago</p><p class="bemo-stat-value">@Fecha(Model.Planilla.FechaPago)</p></div></div>
+            <div class="bemo-stat"><div><p class="bemo-stat-label">Empleados</p><p class="bemo-stat-value">@Model.TotalRegistros</p></div></div>
+            <div class="bemo-stat"><div><p class="bemo-stat-label">Estado</p><p class="bemo-stat-value">@Model.Planilla.Estado</p></div></div>
+        </section>
+
+        <form asp-action="CapturarAsistencia" method="post" class="bemo-card space-y-5 p-5 md:p-8">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="IdPlanilla" value="@Model.Planilla.IdPlanilla" />
+            <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold">Captura de asistencia</h2>
+                    <p class="mt-1 text-sm text-[#684026]">Los valores se guardan en el borrador y pueden corregirse antes del calculo.</p>
+                </div>
+                <span class="bemo-status bemo-status-yellow">BORRADOR</span>
+            </div>
+
+            <div class="bemo-table-wrap">
+                <table class="bemo-table min-w-[900px]">
+                    <thead>
+                        <tr><th>Empleado</th><th>Departamento</th><th>Dias trabajados</th><th>Dias no trabajados</th><th>Horas extra</th><th>Bonificaciones</th></tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Asistencias.Count == 0)
+                        {
+                            <tr><td colspan="6" class="py-8 text-center text-[#684026]">La planilla no tiene empleados elegibles.</td></tr>
+                        }
+                        else
+                        {
+                            @for (var i = 0; i < Model.Asistencias.Count; i++)
+                            {
+                                var asistencia = Model.Asistencias[i];
+                                var bonificaciones = asistencia.Bonificaciones.ToString("0.00", CultureInfo.InvariantCulture);
+                                <tr>
+                                    <td class="font-semibold">
+                                        @asistencia.NombreEmpleado
+                                        <input type="hidden" name="Asistencias[@i].IdDetallePlanilla" value="@asistencia.IdDetallePlanilla" />
+                                    </td>
+                                    <td>@asistencia.NombreDepartamento</td>
+                                    <td><input class="bemo-input min-w-24" type="number" min="0" name="Asistencias[@i].DiasTrabajados" value="@asistencia.DiasTrabajados" required /></td>
+                                    <td><input class="bemo-input min-w-24" type="number" min="0" name="Asistencias[@i].DiasNoTrabajados" value="@asistencia.DiasNoTrabajados" required /></td>
+                                    <td><input class="bemo-input min-w-24" type="number" min="0" name="Asistencias[@i].HorasExtras" value="@asistencia.HorasExtras" required /></td>
+                                    <td><input class="bemo-input min-w-32" type="number" min="0" step="0.01" name="Asistencias[@i].Bonificaciones" value="@bonificaciones" required /></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros empleados. Guarda la asistencia antes de cambiar de pagina.</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if (Model.PaginaActual > 1)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                    }
+                    @if (Model.TotalPaginas <= 7)
+                    {
+                        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                    }
+                    else
+                    {
+                        var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                        var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                        var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                        var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+
+                        <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                        @if (paginaInicio > 2)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                        @if (paginaFin < Model.TotalPaginas - 1)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                    }
+                    @if (Model.PaginaActual < Model.TotalPaginas)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                    }
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <input type="hidden" name="Pagina" value="@Model.PaginaActual" />
+                <button type="submit" class="bemo-button bemo-button-secondary">Guardar asistencia</button>
+            </div>
+        </form>
+
+        <form asp-action="Calcular" method="post" class="bemo-card space-y-5 p-5 md:p-8">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="IdPlanilla" value="@Model.Planilla.IdPlanilla" />
+            <h2 class="text-xl font-extrabold">Calculo de planilla</h2>
+            <label class="flex items-start gap-3 text-[#381F12]">
+                <input class="bemo-check mt-1" type="checkbox" name="IncluirAguinaldo" value="true" />
+                <span><strong>Incluir aguinaldo</strong><br /><small>Solo se aplicara a empleados con contrato PERMANENTE.</small></span>
+            </label>
+            <div class="bemo-info"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>Al calcular se aplicaran ISSS, AFP, renta, prestamos y anticipos vigentes.</div>
+            <div class="flex flex-wrap gap-3">
+                <button type="submit" class="bemo-button bemo-button-primary"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calculator"></use></svg>Calcular planilla</button>
+                <a asp-action="Index" class="bemo-button bemo-button-secondary">Volver</a>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

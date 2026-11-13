@@ -15,6 +15,7 @@ public static class RegistroDatos
         servicios.AddScoped<DAOContrato>();
         servicios.AddScoped<DAODepartamento>();
         servicios.AddScoped<DAOEmpleado>();
+        servicios.AddScoped<DAOPlanilla>();
         servicios.AddScoped<DAOUsuario>();
         servicios.AddScoped<DAOLogin>();
         return servicios;

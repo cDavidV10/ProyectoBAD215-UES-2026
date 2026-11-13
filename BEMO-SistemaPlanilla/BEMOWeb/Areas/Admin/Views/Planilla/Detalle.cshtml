@@ -1,0 +1,114 @@
+@using System.Globalization
+@using System.Collections.Generic
+@model BEMOWeb.Models.DetallePlanillaModel
+
+@{
+    ViewData["Title"] = "Detalle de planilla";
+    string Fecha(DateOnly fecha) => fecha.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+
+    string UrlPagina(int pagina) => Url.Action("Detalle", new { id = Model.Planilla.IdPlanilla, pagina }) ?? "#";
+}
+
+<div class="space-y-5">
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+            <p class="bemo-breadcrumb">Planilla <span class="mx-2">›</span> Detalle</p>
+            <h1 class="bemo-title mt-3">Planilla #@Model.Planilla.NumeroPlanilla</h1>
+            <p class="bemo-subtitle mt-2">@Fecha(Model.Planilla.PeriodoInicio) - @Fecha(Model.Planilla.PeriodoFin) · @Model.Planilla.Estado</p>
+        </div>
+        <a asp-action="Index" class="bemo-button bemo-button-secondary">Volver</a>
+    </div>
+
+    <section class="grid gap-4 md:grid-cols-4">
+        <div class="bemo-stat"><div><p class="bemo-stat-label">Empleados</p><p class="bemo-stat-value">@Model.Planilla.CantidadEmpleados</p></div></div>
+        <div class="bemo-stat"><div><p class="bemo-stat-label">Total bruto</p><p class="bemo-stat-value">@Model.Planilla.TotalBruto.ToString("C2")</p></div></div>
+        <div class="bemo-stat"><div><p class="bemo-stat-label">Deducciones</p><p class="bemo-stat-value">@Model.Planilla.TotalDeducciones.ToString("C2")</p></div></div>
+        <div class="bemo-stat"><div><p class="bemo-stat-label">Neto a pagar</p><p class="bemo-stat-value">@Model.Planilla.TotalLiquido.ToString("C2")</p></div></div>
+    </section>
+
+    <section class="bemo-card overflow-hidden">
+        <div class="bemo-table-wrap">
+            <table class="bemo-table min-w-[1550px]">
+                <thead>
+                    <tr><th>Empleado</th><th>Cargo</th><th>Dias</th><th>Horas extra</th><th>Salario mensual</th><th>Aguinaldo</th><th>Bruto</th><th>ISSS</th><th>AFP</th><th>Renta</th><th>Prestamos</th><th>Anticipos</th><th>Deducciones</th><th>Neto</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                    @if (Model.Detalles.Count == 0)
+                    {
+                        <tr><td colspan="15" class="py-8 text-center text-[#684026]">Esta planilla no tiene detalles.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var detalle in Model.Detalles)
+                        {
+                            <tr>
+                                <td><strong>@detalle.NombreEmpleado</strong><br /><small>@detalle.Dui</small></td>
+                                <td>@detalle.NombreCargo</td>
+                                <td>@detalle.DiasTrabajados / @detalle.DiasNoTrabajados</td>
+                                <td>@detalle.HorasExtras</td>
+                                <td>@detalle.SalarioMensual.ToString("C2")</td>
+                                <td>@detalle.Aguinaldo.ToString("C2")</td>
+                                <td>@detalle.TotalBruto.ToString("C2")</td>
+                                <td>@detalle.MontoIsss.ToString("C2")</td>
+                                <td>@detalle.MontoAfp.ToString("C2")</td>
+                                <td>@detalle.MontoRenta.ToString("C2")</td>
+                                <td>@detalle.DescuentosPrestamos.ToString("C2")</td>
+                                <td>@detalle.DescuentosAnticipos.ToString("C2")</td>
+                                <td>@detalle.TotalDeducciones.ToString("C2")</td>
+                                <td class="font-bold">@detalle.SalarioLiquido.ToString("C2")</td>
+                                <td>@detalle.EstadoDetalle</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginacion del detalle de planilla">
+        <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros empleados</p>
+        <div class="flex flex-wrap items-center gap-2">
+            @if (Model.PaginaActual > 1)
+            {
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+            }
+            @if (Model.TotalPaginas <= 7)
+            {
+                @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                }
+            }
+            else
+            {
+                var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+
+                <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                @if (paginaInicio > 2)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                }
+                @if (paginaFin < Model.TotalPaginas - 1)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+            }
+            @if (Model.PaginaActual < Model.TotalPaginas)
+            {
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+            }
+        </div>
+    </nav>
+</div>
