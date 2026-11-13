@@ -1,7 +1,7 @@
 @{
     var areaName = ViewContext.RouteData.Values["area"]?.ToString() ?? string.Empty;
     var isAdmin = areaName.Equals("Admin", StringComparison.OrdinalIgnoreCase);
-    var roleName = isAdmin ? "ADMINISTRADOR NOMINA" : "RECURSOS HUMANOS";
+    var roleName = isAdmin ? "ADMINISTRADOR" : "RECURSOS HUMANOS";
     var modules = isAdmin
         ? new[]
         {

@@ -120,7 +120,7 @@ namespace BEMOWeb.Controllers
 
             return rol switch
             {
-                "ADMINISTRADOR NOMINA" => RedirectToAction("Index", "Home", new { area = "Admin" }),
+                "ADMINISTRADOR" => RedirectToAction("Index", "Home", new { area = "Admin" }),
                 "RECURSOS HUMANOS"  => RedirectToAction("Index", "Home", new { area = "RRHH" }),
                 _       => RedirectToAction("Privacy", "Home", new { area = "" })
             };

@@ -8,7 +8,7 @@ using Microsoft.Data.SqlClient;
 namespace BEMOWeb.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "ADMINISTRADOR NOMINA")]
+[Authorize(Roles = "ADMINISTRADOR")]
 public class EmpleadosController : Controller
 {
      private readonly CN_Empleado _empleados;

@@ -6,7 +6,7 @@ using BEMO.Negocio;
 namespace BEMOWeb.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "ADMINISTRADOR NOMINA")]
+[Authorize(Roles = "ADMINISTRADOR")]
 public class UsuariosController : Controller
 {
     private readonly CN_Empleado _empleado;
