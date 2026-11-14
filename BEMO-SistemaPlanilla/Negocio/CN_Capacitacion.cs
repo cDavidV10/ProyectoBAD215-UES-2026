@@ -64,4 +64,9 @@ public class CN_Capacitacion
 
     public void ActualizarResultado(int idDetalleCapacitacion, decimal resultado) =>
         _metodos.ActualizarResultado(idDetalleCapacitacion, resultado);
+
+    public void ActualizarResultados(
+        int idCapacitacion,
+        IEnumerable<(int IdDetalleCapacitacion, decimal Resultado)> resultados) =>
+        _metodos.ActualizarResultados(idCapacitacion, resultados);
 }

@@ -1,6 +1,7 @@
 using BEMO.Entidades;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Text.Json;
 
 namespace BEMO.Datos;
 
@@ -476,6 +477,38 @@ public class DAOCapacitacion
         resultadoParametro.Scale = 2;
         resultadoParametro.Value = resultado;
 
+        cmd.ExecuteNonQuery();
+    }
+
+    public void ActualizarResultados(
+        int idCapacitacion,
+        IEnumerable<(int IdDetalleCapacitacion, decimal Resultado)> resultados)
+    {
+        var lista = resultados
+            .GroupBy(resultado => resultado.IdDetalleCapacitacion)
+            .Select(grupo => grupo.Last())
+            .ToList();
+
+        if (lista.Count == 0)
+        {
+            return;
+        }
+
+        var json = JsonSerializer.Serialize(lista.Select(resultado => new
+        {
+            resultado.IdDetalleCapacitacion,
+            resultado.Resultado
+        }));
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand("dbo.usp_Actualizar_Resultados_Capacitacion", conexionSql)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+        cmd.Parameters.Add("@id_capacitacion", SqlDbType.Int).Value = idCapacitacion;
+        cmd.Parameters.Add("@resultados_json", SqlDbType.NVarChar, -1).Value = json;
+
+        conexionSql.Open();
         cmd.ExecuteNonQuery();
     }
 

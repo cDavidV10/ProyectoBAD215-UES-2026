@@ -166,61 +166,84 @@ public abstract class CapacitacionesControllerBase : Controller
         }
 
         const int tamanoPagina = 8;
-        pagina = Math.Max(1, pagina);
-        var resultado = _capacitaciones.ListarParticipantesPaginado(id, pagina, tamanoPagina);
-        var totalPaginas = Math.Max(1, (int)Math.Ceiling(resultado.Total / (double)tamanoPagina));
+        var esFinalizada = string.Equals(capacitacion.Estado, "FINALIZADA", StringComparison.OrdinalIgnoreCase);
+        var paginaActual = Math.Max(1, pagina);
+        List<CapacitacionParticipante> listaParticipantes;
+        int totalRegistros;
+        int totalPaginas;
 
-        if (pagina > totalPaginas)
+        if (esFinalizada)
         {
-            pagina = totalPaginas;
-            resultado = _capacitaciones.ListarParticipantesPaginado(id, pagina, tamanoPagina);
+            var resultado = _capacitaciones.ListarParticipantesPaginado(id, paginaActual, tamanoPagina);
+            totalRegistros = resultado.Total;
+            totalPaginas = Math.Max(1, (int)Math.Ceiling(totalRegistros / (double)tamanoPagina));
+
+            if (paginaActual > totalPaginas)
+            {
+                paginaActual = totalPaginas;
+                resultado = _capacitaciones.ListarParticipantesPaginado(id, paginaActual, tamanoPagina);
+                totalRegistros = resultado.Total;
+            }
+
+            listaParticipantes = resultado.Participantes;
+        }
+        else
+        {
+            paginaActual = 1;
+            listaParticipantes = _capacitaciones.ListarParticipantes(id);
+            totalRegistros = listaParticipantes.Count;
+            totalPaginas = 1;
         }
 
         return View(VistasCapacitaciones + "Detalle.cshtml", new CapacitacionDetalleModel
         {
             Capacitacion = capacitacion,
-            Participantes = resultado.Participantes,
-            PaginaActual = pagina,
+            Participantes = listaParticipantes,
+            PaginaActual = paginaActual,
             TotalPaginas = totalPaginas,
-            TotalRegistros = resultado.Total,
-            TamanoPagina = tamanoPagina
+            TotalRegistros = totalRegistros,
+            TamanoPagina = esFinalizada ? tamanoPagina : listaParticipantes.Count
         });
     }
 
-    protected IActionResult ActualizarResultadoCore(
-        int idCapacitacion,
-        int idDetalleCapacitacion,
-        decimal resultado,
-        int pagina = 1)
+    protected IActionResult ActualizarResultadosCore(CapacitacionResultadosModel modelo)
     {
-        if (resultado is < 0 or > 100)
-        {
-            TempData["Error"] = "El resultado debe estar entre 0 y 100.";
-            return RedirectToAction("Detalle", new { id = idCapacitacion, pagina });
-        }
-
-        var participante = _capacitaciones.ListarParticipantes(idCapacitacion)
-            .FirstOrDefault(item => item.IdDetalleCapacitacion == idDetalleCapacitacion);
-        if (participante is null)
+        var capacitacion = _capacitaciones.ObtenerPorId(modelo.IdCapacitacion);
+        if (capacitacion is null)
         {
             return NotFound();
         }
 
+        var participantes = _capacitaciones.ListarParticipantes(modelo.IdCapacitacion);
+        var participantesPorId = participantes.ToDictionary(item => item.IdDetalleCapacitacion);
+        var idsRecibidos = modelo.Resultados.Select(item => item.IdDetalleCapacitacion).ToList();
+
+        if (modelo.Resultados.Count == 0
+            || idsRecibidos.Count != idsRecibidos.Distinct().Count()
+            || modelo.Resultados.Any(item => item.Resultado is < 0 or > 100)
+            || modelo.Resultados.Any(item => !participantesPorId.ContainsKey(item.IdDetalleCapacitacion)))
+        {
+            TempData["Error"] = "Verifica que todas las notas estén entre 0 y 100 y correspondan a los participantes asignados.";
+            return RedirectToAction("Detalle", new { id = modelo.IdCapacitacion });
+        }
+
         try
         {
-            _capacitaciones.ActualizarResultado(idDetalleCapacitacion, resultado);
-            TempData["Mensaje"] = "El resultado fue actualizado correctamente.";
+            _capacitaciones.ActualizarResultados(
+                modelo.IdCapacitacion,
+                modelo.Resultados.Select(item => (item.IdDetalleCapacitacion, item.Resultado)));
+            TempData["Mensaje"] = "Los resultados fueron actualizados correctamente.";
         }
         catch (SqlException ex)
         {
-            TempData["Error"] = MensajeError(ex, "No se pudo actualizar el resultado.");
+            TempData["Error"] = MensajeError(ex, "No se pudieron actualizar los resultados.");
         }
         catch (InvalidOperationException ex)
         {
             TempData["Error"] = ex.Message;
         }
 
-        return RedirectToAction("Detalle", new { id = idCapacitacion, pagina });
+        return RedirectToAction("Detalle", new { id = modelo.IdCapacitacion });
     }
 
     private NuevaCapacitacionModel CargarTipos(NuevaCapacitacionModel modelo)

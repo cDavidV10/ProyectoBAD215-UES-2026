@@ -6,15 +6,13 @@
     ViewData["Title"] = "Detalle de capacitación";
     var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
     var capacitacion = Model.Capacitacion;
+    var esFinalizada = string.Equals(capacitacion.Estado, "FINALIZADA", StringComparison.OrdinalIgnoreCase);
     var mensaje = TempData["Mensaje"] as string;
     var error = TempData["Error"] as string;
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
 
-    string UrlPagina(int pagina)
-    {
-        return $"?id={capacitacion.IdCapacitacion}&pagina={pagina}";
-    }
+    string UrlPagina(int pagina) => $"?id={capacitacion.IdCapacitacion}&pagina={pagina}";
     var estadoTexto = capacitacion.Estado switch
     {
         "SIN ASIGNAR" => "Sin asignar",
@@ -85,18 +83,22 @@
 
     <section class="bemo-card overflow-hidden">
         <div class="border-b border-[#E3D2AE] px-5 py-4"><h2 class="text-xl font-extrabold">Participantes asignados</h2><p class="mt-1 text-sm text-[#684026]">Consulta el periodo y el resultado registrado para cada empleado.</p></div>
+        <form asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="ActualizarResultados" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="IdCapacitacion" value="@capacitacion.IdCapacitacion" />
         <div class="bemo-table-wrap">
             <table class="bemo-table min-w-[800px]">
-                <thead><tr><th>Empleado</th><th>DUI</th><th>Departamento</th><th>Inicio</th><th>Fin</th><th>Resultado</th><th>Acción</th></tr></thead>
+                <thead><tr><th>Empleado</th><th>DUI</th><th>Departamento</th><th>Inicio</th><th>Fin</th><th>Resultado</th></tr></thead>
                 <tbody>
                     @if (Model.Participantes.Count == 0)
                     {
-                        <tr><td colspan="7" class="py-10 text-center text-[#684026]">Todavía no hay participantes asignados.</td></tr>
+                        <tr><td colspan="6" class="py-10 text-center text-[#684026]">Todavía no hay participantes asignados.</td></tr>
                     }
                     else
                     {
-                        foreach (var participante in Model.Participantes)
+                        @for (var indice = 0; indice < Model.Participantes.Count; indice++)
                         {
+                            var participante = Model.Participantes[indice];
                             <tr>
                                 <td><span class="font-semibold">@participante.NombreEmpleado</span><small class="block text-[#804C2C]">EMP-@participante.IdEmpleado.ToString("D6")</small></td>
                                 <td>@participante.Dui</td>
@@ -104,23 +106,32 @@
                                 <td>@participante.FechaInicio.ToString("dd/MM/yyyy")</td>
                                 <td>@participante.FechaFin.ToString("dd/MM/yyyy")</td>
                                 <td>
-                                    <form asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="ActualizarResultado" method="post" class="flex items-center gap-2">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="idCapacitacion" value="@capacitacion.IdCapacitacion" />
-                                        <input type="hidden" name="idDetalleCapacitacion" value="@participante.IdDetalleCapacitacion" />
-                                        <input type="hidden" name="pagina" value="@Model.PaginaActual" />
-                                        <input class="bemo-input w-24 py-2" type="number" name="resultado" value="@participante.Resultado.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" min="0" max="100" step="0.01" aria-label="Resultado de @participante.NombreEmpleado" />
-                                        <button class="bemo-button bemo-button-secondary px-3 py-2" type="submit">Guardar</button>
-                                    </form>
+                                    @if (esFinalizada)
+                                    {
+                                        <span class="font-semibold">@participante.Resultado.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)</span>
+                                    }
+                                    else
+                                    {
+                                        <input type="hidden" name="Resultados[@indice].IdDetalleCapacitacion" value="@participante.IdDetalleCapacitacion" />
+                                        <input class="bemo-input w-24 py-2" type="number" name="Resultados[@indice].Resultado" value="@participante.Resultado.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" min="0" max="100" step="0.01" aria-label="Resultado de @participante.NombreEmpleado" />
+                                    }
+                                    <span class="ml-2 text-sm text-[#684026]">0 - 100</span>
                                 </td>
-                                <td><span class="text-sm text-[#684026]">0 - 100</span></td>
                             </tr>
                         }
                     }
                 </tbody>
             </table>
         </div>
-        @if (Model.TotalRegistros > 0)
+        @if (!esFinalizada && Model.Participantes.Count > 0)
+        {
+            <div class="flex justify-end border-t border-[#E3D2AE] px-5 py-4">
+                <button class="bemo-button bemo-button-primary" type="submit">Guardar resultados</button>
+            </div>
+        }
+        </form>
+
+        @if (esFinalizada && Model.TotalRegistros > 0)
         {
             <nav class="flex flex-col justify-between gap-3 border-t border-[#E3D2AE] px-5 py-4 sm:flex-row sm:items-center" aria-label="Paginación de participantes">
                 <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros participantes</p>
@@ -129,7 +140,6 @@
                     {
                         <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
                     }
-
                     @if (Model.TotalPaginas <= 7)
                     {
                         @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
@@ -158,7 +168,6 @@
                         }
                         <a class="@(Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary")" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
                     }
-
                     @if (Model.PaginaActual < Model.TotalPaginas)
                     {
                         <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>

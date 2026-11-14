@@ -44,6 +44,6 @@ public class CapacitacionesController : CapacitacionesControllerBase
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult ActualizarResultado(int idCapacitacion, int idDetalleCapacitacion, decimal resultado, int pagina = 1) =>
-        ActualizarResultadoCore(idCapacitacion, idDetalleCapacitacion, resultado, pagina);
+    public IActionResult ActualizarResultados(CapacitacionResultadosModel modelo) =>
+        ActualizarResultadosCore(modelo);
 }
