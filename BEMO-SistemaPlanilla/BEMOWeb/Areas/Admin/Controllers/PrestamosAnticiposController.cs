@@ -81,6 +81,7 @@ public class PrestamosAnticiposController : Controller
     public IActionResult NuevoPrestamo(Models.NuevoPrestamoModel modelo)
     {
         ValidarFecha(modelo.FechaOtorgamiento, "FechaOtorgamiento");
+        ValidarEmpleadoConContratoActivo(modelo.IdEmpleado, modelo.FechaOtorgamiento, nameof(modelo.IdEmpleado));
         if (!ModelState.IsValid)
         {
             CargarEmpleados(modelo, modelo.PaginaActual, modelo.Busqueda);
@@ -118,6 +119,7 @@ public class PrestamosAnticiposController : Controller
     public IActionResult NuevoAnticipo(Models.NuevoAnticipoModel modelo)
     {
         ValidarFecha(modelo.FechaAnticipo, "FechaAnticipo");
+        ValidarEmpleadoConContratoActivo(modelo.IdEmpleado, modelo.FechaAnticipo, nameof(modelo.IdEmpleado));
         if (!ModelState.IsValid)
         {
             CargarEmpleados(modelo, modelo.PaginaActual, modelo.Busqueda);
@@ -193,6 +195,7 @@ public class PrestamosAnticiposController : Controller
                 salarioQuincenal = info.SalarioQuincenal,
                 maximoPrestamo = info.MaximoPrestamo,
                 maximoAnticipo = info.MaximoAnticipo,
+                contratoValidoEnFecha = info.ContratoValidoEnFecha,
                 tienePrestamoActivo = info.TienePrestamoActivo,
                 tieneAnticipoPendiente = info.TieneAnticipoPendiente
             });
@@ -203,6 +206,20 @@ public class PrestamosAnticiposController : Controller
         if (fecha == default)
         {
             ModelState.AddModelError(campo, "Indique una fecha válida.");
+        }
+    }
+
+    private void ValidarEmpleadoConContratoActivo(int? idEmpleado, DateOnly fecha, string campo)
+    {
+        if (!idEmpleado.HasValue || idEmpleado.Value <= 0 || fecha == default)
+        {
+            return;
+        }
+
+        var informacion = _prestamosAnticipos.ObtenerInformacionEmpleado(idEmpleado.Value, fecha);
+        if (informacion is null || !informacion.ContratoValidoEnFecha)
+        {
+            ModelState.AddModelError(campo, "Seleccione un empleado activo con un contrato vigente para la fecha indicada.");
         }
     }
 

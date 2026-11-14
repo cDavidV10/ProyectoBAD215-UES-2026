@@ -66,6 +66,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.querySelectorAll("form[data-auto-submit]").forEach((form) => {
+        form.querySelectorAll("input[type='date'], select").forEach((field) => {
+            field.addEventListener("change", () => form.submit());
+        });
+    });
+
     document.querySelectorAll("[data-notification]").forEach((notification) => {
         const closeButton = notification.querySelector("[data-notification-close]");
         const countdownElement = notification.querySelector("[data-notification-countdown]");
@@ -308,6 +314,44 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener("keydown", (event) => {
             if (event.key === "Escape" && !contractModal.classList.contains("hidden")) {
                 closeContractModal();
+            }
+        });
+    }
+
+    const auditModal = document.querySelector("[data-audit-modal]");
+    if (auditModal) {
+        const closeButton = auditModal.querySelector("[data-audit-modal-close]");
+
+        const closeAuditModal = () => {
+            auditModal.classList.add("hidden");
+            auditModal.setAttribute("aria-hidden", "true");
+        };
+
+        document.querySelectorAll("[data-audit-view]").forEach((button) => {
+            button.addEventListener("click", () => {
+                auditModal.querySelectorAll("[data-audit-field]").forEach((field) => {
+                    const fieldName = field.dataset.auditField || "";
+                    const dataName = fieldName
+                        .split("-")
+                        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                        .join("");
+                    const value = button.dataset[`audit${dataName}`];
+                    field.textContent = value || "No registrado";
+                });
+
+                auditModal.classList.remove("hidden");
+                auditModal.setAttribute("aria-hidden", "false");
+                closeButton?.focus();
+            });
+        });
+
+        closeButton?.addEventListener("click", closeAuditModal);
+        auditModal.addEventListener("click", (event) => {
+            if (event.target === auditModal) closeAuditModal();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !auditModal.classList.contains("hidden")) {
+                closeAuditModal();
             }
         });
     }

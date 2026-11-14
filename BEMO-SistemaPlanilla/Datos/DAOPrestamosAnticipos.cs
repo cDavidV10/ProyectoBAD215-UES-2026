@@ -426,6 +426,9 @@ public class DAOPrestamosAnticipos
                 c.salario_bruto,
                 CAST(c.salario_bruto / 2.0 AS DECIMAL(10,2)) AS salario_quincenal,
                 c.fecha_culminacion,
+                CAST(CASE WHEN c.fecha_contratacion <= @fecha
+                               AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= @fecha)
+                          THEN 1 ELSE 0 END AS bit) AS contrato_valido_en_fecha,
                 ISNULL((
                     SELECT SUM(p.cuota_quincenal)
                     FROM dbo.PRESTAMO p
@@ -458,9 +461,10 @@ public class DAOPrestamosAnticipos
             WHERE e.id_empleado = @id_empleado
               AND e.estado = 'ACTIVO'
               AND c.estado = 'VIGENTE'
-              AND c.fecha_contratacion <= @fecha
-              AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= @fecha)
-            ORDER BY c.fecha_contratacion DESC;";
+            ORDER BY CASE WHEN c.fecha_contratacion <= @fecha
+                               AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= @fecha)
+                          THEN 0 ELSE 1 END,
+                     c.fecha_contratacion DESC;";
 
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand(consulta, conexionSql);
@@ -482,6 +486,7 @@ public class DAOPrestamosAnticipos
             SalarioBruto = Convert.ToDecimal(dr["salario_bruto"]),
             SalarioQuincenal = Convert.ToDecimal(dr["salario_quincenal"]),
             FechaCulminacion = FechaNullable(dr["fecha_culminacion"]),
+            ContratoValidoEnFecha = Convert.ToBoolean(dr["contrato_valido_en_fecha"]),
             CuotaPrestamoActiva = Convert.ToDecimal(dr["cuota_prestamo_activa"]),
             AnticipoPendiente = Convert.ToDecimal(dr["anticipo_pendiente"]),
             LiquidoEstimado = Convert.ToDecimal(dr["liquido_estimado"]),

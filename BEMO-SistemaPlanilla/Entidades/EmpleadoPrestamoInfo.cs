@@ -11,6 +11,7 @@ public class EmpleadoPrestamoInfo
     public decimal CuotaPrestamoActiva { get; set; }
     public decimal AnticipoPendiente { get; set; }
     public decimal LiquidoEstimado { get; set; }
+    public bool ContratoValidoEnFecha { get; set; }
     public bool TienePrestamoActivo { get; set; }
     public bool TieneAnticipoPendiente { get; set; }
     public decimal MaximoPrestamo { get; set; }

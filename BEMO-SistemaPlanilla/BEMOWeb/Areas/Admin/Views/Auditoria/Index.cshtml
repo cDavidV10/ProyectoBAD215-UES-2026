@@ -1,9 +1,311 @@
+@using System
+@using System.Collections.Generic
+@using System.Globalization
+@model BEMOWeb.Models.AuditoriaIndexModel
+
 @{
     ViewData["Title"] = "Auditoría";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+
+    string EtiquetaModulo(string modulo) => modulo switch
+    {
+        "Prestamos y anticipos" => "Préstamos y anticipos",
+        "Parametros legales" => "Parámetros legales",
+        _ => modulo
+    };
+
+    string EtiquetaOperacion(string operacion) => operacion switch
+    {
+        "Insercion" => "Inserción",
+        "Actualizacion" => "Actualización",
+        "Eliminacion" => "Eliminación",
+        "Cambio de estado" => "Cambio de estado",
+        "Reapertura" => "Reapertura",
+        _ => operacion
+    };
+
+    string UrlPagina(int pagina, int? idAuditoria = null)
+    {
+        var parametros = new List<string> { $"pagina={pagina}" };
+
+        if (Model.FechaDesde.HasValue)
+        {
+            parametros.Add($"fechaDesde={Model.FechaDesde.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
+        }
+
+        if (Model.FechaHasta.HasValue)
+        {
+            parametros.Add($"fechaHasta={Model.FechaHasta.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.UsuarioSeleccionado))
+        {
+            parametros.Add($"usuario={Uri.EscapeDataString(Model.UsuarioSeleccionado)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.ModuloSeleccionado))
+        {
+            parametros.Add($"modulo={Uri.EscapeDataString(Model.ModuloSeleccionado)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.OperacionSeleccionada))
+        {
+            parametros.Add($"operacion={Uri.EscapeDataString(Model.OperacionSeleccionada)}");
+        }
+
+        if (idAuditoria.HasValue)
+        {
+            parametros.Add($"id={idAuditoria.Value}");
+        }
+
+        return "?" + string.Join("&", parametros);
+    }
 }
 
-<div class="space-y-5"><header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-start"><div><div class="flex items-center gap-4"><div><p class="bemo-kicker">Auditoría</p><h1 class="bemo-title mt-2">Auditoría</h1></div><span class="bemo-button bemo-button-secondary">Solo consulta</span></div><p class="bemo-subtitle mt-2">Consulta el historial de operaciones del sistema.</p></div><div class="bemo-info max-w-xl"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>Los registros de auditoría se conservan para garantizar la trazabilidad.</div></header>
-    <section class="bemo-card p-4"><h2 class="text-xl font-extrabold">Filtros</h2><div class="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto]"><div><label class="bemo-label">Desde</label><input class="bemo-input" type="date" value="2026-01-01" /></div><div><label class="bemo-label">Hasta</label><input class="bemo-input" type="date" value="2026-01-31" /></div><div><label class="bemo-label">Usuario</label><select class="bemo-select"><option>Todos</option><option>vr24001</option></select></div><div><label class="bemo-label">Módulo</label><select class="bemo-select"><option>Todos</option><option>Empleados</option><option>Contratos</option><option>Planilla</option></select></div><div><label class="bemo-label">Operación</label><select class="bemo-select"><option>Todas</option><option>Creación</option><option>Actualización</option><option>Cierre</option></select></div><button class="bemo-button bemo-button-primary self-end" type="button"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-filter"></use></svg>Filtrar</button></div></section>
-    <section class="bemo-card overflow-hidden"><div class="bemo-table-wrap"><table class="bemo-table"><thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Módulo</th><th>Operación</th><th>Registro</th><th>Acción</th></tr></thead><tbody><tr class="bg-[#FFF1D7]"><td>15/01/2026 10:24:36</td><td>vr24001</td><td>Empleados</td><td>Actualización</td><td>Empleado: EMP-0143 – Ana María Rivera</td><td><button class="bemo-link-action" type="button">Ver detalle</button></td></tr><tr><td>15/01/2026 09:17:08</td><td>vr24001</td><td>Contratos</td><td>Creación</td><td>Contrato: CT-00297 – EMP-0143</td><td><button class="bemo-link-action" type="button">Ver detalle</button></td></tr><tr><td>14/01/2026 16:05:21</td><td>vr24001</td><td>Planilla</td><td>Cálculo</td><td>Planilla: ENE-2026</td><td><button class="bemo-link-action" type="button">Ver detalle</button></td></tr><tr><td>14/01/2026 17:32:09</td><td>vr24001</td><td>Planilla</td><td>Cierre</td><td>Planilla: ENE-2026</td><td><button class="bemo-link-action" type="button">Ver detalle</button></td></tr></tbody></table></div></section>
-    <section class="bemo-card p-5"><h2 class="text-xl font-extrabold">Detalle del evento seleccionado</h2><div class="mt-4 grid gap-4 md:grid-cols-3"><p><strong>♙ Usuario:</strong> vr24001</p><p><strong>▱ Módulo:</strong> Empleados</p><p><strong>⚙ Operación:</strong> Actualización</p></div><div class="bemo-divider mt-4 grid gap-4 pt-4 md:grid-cols-2"><div><strong>Valor anterior</strong><p>Departamento: Ventas</p></div><div><strong>Valor nuevo</strong><p>Departamento: Administración</p></div></div></section>
+<div class="space-y-5">
+    <header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
+        <div>
+            <div class="flex items-center gap-4">
+                <div>
+                    <p class="bemo-kicker">Administración</p>
+                    <h1 class="bemo-title mt-2">Auditoría</h1>
+                </div>
+                <span class="bemo-button bemo-button-secondary">Solo consulta</span>
+            </div>
+            <p class="bemo-subtitle mt-2">Consulta el historial de operaciones del sistema.</p>
+        </div>
+        <div class="bemo-info max-w-xl">
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
+            Los registros de auditoría se conservan para garantizar la trazabilidad.
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="bemo-alert bemo-alert-error" role="alert">
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+            <span>@Model.Error</span>
+        </div>
+    }
+
+    <section class="bemo-card p-5">
+        <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="text-xl font-extrabold">Filtros</h2>
+                <p class="mt-1 text-sm text-[#684026]">Acota la consulta para encontrar una operación específica.</p>
+            </div>
+            <a asp-area="@areaActual" asp-controller="Auditoria" asp-action="Index" class="bemo-link-action">Limpiar filtros</a>
+        </div>
+
+        <form method="get" asp-area="@areaActual" asp-controller="Auditoria" asp-action="Index" class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1.2fr_1.2fr_1.2fr] xl:items-end" data-auto-submit>
+            <div>
+                <label class="bemo-label" for="fechaDesde">Desde</label>
+                <input class="bemo-input" id="fechaDesde" name="fechaDesde" type="date" value="@(Model.FechaDesde?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))" />
+            </div>
+            <div>
+                <label class="bemo-label" for="fechaHasta">Hasta</label>
+                <input class="bemo-input" id="fechaHasta" name="fechaHasta" type="date" value="@(Model.FechaHasta?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))" />
+            </div>
+            <div>
+                <label class="bemo-label" for="usuario">Usuario</label>
+                <select class="bemo-select" id="usuario" name="usuario">
+                    <option value="">Todos</option>
+                    @foreach (var usuario in Model.Usuarios)
+                    {
+                        <option value="@usuario" selected="@(string.Equals(Model.UsuarioSeleccionado, usuario, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@usuario</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="bemo-label" for="modulo">Módulo</label>
+                <select class="bemo-select" id="modulo" name="modulo">
+                    <option value="">Todos</option>
+                    @foreach (var modulo in Model.Modulos)
+                    {
+                        <option value="@modulo" selected="@(string.Equals(Model.ModuloSeleccionado, modulo, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@EtiquetaModulo(modulo)</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="bemo-label" for="operacion">Operación</label>
+                <select class="bemo-select" id="operacion" name="operacion">
+                    <option value="">Todas</option>
+                    @foreach (var operacion in Model.Operaciones)
+                    {
+                        <option value="@operacion" selected="@(string.Equals(Model.OperacionSeleccionada, operacion, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@EtiquetaOperacion(operacion)</option>
+                    }
+                </select>
+            </div>
+        </form>
+    </section>
+
+    <section class="bemo-card overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#E3D2AE] px-5 py-4">
+            <div>
+                <h2 class="text-xl font-extrabold">Historial de operaciones</h2>
+                <p class="mt-1 text-sm text-[#684026]">Los registros son inmutables y se muestran del más reciente al más antiguo.</p>
+            </div>
+            <span class="rounded-full bg-[#FFF3D7] px-4 py-2 text-sm font-bold text-[#684026]">@Model.TotalRegistros registro@(Model.TotalRegistros == 1 ? "" : "s")</span>
+        </div>
+
+        <div class="bemo-table-wrap">
+            <table class="bemo-table min-w-[950px]">
+                <thead>
+                    <tr>
+                        <th>Fecha y hora</th>
+                        <th>Usuario</th>
+                        <th>Módulo</th>
+                        <th>Operación</th>
+                        <th>Registro afectado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Auditorias.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="py-10 text-center text-[#684026]">No hay registros de auditoría para los filtros seleccionados.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var auditoria in Model.Auditorias)
+                        {
+                            <tr>
+                                <td class="whitespace-nowrap">@auditoria.FechaHora.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture)</td>
+                                <td><span class="font-semibold">@auditoria.NombreUsuario</span><small class="block text-[#804C2C]">Usuario #@auditoria.IdUsuario</small></td>
+                                <td>@EtiquetaModulo(auditoria.Modulo)</td>
+                                <td>@EtiquetaOperacion(auditoria.Operacion)</td>
+                                <td>@auditoria.Registro</td>
+                                <td>
+                                    <button class="bemo-link-action whitespace-nowrap" type="button" data-audit-view
+                                            data-audit-id="@auditoria.IdAuditoria"
+                                            data-audit-date="@auditoria.FechaHora.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture)"
+                                            data-audit-user="@auditoria.NombreUsuario"
+                                            data-audit-user-id="@auditoria.IdUsuario"
+                                            data-audit-module="@EtiquetaModulo(auditoria.Modulo)"
+                                            data-audit-operation="@EtiquetaOperacion(auditoria.Operacion)"
+                                            data-audit-operation-detail="@EtiquetaOperacion(auditoria.Operacion)"
+                                            data-audit-record="@auditoria.Registro"
+                                            data-audit-field="@auditoria.CampoModificado"
+                                            data-audit-old-value="@(auditoria.ValorViejo ?? "Sin valor anterior")"
+                                            data-audit-new-value="@auditoria.ValorNuevo">
+                                        <svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>
+                                        Ver detalle
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalRegistros > 0)
+        {
+            <nav class="flex flex-col justify-between gap-3 border-t border-[#E3D2AE] px-5 py-4 sm:flex-row sm:items-center" aria-label="Paginación de auditoría">
+                <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros registros</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if (Model.PaginaActual > 1)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                    }
+
+                    @if (Model.TotalPaginas <= 7)
+                    {
+                        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                    }
+                    else
+                    {
+                        var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                        var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                        var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                        var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+
+                        <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                        @if (paginaInicio > 2)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                        @if (paginaFin < Model.TotalPaginas - 1)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                    }
+
+                    @if (Model.PaginaActual < Model.TotalPaginas)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                    }
+                </div>
+            </nav>
+        }
+    </section>
+
+    <div class="fixed inset-0 z-50 hidden overflow-y-auto bg-black/50 p-4" data-audit-modal aria-hidden="true">
+        <section class="relative mx-auto my-4 max-h-[calc(100vh-2rem)] max-w-5xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl md:p-8"
+                 role="dialog" aria-modal="true" aria-labelledby="audit-modal-title">
+            <button type="button" class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                    data-audit-modal-close aria-label="Cerrar detalle">&times;</button>
+
+            <div class="pr-10">
+                <p class="bemo-kicker">Registro de auditoría</p>
+                <div class="flex flex-wrap items-center gap-3">
+                    <h2 id="audit-modal-title" class="bemo-title mt-2">Detalle del evento</h2>
+                    <span class="bemo-status bemo-status-yellow" data-audit-field="id"></span>
+                </div>
+                <p class="bemo-subtitle mt-2">Consulta los valores registrados por la operación.</p>
+            </div>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <div class="bemo-stat">
+                    <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div>
+                    <div><p class="bemo-stat-label">Fecha y hora</p><p class="mt-1 font-extrabold" data-audit-field="date"></p></div>
+                </div>
+                <div class="bemo-stat">
+                    <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-user-settings"></use></svg></div>
+                    <div><p class="bemo-stat-label">Usuario</p><p class="mt-1 font-extrabold" data-audit-field="user"></p><p class="text-sm text-[#684026]" data-audit-field="user-id"></p></div>
+                </div>
+                <div class="bemo-stat">
+                    <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg></div>
+                    <div><p class="bemo-stat-label">Módulo</p><p class="mt-1 font-extrabold" data-audit-field="module"></p><p class="text-sm text-[#684026]" data-audit-field="operation"></p></div>
+                </div>
+                <div class="bemo-stat">
+                    <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg></div>
+                    <div><p class="bemo-stat-label">Registro</p><p class="mt-1 font-extrabold" data-audit-field="record"></p></div>
+                </div>
+            </div>
+
+            <div class="bemo-divider mt-5 grid gap-4 pt-5 md:grid-cols-2">
+                <div>
+                    <p class="bemo-stat-label">Campo modificado</p>
+                    <p class="mt-1 font-bold" data-audit-field="field"></p>
+                </div>
+                <div>
+                    <p class="bemo-stat-label">Operación</p>
+                    <p class="mt-1 font-bold" data-audit-field="operation-detail"></p>
+                </div>
+                <div class="rounded-lg border border-[#E3D2AE] bg-[#FBF8F1] p-4">
+                    <p class="font-extrabold">Valor anterior</p>
+                    <p class="mt-2 break-words text-[#684026]" data-audit-field="old-value"></p>
+                </div>
+                <div class="rounded-lg border border-[#D8B36A] bg-[#FFF8E8] p-4">
+                    <p class="font-extrabold">Valor nuevo</p>
+                    <p class="mt-2 break-words text-[#684026]" data-audit-field="new-value"></p>
+                </div>
+            </div>
+        </section>
+    </div>
 </div>

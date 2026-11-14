@@ -155,6 +155,7 @@
             const infoSalary = infoPanel?.querySelector("[data-employee-info-salary]");
             const infoBiweekly = infoPanel?.querySelector("[data-employee-info-biweekly]");
             const infoLimit = infoPanel?.querySelector("[data-employee-info-limit]");
+            const employeeMessage = lookup?.querySelector("[data-prestamo-employee-message]");
 
             const normalizar = (valor) => (valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
             const moneda = (valor) => `$${Number(valor || 0).toFixed(2)}`;
@@ -178,9 +179,14 @@
                     infoCargo.textContent = data.cargo;
                     infoSalary.textContent = moneda(data.salarioBruto);
                     infoBiweekly.textContent = moneda(data.salarioQuincenal);
-                    infoLimit.textContent = data.tienePrestamoActivo
-                        ? "No disponible: ya tiene un préstamo activo"
-                        : moneda(data.maximoPrestamo);
+                    infoLimit.textContent = !data.contratoValidoEnFecha
+                        ? "No disponible para la fecha seleccionada"
+                        : data.tienePrestamoActivo
+                            ? "No disponible: ya tiene un préstamo activo"
+                            : moneda(data.maximoPrestamo);
+                    if (employeeMessage && !data.contratoValidoEnFecha) {
+                        employeeMessage.textContent = "Empleado seleccionado. La fecha no coincide con un contrato vigente.";
+                    }
                     infoPanel?.classList.remove("hidden");
                 } catch {
                     infoPanel?.classList.add("hidden");
