@@ -22,6 +22,7 @@ public static class RegistroNegocio
         servicios.AddScoped<CN_Contrato>();
         servicios.AddScoped<global::Negocio.CN_Departamento>();
         servicios.AddScoped<CN_Empleado>();
+        servicios.AddScoped<CN_ConstanciaSalarial>();
         servicios.AddScoped<CN_Planilla>();
         servicios.AddScoped<CN_PrestamosAnticipos>();
         servicios.AddScoped<CN_Capacitacion>();

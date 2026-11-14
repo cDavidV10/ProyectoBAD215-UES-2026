@@ -1,0 +1,110 @@
+@model BEMOWeb.Models.ConstanciaSalarialViewModel
+
+@{
+    ViewData["Title"] = "Constancia salarial";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+    var datos = Model.Constancia.Encabezado;
+    var resumen = Model.Constancia.Resumen;
+}
+
+<style media="print">
+    .no-print { display: none !important; }
+    .bemo-page { background: white !important; }
+    .bemo-card { border: 1px solid #D7C49E !important; box-shadow: none !important; }
+</style>
+
+<div class="mx-auto max-w-5xl space-y-5">
+    <div class="no-print flex flex-wrap justify-between gap-3">
+        <a asp-area="@areaActual" asp-controller="Constancias" asp-action="Index" class="bemo-button bemo-button-secondary">Nueva constancia</a>
+        <button type="button" class="bemo-button bemo-button-primary" onclick="window.print()">
+            <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg>
+            Imprimir / Guardar PDF
+        </button>
+    </div>
+
+    <article class="bemo-card overflow-hidden bg-white">
+        <header class="border-b-2 border-[#9F5F2F] px-7 py-7 text-center md:px-12">
+            <p class="text-sm font-bold uppercase tracking-[0.2em] text-[#9F5F2F]">Corporación Textil Salvadoreña</p>
+            <h1 class="mt-3 text-3xl font-extrabold">CONSTANCIA SALARIAL</h1>
+            <p class="mt-2 text-sm text-[#684026]">Emitida el @datos.PeriodoHasta.ToString("dd/MM/yyyy")</p>
+        </header>
+
+        <div class="space-y-7 px-7 py-8 md:px-12">
+            <section class="grid gap-4 border-b border-[#E3D2AE] pb-6 md:grid-cols-2">
+                <div><p class="bemo-stat-label">Empleado</p><p class="mt-1 text-lg font-extrabold">@datos.NombreCompleto</p></div>
+                <div><p class="bemo-stat-label">DUI</p><p class="mt-1 font-semibold">@datos.Dui</p></div>
+                <div><p class="bemo-stat-label">Número ISSS</p><p class="mt-1 font-semibold">@datos.NumeroIsss</p></div>
+                <div><p class="bemo-stat-label">Fecha de ingreso</p><p class="mt-1 font-semibold">@datos.FechaIngreso.ToString("dd/MM/yyyy")</p></div>
+                <div><p class="bemo-stat-label">Cargo</p><p class="mt-1 font-semibold">@datos.NombreCargo</p></div>
+                <div><p class="bemo-stat-label">Departamento</p><p class="mt-1 font-semibold">@datos.NombreDepartamento</p></div>
+                <div><p class="bemo-stat-label">Tipo de contrato</p><p class="mt-1 font-semibold">@datos.NombreTipoContrato</p></div>
+                <div><p class="bemo-stat-label">Salario bruto mensual actual</p><p class="mt-1 text-lg font-extrabold">$@datos.SalarioBaseActual.ToString("N2")</p></div>
+            </section>
+
+            <p class="leading-7">
+                Por medio de la presente se hace constar que <strong>@datos.NombreCompleto</strong>, identificado(a) con DUI
+                <strong>@datos.Dui</strong>, labora para la empresa en el cargo de <strong>@datos.NombreCargo</strong>,
+                bajo un contrato <strong>@datos.NombreTipoContrato</strong>, y devenga un salario bruto mensual de
+                <strong>$@datos.SalarioBaseActual.ToString("N2")</strong>.
+            </p>
+
+            <p class="leading-7">
+                Para efectos de esta constancia se presenta el historial salarial correspondiente al período comprendido
+                del <strong>@datos.PeriodoDesde.ToString("dd/MM/yyyy")</strong> al
+                <strong>@datos.PeriodoHasta.ToString("dd/MM/yyyy")</strong>, equivalente a los últimos
+                <strong>@Model.Meses meses</strong>.
+            </p>
+
+            <section>
+                <h2 class="mb-3 text-xl font-extrabold">Historial de planillas pagadas</h2>
+                @if (Model.Constancia.Periodos.Count == 0)
+                {
+                    <div class="rounded-lg border border-[#E3D2AE] bg-[#FBF8F1] p-4 text-[#684026]">
+                        No existen planillas pagadas dentro del período seleccionado.
+                    </div>
+                }
+                else
+                {
+                    <div class="bemo-table-wrap">
+                        <table class="bemo-table min-w-[760px]">
+                            <thead>
+                                <tr><th>Planilla</th><th>Período</th><th>Fecha de pago</th><th>Bruto</th><th>Deducciones</th><th>Líquido</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var periodo in Model.Constancia.Periodos)
+                                {
+                                    <tr>
+                                        <td>PLAN-@periodo.NumeroPlanilla.ToString("D6")</td>
+                                        <td>@periodo.PeriodoInicio.ToString("dd/MM/yyyy") - @periodo.PeriodoFin.ToString("dd/MM/yyyy")</td>
+                                        <td>@periodo.FechaPago.ToString("dd/MM/yyyy")</td>
+                                        <td>$@periodo.TotalBruto.ToString("N2")</td>
+                                        <td>$@periodo.TotalDeducciones.ToString("N2")</td>
+                                        <td>$@periodo.SalarioLiquido.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </section>
+
+            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+                <div class="bemo-stat"><div><p class="bemo-stat-label">Planillas incluidas</p><p class="bemo-stat-value">@resumen.PlanillasIncluidas</p></div></div>
+                <div class="bemo-stat"><div><p class="bemo-stat-label">Total bruto</p><p class="bemo-stat-value">$@resumen.TotalBruto.ToString("N2")</p></div></div>
+                <div class="bemo-stat"><div><p class="bemo-stat-label">Total deducciones</p><p class="bemo-stat-value">$@resumen.TotalDeducciones.ToString("N2")</p></div></div>
+                <div class="bemo-stat"><div><p class="bemo-stat-label">Total líquido</p><p class="bemo-stat-value">$@resumen.TotalLiquido.ToString("N2")</p></div></div>
+                <div class="bemo-stat"><div><p class="bemo-stat-label">Promedio bruto mensual</p><p class="bemo-stat-value">$@resumen.PromedioMensualBruto.ToString("N2")</p></div></div>
+                <div class="bemo-stat"><div><p class="bemo-stat-label">Promedio líquido mensual</p><p class="bemo-stat-value">$@resumen.PromedioMensualLiquido.ToString("N2")</p></div></div>
+            </section>
+
+            <p class="text-sm leading-6 text-[#684026]">
+                Se extiende la presente constancia a solicitud de la persona interesada, para los usos que estime convenientes.
+            </p>
+
+            <div class="grid gap-12 pt-10 text-center md:grid-cols-2">
+                <div class="border-t border-[#381F12] pt-2">Firma y sello de Recursos Humanos</div>
+                <div class="border-t border-[#381F12] pt-2">Firma del responsable</div>
+            </div>
+        </div>
+    </article>
+</div>

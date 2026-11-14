@@ -1,0 +1,182 @@
+@using System.Globalization
+@model BEMOWeb.Models.ConstanciasSalarialesIndexModel
+
+@{
+    ViewData["Title"] = "Constancias salariales";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+    var mensaje = TempData["Mensaje"] as string;
+    var error = TempData["Error"] as string;
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+
+    string UrlPagina(int pagina) => Url.Action("Index", "Constancias", new
+    {
+        area = areaActual,
+        pagina,
+        busqueda = Model.Busqueda
+    }) ?? "#";
+}
+
+<div class="space-y-6">
+    <header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+            <p class="bemo-kicker">Recursos humanos</p>
+            <h1 class="bemo-title mt-2">Constancias salariales</h1>
+            <p class="bemo-subtitle mt-2">Emite constancias únicamente para empleados activos con contrato vigente.</p>
+        </div>
+        <div class="bemo-stat min-w-56">
+            <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg></div>
+            <div>
+                <p class="bemo-stat-label">Empleados disponibles</p>
+                <p class="bemo-stat-value">@Model.TotalRegistros</p>
+            </div>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(mensaje) || !string.IsNullOrWhiteSpace(error))
+    {
+        <div class="bemo-notifications" aria-live="polite" aria-atomic="true">
+            @if (!string.IsNullOrWhiteSpace(mensaje))
+            {
+                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5" role="status">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@mensaje</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7" role="alert">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@error</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+        </div>
+    }
+
+    <section class="bemo-card overflow-hidden">
+        <div class="flex flex-col justify-between gap-3 border-b border-[#E3D2AE] px-5 py-4 md:flex-row md:items-center">
+            <div>
+                <h2 class="text-xl font-extrabold">Personal elegible</h2>
+                <p class="mt-1 text-sm text-[#684026]">La lista se limita a empleados activos con contrato vigente.</p>
+            </div>
+            <form method="get" asp-area="@areaActual" asp-controller="Constancias" asp-action="Index"
+                  class="relative w-full md:max-w-xs" data-server-search>
+                <label class="sr-only" for="busqueda">Buscar empleado</label>
+                <button class="absolute left-3 top-2.5 z-10 rounded-md p-1 text-[#381F12]" type="submit"
+                        aria-label="Buscar empleados">
+                    <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>
+                </button>
+                <input class="bemo-input pl-12" id="busqueda" type="search" name="busqueda" value="@Model.Busqueda"
+                       placeholder="Buscar por DUI o nombre..." autocomplete="off" />
+            </form>
+        </div>
+        <div class="bemo-table-wrap">
+            <table class="bemo-table">
+                <thead>
+                    <tr>
+                        <th>Empleado</th>
+                        <th>DUI</th>
+                        <th>Cargo</th>
+                        <th>Departamento</th>
+                        <th>Salario mensual</th>
+                        <th>Inicio de contrato</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Empleados.Count == 0)
+                    {
+                        <tr><td colspan="7" class="py-10 text-center text-[#684026]">No hay empleados activos con contrato vigente.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var empleado in Model.Empleados)
+                        {
+                            <tr>
+                                <td><span class="font-semibold">@empleado.NombreCompleto</span><small class="block text-[#804C2C]">EMP-@empleado.IdEmpleado.ToString("D6")</small></td>
+                                <td>@empleado.Dui</td>
+                                <td>@empleado.NombreCargo</td>
+                                <td>@empleado.NombreDepartamento</td>
+                                <td>$@empleado.SalarioBruto.ToString("N2")</td>
+                                <td>@empleado.FechaContratacion.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <form asp-area="@areaActual" asp-controller="Constancias" asp-action="Generar" method="get" class="flex min-w-[240px] items-center gap-2">
+                                        <input type="hidden" name="idEmpleado" value="@empleado.IdEmpleado" />
+                                        <input type="hidden" name="fechaEmision" value="@Model.FechaEmision.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" />
+                                        <select class="bemo-select py-2" name="meses" aria-label="Período de @empleado.NombreCompleto">
+                                            <option value="3">3 meses</option>
+                                            <option value="6">6 meses</option>
+                                            <option value="12">12 meses</option>
+                                        </select>
+                                        <button class="bemo-button bemo-button-primary whitespace-nowrap px-3 py-2" type="submit">
+                                            <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-document"></use></svg>
+                                            Generar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de empleados elegibles">
+        <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros empleados</p>
+        <div class="flex flex-wrap items-center gap-2">
+            @if (Model.PaginaActual > 1)
+            {
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+            }
+
+            @if (Model.TotalPaginas <= 7)
+            {
+                @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                }
+            }
+            else
+            {
+                var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                <a class="@(Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary")" href="@UrlPagina(1)">1</a>
+                @if (paginaInicio > 2)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                {
+                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                }
+                @if (paginaFin < Model.TotalPaginas - 1)
+                {
+                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                }
+                <a class="@(Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary")" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+            }
+
+            @if (Model.PaginaActual < Model.TotalPaginas)
+            {
+                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+            }
+        </div>
+    </nav>
+</div>
