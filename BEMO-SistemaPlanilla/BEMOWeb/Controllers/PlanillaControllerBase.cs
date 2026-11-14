@@ -451,6 +451,11 @@ public abstract class PlanillaControllerBase : Controller
             return "No hay empleados con contrato vigente para ese periodo.";
         }
 
+        if (ex.Number == 51086)
+        {
+            return "No se puede crear la planilla porque la quincena anterior aun no existe.";
+        }
+
         if (ex.Number is 50012 or 50013)
         {
             return ex.Message;
