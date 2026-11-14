@@ -17,6 +17,7 @@ public class EmpleadosController : Controller
     private readonly BEMO.Negocio.CN_Afp _afps;
     private readonly BEMO.Negocio.CN_Cargo _cargos;
     private readonly BEMO.Negocio.CN_TipoContrato _tiposContrato;
+    private readonly BEMO.Negocio.CN_Contrato _contratos;
 
     public EmpleadosController(
         BEMO.Negocio.CN_Empleado empleados,
@@ -25,7 +26,8 @@ public class EmpleadosController : Controller
         BEMO.Negocio.CN_MunicipioUbicacion municipiosUbicacion,
         BEMO.Negocio.CN_Afp afps,
         BEMO.Negocio.CN_Cargo cargos,
-        BEMO.Negocio.CN_TipoContrato tiposContrato)
+        BEMO.Negocio.CN_TipoContrato tiposContrato,
+        BEMO.Negocio.CN_Contrato contratos)
     {
         _empleados = empleados;
         _departamento = departamento;
@@ -34,6 +36,7 @@ public class EmpleadosController : Controller
         _afps = afps;
         _cargos = cargos;
         _tiposContrato = tiposContrato;
+        _contratos = contratos;
     }
 
     public IActionResult Index(int pagina = 1, string? busqueda = null, string? departamento = null, string? estado = null)
@@ -258,6 +261,8 @@ public class EmpleadosController : Controller
     {
         var mensaje = ex.Number switch
         {
+            51012 => ex.Message.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()
+                ?? "La fecha de contratación debe ser posterior al cierre de la última planilla.",
             51001 => "Ya existe un empleado registrado con ese DUI.",
             51002 => "Ya existe un empleado registrado con ese número de ISSS.",
             51003 => "Ya existe un empleado registrado con ese NIT.",
@@ -361,6 +366,7 @@ public class EmpleadosController : Controller
 
     private BEMOWeb.Models.NuevoEmpleadoModel CargarCatalogos(BEMOWeb.Models.NuevoEmpleadoModel modelo)
     {
+        modelo.FechaMinimaContratacion = _contratos.ObtenerFechaMinimaContratacion();
         modelo.DepartamentosUbicacion = _departamentosUbicacion.listar();
         modelo.Municipios = _municipiosUbicacion.Listar();
         modelo.Afps = _afps.Listar();
@@ -373,6 +379,13 @@ public class EmpleadosController : Controller
     private void ValidarRegistro(BEMOWeb.Models.NuevoEmpleadoModel modelo)
     {
         var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
+        if (modelo.FechaContratacion.HasValue
+            && modelo.FechaMinimaContratacion.HasValue
+            && modelo.FechaContratacion.Value < modelo.FechaMinimaContratacion.Value)
+        {
+            ModelState.AddModelError(nameof(modelo.FechaContratacion),
+                $"La fecha debe ser posterior al cierre de la última planilla. La fecha mínima permitida es el {modelo.FechaMinimaContratacion.Value:dd/MM/yyyy}.");
+        }
         var fechaMinimaNacimiento = DateOnly.FromDateTime(DateTime.Today).AddYears(-18);
 
         if (modelo.Empleado.FechaNac == DateOnly.MinValue)

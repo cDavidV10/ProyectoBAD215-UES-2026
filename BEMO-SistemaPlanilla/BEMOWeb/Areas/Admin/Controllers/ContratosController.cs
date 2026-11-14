@@ -188,6 +188,7 @@ public class ContratosController : Controller
 
     private Models.EditarContratoModel CargarCatalogos(Models.EditarContratoModel modelo)
     {
+        modelo.FechaMinimaContratacion = _contratos.ObtenerFechaMinimaContratacion();
         modelo.Departamentos = _departamento.Listar();
         modelo.Cargos = _cargos.Listar();
         modelo.TiposContrato = _tiposContrato.Listar();
@@ -221,6 +222,15 @@ public class ContratosController : Controller
         if (!string.Equals(contratoActual.Estado, "VIGENTE", StringComparison.OrdinalIgnoreCase))
         {
             ModelState.AddModelError(string.Empty, "Solo se pueden editar contratos vigentes.");
+        }
+
+        if (modelo.FechaContratacion.HasValue
+            && modelo.FechaMinimaContratacion.HasValue
+            && modelo.FechaContratacion.Value != contratoActual.FechaContratacion
+            && modelo.FechaContratacion.Value < modelo.FechaMinimaContratacion.Value)
+        {
+            ModelState.AddModelError(nameof(modelo.FechaContratacion),
+                $"La fecha debe ser posterior al cierre de la última planilla. La fecha mínima permitida es el {modelo.FechaMinimaContratacion.Value:dd/MM/yyyy}.");
         }
 
         if (!modelo.IdDepartamento.HasValue || !modelo.Departamentos.Any(item => item.IdDepartamento == modelo.IdDepartamento.Value))
@@ -347,6 +357,7 @@ public class ContratosController : Controller
 
     private Models.NuevoContratoModel CargarCatalogos(Models.NuevoContratoModel modelo)
     {
+        modelo.FechaMinimaContratacion = _contratos.ObtenerFechaMinimaContratacion();
         modelo.EmpleadosDisponibles = _empleados.ListarActivosSinContrato()
             .Select(empleado => new Models.ContratoEmpleadoDisponibleOption
             {
@@ -363,6 +374,14 @@ public class ContratosController : Controller
 
     private void ValidarRegistro(Models.NuevoContratoModel modelo)
     {
+        if (modelo.FechaContratacion.HasValue
+            && modelo.FechaMinimaContratacion.HasValue
+            && modelo.FechaContratacion.Value < modelo.FechaMinimaContratacion.Value)
+        {
+            ModelState.AddModelError(nameof(modelo.FechaContratacion),
+                $"La fecha debe ser posterior al cierre de la última planilla. La fecha mínima permitida es el {modelo.FechaMinimaContratacion.Value:dd/MM/yyyy}.");
+        }
+
         var empleado = modelo.EmpleadosDisponibles.FirstOrDefault(item => item.IdEmpleado == modelo.IdEmpleado);
         if (modelo.IdEmpleado.HasValue && empleado is null)
         {
@@ -466,6 +485,8 @@ public class ContratosController : Controller
     {
         return ex.Number switch
         {
+            51012 => ex.Message.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()
+                ?? "La fecha de contratación debe ser posterior al cierre de la última planilla.",
             51020 => "El empleado seleccionado no existe o no está activo.",
             51028 => "El empleado seleccionado ya tiene un contrato vigente.",
             51034 => "El nuevo contrato debe iniciar un día después de la fecha de culminación del contrato anterior.",

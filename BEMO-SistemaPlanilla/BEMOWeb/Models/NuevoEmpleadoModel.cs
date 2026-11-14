@@ -26,6 +26,8 @@ public class NuevoEmpleadoModel
 
     public DateOnly? FechaContratacion { get; set; }
 
+    public DateOnly? FechaMinimaContratacion { get; set; }
+
     public DateOnly? FechaCulminacion { get; set; }
 
     [Required(ErrorMessage = "La calle es obligatoria.")]

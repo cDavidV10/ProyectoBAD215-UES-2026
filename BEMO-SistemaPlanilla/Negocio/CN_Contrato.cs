@@ -22,6 +22,11 @@ public class CN_Contrato
         return _metodos.ObtenerPorId(idContrato);
     }
 
+    public DateOnly? ObtenerFechaMinimaContratacion()
+    {
+        return _metodos.ObtenerFechaMinimaContratacion();
+    }
+
     public (List<ContratoListado> Contratos, int Total) ListarPaginado(
         int pagina,
         int tamanoPagina,

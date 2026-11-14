@@ -100,6 +100,23 @@ public class DAOContrato
         return dr.Read() ? MapearContrato(dr) : null;
     }
 
+    public DateOnly? ObtenerFechaMinimaContratacion()
+    {
+        const string consulta = @"
+            SELECT CAST(DATEADD(DAY, 1, MAX(periodo_fin)) AS DATE)
+            FROM dbo.PLANILLA
+            WHERE estado = 'CERRADA';";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+
+        conexionSql.Open();
+        var valor = cmd.ExecuteScalar();
+        return valor is null || valor == DBNull.Value
+            ? null
+            : DateOnly.FromDateTime(Convert.ToDateTime(valor));
+    }
+
     public (List<ContratoListado> Contratos, int Total) ListarPaginado(
         int pagina,
         int tamanoPagina,
@@ -270,6 +287,20 @@ public class DAOContrato
                   AND c.estado = 'FINALIZADO'
                   AND c.fecha_culminacion IS NOT NULL;
 
+                DECLARE @ultima_fecha_planilla DATE;
+                SELECT @ultima_fecha_planilla = MAX(periodo_fin)
+                FROM dbo.PLANILLA
+                WHERE estado = 'CERRADA';
+
+                IF @ultima_fecha_planilla IS NOT NULL
+                   AND @fecha_contratacion <= @ultima_fecha_planilla
+                BEGIN
+                    SET @msg = CONCAT(N'La fecha de contratacion debe ser posterior al cierre de la ultima planilla (',
+                        CONVERT(VARCHAR(10), @ultima_fecha_planilla, 103), N'). La fecha minima permitida es el ',
+                        CONVERT(VARCHAR(10), DATEADD(DAY, 1, @ultima_fecha_planilla), 103));
+                    THROW 51012, @msg, 1;
+                END;
+
                 IF @ultima_fecha_culminacion IS NOT NULL
                    AND @fecha_contratacion <> DATEADD(DAY, 1, @ultima_fecha_culminacion)
                     THROW 51034, N'El nuevo contrato debe iniciar un dia despues de la fecha de culminacion del contrato anterior', 1;
@@ -379,6 +410,29 @@ public class DAOContrato
         DateOnly? fechaCulminacion)
     {
         const string consulta = @"
+            DECLARE @ultima_fecha_planilla DATE;
+            DECLARE @fecha_contratacion_actual DATE;
+
+            SELECT @fecha_contratacion_actual = fecha_contratacion
+            FROM dbo.CONTRATO
+            WHERE id_contrato = @id_contrato
+              AND estado = 'VIGENTE';
+
+            SELECT @ultima_fecha_planilla = MAX(periodo_fin)
+            FROM dbo.PLANILLA
+            WHERE estado = 'CERRADA';
+
+            IF @fecha_contratacion_actual IS NOT NULL
+               AND @fecha_contratacion_actual <> @fecha_contratacion
+               AND @ultima_fecha_planilla IS NOT NULL
+               AND @fecha_contratacion <= @ultima_fecha_planilla
+            BEGIN
+                DECLARE @msg NVARCHAR(300) = CONCAT(N'La fecha de contratacion debe ser posterior al cierre de la ultima planilla (',
+                    CONVERT(VARCHAR(10), @ultima_fecha_planilla, 103), N'). La fecha minima permitida es el ',
+                    CONVERT(VARCHAR(10), DATEADD(DAY, 1, @ultima_fecha_planilla), 103));
+                THROW 51012, @msg, 1;
+            END;
+
             UPDATE dbo.CONTRATO
             SET id_cargo = @id_cargo,
                 id_departamento = @id_departamento,

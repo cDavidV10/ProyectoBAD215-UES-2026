@@ -29,6 +29,8 @@ public class NuevoContratoModel
     [Required(ErrorMessage = "Ingrese la fecha de contratación.")]
     public DateOnly? FechaContratacion { get; set; }
 
+    public DateOnly? FechaMinimaContratacion { get; set; }
+
     public DateOnly? FechaCulminacion { get; set; }
 
     public List<ContratoEmpleadoDisponibleOption> EmpleadosDisponibles { get; set; } = new();
