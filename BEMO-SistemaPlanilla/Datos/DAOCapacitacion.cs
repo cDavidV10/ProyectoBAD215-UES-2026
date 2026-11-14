@@ -223,7 +223,7 @@ public class DAOCapacitacion
                          contrato.id_contrato DESC
             ) departamento
             WHERE dc.id_capacitacion = @id_capacitacion
-            ORDER BY e.apellido, e.nombre, dc.id_detalle_capacitacion
+            ORDER BY e.nombre, e.apellido, dc.id_detalle_capacitacion
             OFFSET @desplazamiento ROWS
             FETCH NEXT @tamano_pagina ROWS ONLY;";
 
@@ -328,7 +328,7 @@ public class DAOCapacitacion
                    OR e.apellido LIKE '%' + @busqueda + '%'
                    OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
               AND (@departamento IS NULL OR contrato.nombre_departamento = @departamento)
-            ORDER BY e.apellido, e.nombre, e.id_empleado
+            ORDER BY e.nombre, e.apellido, e.id_empleado
             OFFSET @desplazamiento ROWS
             FETCH NEXT @tamano_pagina ROWS ONLY;";
 
