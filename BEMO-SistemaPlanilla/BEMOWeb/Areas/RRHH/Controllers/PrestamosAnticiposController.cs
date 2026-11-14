@@ -17,8 +17,10 @@ public class PrestamosAnticiposController : Controller
     }
 
     [HttpGet]
-    public IActionResult Index(string? busqueda, string? estado, string tipo = "prestamos")
+    public IActionResult Index(int pagina = 1, string? busqueda = null, string? estado = null, string tipo = "prestamos")
     {
+        const int tamanoPagina = 5;
+        pagina = Math.Max(1, pagina);
         tipo = NormalizarTipo(tipo);
         var modelo = new Models.PrestamosAnticiposIndexModel
         {
@@ -30,23 +32,48 @@ public class PrestamosAnticiposController : Controller
 
         if (tipo == "prestamos")
         {
-            modelo.Prestamos = _prestamosAnticipos.ListarPrestamos(modelo.Busqueda, modelo.EstadoSeleccionado);
+            var resultado = _prestamosAnticipos.ListarPrestamosPaginado(
+                pagina, tamanoPagina, modelo.Busqueda, modelo.EstadoSeleccionado);
+            var totalPaginas = Math.Max(1, (int)Math.Ceiling(resultado.Total / (double)tamanoPagina));
+            if (pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+                resultado = _prestamosAnticipos.ListarPrestamosPaginado(
+                    pagina, tamanoPagina, modelo.Busqueda, modelo.EstadoSeleccionado);
+            }
+
+            modelo.Prestamos = resultado.Prestamos;
+            modelo.TotalRegistros = resultado.Total;
+            modelo.TotalPaginas = totalPaginas;
         }
         else
         {
-            modelo.Anticipos = _prestamosAnticipos.ListarAnticipos(modelo.Busqueda, modelo.EstadoSeleccionado);
+            var resultado = _prestamosAnticipos.ListarAnticiposPaginado(
+                pagina, tamanoPagina, modelo.Busqueda, modelo.EstadoSeleccionado);
+            var totalPaginas = Math.Max(1, (int)Math.Ceiling(resultado.Total / (double)tamanoPagina));
+            if (pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+                resultado = _prestamosAnticipos.ListarAnticiposPaginado(
+                    pagina, tamanoPagina, modelo.Busqueda, modelo.EstadoSeleccionado);
+            }
+
+            modelo.Anticipos = resultado.Anticipos;
+            modelo.TotalRegistros = resultado.Total;
+            modelo.TotalPaginas = totalPaginas;
         }
 
+        modelo.PaginaActual = pagina;
+        modelo.TamanoPagina = tamanoPagina;
         return View("~/Areas/Admin/Views/PrestamosAnticipos/Index.cshtml", modelo);
     }
 
     [HttpGet]
-    public IActionResult NuevoPrestamo()
+    public IActionResult NuevoPrestamo(int pagina = 1, string? busqueda = null)
     {
-        return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoPrestamo.cshtml", new Models.NuevoPrestamoModel
-        {
-            Empleados = _prestamosAnticipos.ListarEmpleadosActivos()
-        });
+        var modelo = new Models.NuevoPrestamoModel();
+        CargarEmpleados(modelo, pagina, busqueda);
+        return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoPrestamo.cshtml", modelo);
     }
 
     [HttpPost]
@@ -56,7 +83,7 @@ public class PrestamosAnticiposController : Controller
         ValidarFecha(modelo.FechaOtorgamiento, "FechaOtorgamiento");
         if (!ModelState.IsValid)
         {
-            modelo.Empleados = _prestamosAnticipos.ListarEmpleadosActivos();
+            CargarEmpleados(modelo, modelo.PaginaActual, modelo.Busqueda);
             return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoPrestamo.cshtml", modelo);
         }
 
@@ -73,18 +100,17 @@ public class PrestamosAnticiposController : Controller
         catch (SqlException ex)
         {
             ModelState.AddModelError(string.Empty, MensajeError(ex));
-            modelo.Empleados = _prestamosAnticipos.ListarEmpleadosActivos();
+            CargarEmpleados(modelo, modelo.PaginaActual, modelo.Busqueda);
             return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoPrestamo.cshtml", modelo);
         }
     }
 
     [HttpGet]
-    public IActionResult NuevoAnticipo()
+    public IActionResult NuevoAnticipo(int pagina = 1, string? busqueda = null)
     {
-        return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoAnticipo.cshtml", new Models.NuevoAnticipoModel
-        {
-            Empleados = _prestamosAnticipos.ListarEmpleadosActivos()
-        });
+        var modelo = new Models.NuevoAnticipoModel();
+        CargarEmpleados(modelo, pagina, busqueda);
+        return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoAnticipo.cshtml", modelo);
     }
 
     [HttpPost]
@@ -94,7 +120,7 @@ public class PrestamosAnticiposController : Controller
         ValidarFecha(modelo.FechaAnticipo, "FechaAnticipo");
         if (!ModelState.IsValid)
         {
-            modelo.Empleados = _prestamosAnticipos.ListarEmpleadosActivos();
+            CargarEmpleados(modelo, modelo.PaginaActual, modelo.Busqueda);
             return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoAnticipo.cshtml", modelo);
         }
 
@@ -111,7 +137,7 @@ public class PrestamosAnticiposController : Controller
         catch (SqlException ex)
         {
             ModelState.AddModelError(string.Empty, MensajeError(ex));
-            modelo.Empleados = _prestamosAnticipos.ListarEmpleadosActivos();
+            CargarEmpleados(modelo, modelo.PaginaActual, modelo.Busqueda);
             return View("~/Areas/Admin/Views/PrestamosAnticipos/NuevoAnticipo.cshtml", modelo);
         }
     }
@@ -142,10 +168,38 @@ public class PrestamosAnticiposController : Controller
             return Json(new { maximo = (decimal?)null });
         }
 
+        var info = _prestamosAnticipos.ObtenerInformacionEmpleado(idEmpleado, fecha);
         return Json(new
         {
-            maximo = _prestamosAnticipos.ObtenerMaximoAnticipo(idEmpleado, fecha)
+            maximo = info is null || info.TieneAnticipoPendiente
+                ? null
+                : _prestamosAnticipos.ObtenerMaximoAnticipo(idEmpleado, fecha)
         });
+    }
+
+    [HttpGet]
+    public IActionResult InformacionEmpleado(int idEmpleado, DateOnly fecha)
+    {
+        if (idEmpleado <= 0 || fecha == default)
+        {
+            return Json(new { disponible = false });
+        }
+
+        var info = _prestamosAnticipos.ObtenerInformacionEmpleado(idEmpleado, fecha);
+        return info is null
+            ? Json(new { disponible = false })
+            : Json(new
+            {
+                disponible = true,
+                nombre = info.NombreEmpleado,
+                cargo = info.NombreCargo,
+                salarioBruto = info.SalarioBruto,
+                salarioQuincenal = info.SalarioQuincenal,
+                maximoPrestamo = info.MaximoPrestamo,
+                maximoAnticipo = info.MaximoAnticipo,
+                tienePrestamoActivo = info.TienePrestamoActivo,
+                tieneAnticipoPendiente = info.TieneAnticipoPendiente
+            });
     }
 
     private void ValidarFecha(DateOnly fecha, string campo)
@@ -161,6 +215,39 @@ public class PrestamosAnticiposController : Controller
         return string.Equals(tipo, "anticipos", StringComparison.OrdinalIgnoreCase)
             ? "anticipos"
             : "prestamos";
+    }
+
+    private void CargarEmpleados(Models.NuevoPrestamoModel modelo, int pagina, string? busqueda)
+    {
+        const int tamanoPagina = 5;
+        pagina = Math.Max(1, pagina);
+        busqueda = NormalizarBusqueda(busqueda);
+        var empleados = _prestamosAnticipos.ListarEmpleadosActivos();
+        modelo.Empleados = empleados;
+        modelo.Busqueda = busqueda;
+        modelo.PaginaActual = 1;
+        modelo.TotalRegistros = empleados.Count;
+        modelo.TotalPaginas = 1;
+        modelo.TamanoPagina = tamanoPagina;
+    }
+
+    private void CargarEmpleados(Models.NuevoAnticipoModel modelo, int pagina, string? busqueda)
+    {
+        const int tamanoPagina = 5;
+        pagina = Math.Max(1, pagina);
+        busqueda = NormalizarBusqueda(busqueda);
+        var empleados = _prestamosAnticipos.ListarEmpleadosActivos();
+        modelo.Empleados = empleados;
+        modelo.Busqueda = busqueda;
+        modelo.PaginaActual = 1;
+        modelo.TotalRegistros = empleados.Count;
+        modelo.TotalPaginas = 1;
+        modelo.TamanoPagina = tamanoPagina;
+    }
+
+    private static string? NormalizarBusqueda(string? busqueda)
+    {
+        return string.IsNullOrWhiteSpace(busqueda) ? null : busqueda.Trim();
     }
 
     private static string MensajeError(SqlException ex)

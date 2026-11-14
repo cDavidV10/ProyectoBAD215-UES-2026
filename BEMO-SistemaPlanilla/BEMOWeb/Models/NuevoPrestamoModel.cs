@@ -17,4 +17,9 @@ public class NuevoPrestamoModel
     public decimal Monto { get; set; }
 
     public List<Empleado> Empleados { get; set; } = new();
+    public string? Busqueda { get; set; }
+    public int PaginaActual { get; set; } = 1;
+    public int TotalPaginas { get; set; } = 1;
+    public int TotalRegistros { get; set; }
+    public int TamanoPagina { get; set; } = 5;
 }

@@ -19,6 +19,15 @@
         "PAGADO" or "DESCONTADO" => "bemo-status-green",
         _ => "bemo-status-gray"
     };
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+    string UrlPagina(int pagina) => Url.Action("Index", new
+    {
+        pagina,
+        tipo = Model.TipoSeleccionado,
+        busqueda = Model.Busqueda,
+        estado = Model.EstadoSeleccionado
+    }) ?? "#";
 }
 
 <div class="space-y-5">
@@ -30,11 +39,15 @@
         </div>
         <div class="flex flex-wrap gap-3 self-start">
             <a asp-action="NuevoAnticipo" class="bemo-button bemo-button-secondary">
-                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+                <svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-plus"></use>
+                </svg>
                 Nuevo anticipo
             </a>
             <a asp-action="NuevoPrestamo" class="bemo-button bemo-button-primary">
-                <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+                <svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-plus"></use>
+                </svg>
                 Nuevo préstamo
             </a>
         </div>
@@ -50,38 +63,91 @@
     }
 
     <div class="flex gap-6 border-b border-[#D7C49E]">
-        <a asp-action="Index" asp-route-tipo="prestamos" asp-route-busqueda="@Model.Busqueda"
+        <a asp-action="Index" asp-route-tipo="prestamos" asp-route-pagina="1" asp-route-busqueda="@Model.Busqueda"
            class="bemo-tab @(esPrestamo ? "active" : "")">Préstamos</a>
-        <a asp-action="Index" asp-route-tipo="anticipos" asp-route-busqueda="@Model.Busqueda"
+        <a asp-action="Index" asp-route-tipo="anticipos" asp-route-pagina="1" asp-route-busqueda="@Model.Busqueda"
            class="bemo-tab @(!esPrestamo ? "active" : "")">Anticipos de salario</a>
     </div>
 
     @if (esPrestamo)
     {
         <section class="grid gap-4 lg:grid-cols-3">
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Préstamos activos</p><p class="bemo-stat-value">@Model.Resumen.PrestamosActivos</p></div></div>
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div><div><p class="bemo-stat-label">Préstamos pagados</p><p class="bemo-stat-value">@Model.Resumen.PrestamosPagados</p></div></div>
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-coins"></use></svg></div><div><p class="bemo-stat-label">Saldo pendiente</p><p class="bemo-stat-value">@Model.Resumen.SaldoPrestamos.ToString("C2")</p></div></div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-calendar"></use>
+                </svg></div>
+                <div>
+                    <p class="bemo-stat-label">Préstamos activos</p>
+                    <p class="bemo-stat-value">@Model.Resumen.PrestamosActivos</p>
+                </div>
+            </div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-check"></use>
+                </svg></div>
+                <div>
+                    <p class="bemo-stat-label">Préstamos pagados</p>
+                    <p class="bemo-stat-value">@Model.Resumen.PrestamosPagados</p>
+                </div>
+            </div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-coins"></use>
+                </svg></div>
+                <div>
+                    <p class="bemo-stat-label">Saldo pendiente</p>
+                    <p class="bemo-stat-value">@Model.Resumen.SaldoPrestamos.ToString("C2")</p>
+                </div>
+            </div>
         </section>
     }
     else
     {
         <section class="grid gap-4 lg:grid-cols-3">
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Pendientes de descuento</p><p class="bemo-stat-value">@Model.Resumen.AnticiposPendientes</p></div></div>
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div><div><p class="bemo-stat-label">Anticipos descontados</p><p class="bemo-stat-value">@Model.Resumen.AnticiposDescontados</p></div></div>
-            <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-coins"></use></svg></div><div><p class="bemo-stat-label">Monto pendiente</p><p class="bemo-stat-value">@Model.Resumen.MontoAnticiposPendientes.ToString("C2")</p></div></div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-calendar"></use>
+                </svg></div>
+                <div>
+                    <p class="bemo-stat-label">Pendientes de descuento</p>
+                    <p class="bemo-stat-value">@Model.Resumen.AnticiposPendientes</p>
+                </div>
+            </div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-check"></use>
+                </svg></div>
+                <div>
+                    <p class="bemo-stat-label">Anticipos descontados</p>
+                    <p class="bemo-stat-value">@Model.Resumen.AnticiposDescontados</p>
+                </div>
+            </div>
+            <div class="bemo-stat">
+                <div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24">
+                    <use href="#icon-coins"></use>
+                </svg></div>
+                <div>
+                    <p class="bemo-stat-label">Monto pendiente</p>
+                    <p class="bemo-stat-value">@Model.Resumen.MontoAnticiposPendientes.ToString("C2")</p>
+                </div>
+            </div>
         </section>
     }
 
-    <form method="get" asp-action="Index" class="bemo-card grid gap-4 p-4 md:grid-cols-[1fr_1fr_auto] md:items-end" data-server-search>
+    <form method="get" asp-action="Index" class="bemo-card grid gap-4 p-4 md:grid-cols-[1fr_1fr_auto] md:items-end"
+          data-server-search>
         <input type="hidden" name="tipo" value="@Model.TipoSeleccionado" />
         <div>
             <label class="bemo-label" for="busqueda">Empleado</label>
             <div class="relative">
-                <button class="absolute left-3 top-2.5 z-10 rounded-md p-1 text-[#381F12]" type="submit" aria-label="Buscar empleado">
-                    <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>
+                <button class="absolute left-3 top-2.5 z-10 rounded-md p-1 text-[#381F12]" type="submit"
+                        aria-label="Buscar empleado">
+                    <svg class="bemo-icon" viewBox="0 0 24 24">
+                        <use href="#icon-search"></use>
+                    </svg>
                 </button>
-                <input class="bemo-input pl-12" id="busqueda" type="search" name="busqueda" value="@Model.Busqueda" placeholder="Buscar por DUI o nombre..." autocomplete="off" />
+                <input class="bemo-input pl-12" id="busqueda" type="search" name="busqueda" value="@Model.Busqueda"
+                       placeholder="Buscar por DUI o nombre..." autocomplete="off" />
             </div>
         </div>
         <div>
@@ -90,85 +156,175 @@
                 <option value="">Todos los estados</option>
                 @if (esPrestamo)
                 {
-                    <option value="ACTIVO" selected="@(Model.EstadoSeleccionado == "ACTIVO" ? "selected" : null)">Activo</option>
-                    <option value="PAGADO" selected="@(Model.EstadoSeleccionado == "PAGADO" ? "selected" : null)">Pagado</option>
+                    <option value="ACTIVO" selected="@(Model.EstadoSeleccionado == "ACTIVO" ? "selected" : null)">Activo
+                    </option>
+                    <option value="PAGADO" selected="@(Model.EstadoSeleccionado == "PAGADO" ? "selected" : null)">Pagado
+                    </option>
                 }
                 else
                 {
-                    <option value="PENDIENTE" selected="@(Model.EstadoSeleccionado == "PENDIENTE" ? "selected" : null)">Pendiente de descuento</option>
-                    <option value="DESCONTADO" selected="@(Model.EstadoSeleccionado == "DESCONTADO" ? "selected" : null)">Descontado</option>
+                    <option value="PENDIENTE" selected="@(Model.EstadoSeleccionado == "PENDIENTE" ? "selected" : null)">
+                        Pendiente de descuento</option>
+                        <option value="DESCONTADO" selected="@(Model.EstadoSeleccionado == "DESCONTADO" ? "selected" : null)">
+                            Descontado</option>
+                        }
+                    </select>
+                </div>
+            </form>
+
+            @if (esPrestamo)
+            {
+                <section class="bemo-card overflow-hidden">
+                    <div class="bemo-table-wrap">
+                        <table class="bemo-table min-w-[980px]">
+                            <thead>
+                                <tr>
+                                    <th>Préstamo</th>
+                                    <th>Empleado</th>
+                                    <th>Otorgamiento</th>
+                                    <th>Monto</th>
+                                    <th>Cuota</th>
+                                    <th>Cuotas restantes</th>
+                                    <th>Saldo</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Prestamos.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="9" class="py-8 text-center text-[#684026]">No hay préstamos para los filtros
+                                            seleccionados.</td>
+                                        </tr>
+                                    }
+                    else
+                                    {
+                                        foreach (var prestamo in Model.Prestamos)
+                                        {
+                                            <tr>
+                                                <td>PRE-@prestamo.IdPrestamo.ToString("D6")</td>
+                                                <td>@prestamo.NombreEmpleado<br /><small>@prestamo.Dui</small></td>
+                                                <td>@prestamo.FechaOtorgamiento.ToString("dd/MM/yyyy")</td>
+                                                <td>@prestamo.Monto.ToString("C2")</td>
+                                                <td>@prestamo.CuotaQuincenal.ToString("C2")</td>
+                                                <td>@(prestamo.Estado == "ACTIVO" ? prestamo.CuotasRestantes : 0)</td>
+                                                <td>@prestamo.SaldoPendiente.ToString("C2")</td>
+                                                <td><span
+                                                    class="bemo-status @ClaseEstado(prestamo.Estado)">@EtiquetaEstado(prestamo.Estado)</span>
+                                                </td>
+                                                <td><a asp-action="RevisarPrestamo" asp-route-id="@prestamo.IdPrestamo"
+                                                       class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                    <use href="#icon-eye"></use>
+                                                </svg>Detalle</a></td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
                 }
-            </select>
-        </div>
-        <button class="bemo-button bemo-button-secondary" type="submit"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-filter"></use></svg>Filtrar</button>
-    </form>
-
-    @if (esPrestamo)
-    {
-        <section class="bemo-card overflow-hidden">
-            <div class="bemo-table-wrap">
-                <table class="bemo-table min-w-[980px]">
-                    <thead><tr><th>Préstamo</th><th>Empleado</th><th>Otorgamiento</th><th>Monto</th><th>Cuota</th><th>Cuotas restantes</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                    @if (Model.Prestamos.Count == 0)
-                    {
-                        <tr><td colspan="9" class="py-8 text-center text-[#684026]">No hay préstamos para los filtros seleccionados.</td></tr>
-                    }
-                    else
-                    {
-                        foreach (var prestamo in Model.Prestamos)
-                        {
-                            <tr>
-                                <td>PRE-@prestamo.IdPrestamo.ToString("D6")</td>
-                                <td>@prestamo.NombreEmpleado<br /><small>@prestamo.Dui</small></td>
-                                <td>@prestamo.FechaOtorgamiento.ToString("dd/MM/yyyy")</td>
-                                <td>@prestamo.Monto.ToString("C2")</td>
-                                <td>@prestamo.CuotaQuincenal.ToString("C2")</td>
-                                <td>@(prestamo.Estado == "ACTIVO" ? prestamo.CuotasRestantes : 0)</td>
-                                <td>@prestamo.SaldoPendiente.ToString("C2")</td>
-                                <td><span class="bemo-status @ClaseEstado(prestamo.Estado)">@EtiquetaEstado(prestamo.Estado)</span></td>
-                                <td><a asp-action="RevisarPrestamo" asp-route-id="@prestamo.IdPrestamo" class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Detalle</a></td>
-                            </tr>
-                        }
-                    }
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    }
     else
-    {
-        <section class="bemo-card overflow-hidden">
-            <div class="bemo-table-wrap">
-                <table class="bemo-table min-w-[800px]">
-                    <thead><tr><th>Anticipo</th><th>Empleado</th><th>Fecha</th><th>Monto</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody>
-                    @if (Model.Anticipos.Count == 0)
-                    {
-                        <tr><td colspan="6" class="py-8 text-center text-[#684026]">No hay anticipos para los filtros seleccionados.</td></tr>
-                    }
+                {
+                    <section class="bemo-card overflow-hidden">
+                        <div class="bemo-table-wrap">
+                            <table class="bemo-table min-w-[800px]">
+                                <thead>
+                                    <tr>
+                                        <th>Anticipo</th>
+                                        <th>Empleado</th>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.Anticipos.Count == 0)
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="py-8 text-center text-[#684026]">No hay anticipos para los filtros
+                                                seleccionados.</td>
+                                            </tr>
+                                        }
                     else
-                    {
-                        foreach (var anticipo in Model.Anticipos)
-                        {
-                            <tr>
-                                <td>ANT-@anticipo.IdAnticipo.ToString("D6")</td>
-                                <td>@anticipo.NombreEmpleado<br /><small>@anticipo.Dui</small></td>
-                                <td>@anticipo.FechaAnticipo.ToString("dd/MM/yyyy")</td>
-                                <td>@anticipo.MontoAnticipo.ToString("C2")</td>
-                                <td><span class="bemo-status @ClaseEstado(anticipo.Estado)">@EtiquetaEstado(anticipo.Estado)</span></td>
-                                <td><a asp-action="DetalleAnticipo" asp-route-id="@anticipo.IdAnticipo" class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg>Detalle</a></td>
-                            </tr>
-                        }
+                                        {
+                                            foreach (var anticipo in Model.Anticipos)
+                                            {
+                                                <tr>
+                                                    <td>ANT-@anticipo.IdAnticipo.ToString("D6")</td>
+                                                    <td>@anticipo.NombreEmpleado<br /><small>@anticipo.Dui</small></td>
+                                                    <td>@anticipo.FechaAnticipo.ToString("dd/MM/yyyy")</td>
+                                                    <td>@anticipo.MontoAnticipo.ToString("C2")</td>
+                                                    <td><span
+                                                        class="bemo-status @ClaseEstado(anticipo.Estado)">@EtiquetaEstado(anticipo.Estado)</span>
+                                                    </td>
+                                                    <td><a asp-action="DetalleAnticipo" asp-route-id="@anticipo.IdAnticipo"
+                                                           class="bemo-button bemo-button-ghost"><svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                        <use href="#icon-eye"></use>
+                                                    </svg>Detalle</a></td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
                     }
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    }
 
-    <section class="bemo-card p-5">
-        <h2 class="text-lg font-extrabold">Aplicación en planilla</h2>
-        <p class="mt-2 leading-7">Al calcular una planilla se agregan los descuentos de los préstamos y anticipos elegibles. Al cerrar la planilla se actualiza el saldo del préstamo y el anticipo pasa a DESCONTADO.</p>
-    </section>
-</div>
+                    <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center"
+                         aria-label="Paginación de préstamos y anticipos">
+                        <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros registros</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @if (Model.PaginaActual > 1)
+                            {
+                                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                            }
+
+                            @if (Model.TotalPaginas <= 7)
+                            {
+                                @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                                {
+                                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                                }
+                            }
+                            else
+                            {
+                                var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                                var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                                var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                                var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" :
+                    "bemo-button bemo-button-secondary";
+
+                                <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                                @if (paginaInicio > 2)
+                                {
+                                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                                }
+                                @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                                {
+                                    var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                                    <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                                }
+                                @if (paginaFin < Model.TotalPaginas - 1)
+                                {
+                                    <span class="flex items-center px-1 text-[#684026]">...</span>
+                                }
+                                <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                            }
+
+                            @if (Model.PaginaActual < Model.TotalPaginas)
+                            {
+                                <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                            }
+                        </div>
+                    </nav>
+
+                    <section class="bemo-card p-5">
+                        <h2 class="text-lg font-extrabold">Aplicación en planilla</h2>
+                        <p class="mt-2 leading-7">Al calcular una planilla se agregan los descuentos de los préstamos y anticipos
+                            elegibles. Al cerrar la planilla se actualiza el saldo del préstamo y el anticipo pasa a DESCONTADO.</p>
+                        </section>
+                    </div>
