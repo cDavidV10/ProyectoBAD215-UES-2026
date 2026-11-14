@@ -208,6 +208,10 @@ public class PrestamosAnticiposController : Controller
         {
             ModelState.AddModelError(campo, "Indique una fecha válida.");
         }
+        else if (fecha < DateOnly.FromDateTime(DateTime.Today))
+        {
+            ModelState.AddModelError(campo, "La fecha no puede ser anterior a la fecha actual.");
+        }
     }
 
     private static string NormalizarTipo(string? tipo)

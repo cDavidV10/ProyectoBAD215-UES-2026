@@ -1,6 +1,10 @@
 @model BEMOWeb.Models.NuevoPrestamoModel
 
 @{
+    var fechaMinima = DateTime.Today.ToString("yyyy-MM-dd");
+}
+
+@{
     ViewData["Title"] = "Nueva solicitud de préstamo";
 }
 
@@ -59,7 +63,7 @@
 
             <div>
                 <label class="bemo-label bemo-required" asp-for="FechaOtorgamiento">Fecha de solicitud</label>
-                <input class="bemo-input" asp-for="FechaOtorgamiento" />
+                <input class="bemo-input" asp-for="FechaOtorgamiento" min="@fechaMinima" />
                 <span asp-validation-for="FechaOtorgamiento" class="bemo-validation-message"></span>
             </div>
 

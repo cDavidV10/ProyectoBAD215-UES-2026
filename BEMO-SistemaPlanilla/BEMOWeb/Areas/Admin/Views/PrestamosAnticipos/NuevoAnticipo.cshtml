@@ -1,6 +1,10 @@
 @model BEMOWeb.Models.NuevoAnticipoModel
 
 @{
+    var fechaMinima = DateTime.Today.ToString("yyyy-MM-dd");
+}
+
+@{
     ViewData["Title"] = "Nueva solicitud de anticipo";
 }
 
@@ -38,7 +42,7 @@
 
             <div>
                 <label class="bemo-label bemo-required" asp-for="FechaAnticipo">Fecha de solicitud</label>
-                <input class="bemo-input" asp-for="FechaAnticipo" />
+                <input class="bemo-input" asp-for="FechaAnticipo" min="@fechaMinima" />
                 <span asp-validation-for="FechaAnticipo" class="bemo-validation-message"></span>
             </div>
 
