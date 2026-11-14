@@ -1,8 +1,243 @@
+@using System
+@using System.Collections.Generic
+@model BEMOWeb.Models.CapacitacionesIndexModel
+
 @{
     ViewData["Title"] = "Capacitaciones";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+    var mensaje = TempData["Mensaje"] as string;
+    var error = TempData["Error"] as string;
+
+    string EtiquetaEstado(string estado) => estado switch
+    {
+        "SIN ASIGNAR" => "Sin asignar",
+        "EN CURSO" => "En curso",
+        "PROGRAMADA" => "Programada",
+        "FINALIZADA" => "Finalizada",
+        _ => estado
+    };
+
+    string ClaseEstado(string estado) => estado switch
+    {
+        "EN CURSO" => "bemo-status-green",
+        "PROGRAMADA" or "SIN ASIGNAR" => "bemo-status-yellow",
+        _ => "bemo-status-gray"
+    };
+
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+
+    string UrlPagina(int pagina)
+    {
+        var parametros = new List<string> { $"pagina={pagina}" };
+
+        if (!string.IsNullOrWhiteSpace(Model.Busqueda))
+        {
+            parametros.Add($"busqueda={Uri.EscapeDataString(Model.Busqueda)}");
+        }
+
+        if (Model.TipoSeleccionado.HasValue)
+        {
+            parametros.Add($"tipo={Model.TipoSeleccionado.Value}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(Model.EstadoSeleccionado))
+        {
+            parametros.Add($"estado={Uri.EscapeDataString(Model.EstadoSeleccionado)}");
+        }
+
+        return "?" + string.Join("&", parametros);
+    }
 }
 
-<div class="space-y-5"><header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end"><div><p class="bemo-kicker">Administración</p><h1 class="bemo-title mt-2">Capacitaciones</h1><p class="bemo-subtitle mt-2">Organiza la formación y asignación del personal.</p></div><a asp-action="Nueva" class="bemo-button bemo-button-primary self-start"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>Nueva capacitación</a></header>
-    <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]"><section class="bemo-card p-4"><div class="flex border-b border-[#D7C49E]"><button class="bemo-tab active" type="button" data-tab="training">Capacitaciones</button><button class="bemo-tab" type="button" data-tab="assignments">Asignaciones</button></div><div class="mt-5 grid gap-4 md:grid-cols-[1.2fr_1fr_1fr]"><div class="relative"><svg class="bemo-icon absolute left-3 top-3" viewBox="0 0 24 24"><use href="#icon-search"></use></svg><input class="bemo-input pl-11" placeholder="Buscar capacitación" /></div><select class="bemo-select"><option>Tipo</option><option>Técnica</option><option>Inducción</option></select><select class="bemo-select"><option>Estado</option><option>Programada</option><option>En curso</option><option>Finalizada</option></select></div><div class="bemo-table-wrap mt-5"><table class="bemo-table min-w-[760px]"><thead><tr><th>Nombre</th><th>Tipo</th><th>Fecha</th><th>Participantes</th><th>Estado</th><th>Acciones</th></tr></thead><tbody><tr><td>Seguridad industrial</td><td>Técnica</td><td>10 de noviembre de 2026</td><td>24</td><td><span class="bemo-status bemo-status-yellow">Programada</span></td><td><button class="bemo-link-action" type="button"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg> Ver</button><span class="mx-2">|</span><a asp-action="Participantes" class="bemo-link-action"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-user-plus"></use></svg> Asignar personal</a></td></tr><tr><td>Inducción al personal</td><td>Inducción</td><td>17 de noviembre de 2026</td><td>36</td><td><span class="bemo-status bemo-status-green">En curso</span></td><td><button class="bemo-link-action" type="button"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg> Ver</button><span class="mx-2">|</span><a asp-action="Participantes" class="bemo-link-action">Asignar personal</a></td></tr><tr><td>Manejo de maquinaria</td><td>Técnica</td><td>24 de noviembre de 2026</td><td>18</td><td><span class="bemo-status bemo-status-gray">Finalizada</span></td><td><button class="bemo-link-action" type="button"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg> Ver</button><span class="mx-2">|</span><a asp-action="Participantes" class="bemo-link-action">Asignar personal</a></td></tr></tbody></table></div></section>
-        <aside class="bemo-card p-5"><h2 class="text-xl font-extrabold">Asignar participantes</h2><label class="bemo-label mt-5">Capacitación</label><input class="bemo-input bg-[#F8F1E4]" value="Seguridad industrial" readonly /><div class="relative mt-5"><svg class="bemo-icon absolute left-3 top-3" viewBox="0 0 24 24"><use href="#icon-search"></use></svg><input class="bemo-input pl-11" placeholder="Buscar empleado" /></div><label class="mt-4 flex gap-3"><input class="bemo-check" type="checkbox" checked /><span>Carlos Ernesto López García<br /><small>Código: EMP-0178</small></span></label><label class="mt-3 flex gap-3"><input class="bemo-check" type="checkbox" checked /><span>María Fernanda Torres Rivera<br /><small>Código: EMP-0234</small></span></label><button class="bemo-button bemo-button-primary mt-6 w-full" type="button"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>Guardar asignación</button></aside></div>
+<div class="space-y-5">
+    <header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+            <p class="bemo-kicker">Administración</p>
+            <h1 class="bemo-title mt-2">Capacitaciones</h1>
+            <p class="bemo-subtitle mt-2">Organiza la formación y asignación del personal.</p>
+        </div>
+        <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Nueva" class="bemo-button bemo-button-primary self-start">
+            <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg>
+            Nueva capacitación
+        </a>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(mensaje) || !string.IsNullOrWhiteSpace(error))
+    {
+        <div class="bemo-notifications" aria-live="polite" aria-atomic="true">
+            @if (!string.IsNullOrWhiteSpace(mensaje))
+            {
+                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5" role="status">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@mensaje</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7" role="alert">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@error</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+        </div>
+    }
+
+    <section class="bemo-card p-4">
+        <form method="get" asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Index" class="grid gap-4 md:grid-cols-[1.4fr_1fr_1fr_auto] md:items-end" data-server-search>
+            <div>
+                <label class="bemo-label" for="busqueda">Buscar capacitación</label>
+                <div class="relative">
+                    <button class="absolute left-3 top-2.5 z-10 rounded-md p-1 text-[#381F12]" type="submit" aria-label="Buscar capacitación">
+                        <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg>
+                    </button>
+                    <input class="bemo-input pl-12" id="busqueda" name="busqueda" type="search" value="@Model.Busqueda" placeholder="Buscar por nombre o tipo..." autocomplete="off" />
+                </div>
+            </div>
+            <div>
+                <label class="bemo-label" for="tipo">Tipo</label>
+                <select class="bemo-select" id="tipo" name="tipo" onchange="this.form.submit()">
+                    <option value="">Todos los tipos</option>
+                    @foreach (var tipo in Model.TiposCapacitacion)
+                    {
+                        <option value="@tipo.IdTipoCapacitacion" selected="@(Model.TipoSeleccionado == tipo.IdTipoCapacitacion ? "selected" : null)">@tipo.NombreTipoCapacitacion</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="bemo-label" for="estado">Estado</label>
+                <select class="bemo-select" id="estado" name="estado" onchange="this.form.submit()">
+                    <option value="">Todos los estados</option>
+                    <option value="SIN ASIGNAR" selected="@(Model.EstadoSeleccionado == "SIN ASIGNAR" ? "selected" : null)">Sin asignar</option>
+                    <option value="PROGRAMADA" selected="@(Model.EstadoSeleccionado == "PROGRAMADA" ? "selected" : null)">Programada</option>
+                    <option value="EN CURSO" selected="@(Model.EstadoSeleccionado == "EN CURSO" ? "selected" : null)">En curso</option>
+                    <option value="FINALIZADA" selected="@(Model.EstadoSeleccionado == "FINALIZADA" ? "selected" : null)">Finalizada</option>
+                </select>
+            </div>
+            <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Index" class="bemo-button bemo-button-secondary">Limpiar</a>
+        </form>
+    </section>
+
+    <section class="bemo-card overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#E3D2AE] px-5 py-4">
+            <div>
+                <h2 class="text-xl font-extrabold">Capacitaciones registradas</h2>
+                <p class="mt-1 text-sm text-[#684026]">Consulta el avance y asigna empleados a cada actividad.</p>
+            </div>
+            <span class="rounded-full bg-[#FFF3D7] px-4 py-2 text-sm font-bold text-[#684026]">@Model.TotalRegistros registro@(Model.TotalRegistros == 1 ? "" : "s")</span>
+        </div>
+        <div class="bemo-table-wrap">
+            <table class="bemo-table min-w-[900px]">
+                <thead><tr><th>Capacitación</th><th>Tipo</th><th>Periodo</th><th>Participantes</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody>
+                    @if (Model.Capacitaciones.Count == 0)
+                    {
+                        <tr><td colspan="6" class="py-10 text-center text-[#684026]">No hay capacitaciones para los filtros seleccionados.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var capacitacion in Model.Capacitaciones)
+                        {
+                            var periodo = capacitacion.FechaInicio is null
+                                ? "Pendiente de asignación"
+                                : capacitacion.FechaInicio == capacitacion.FechaFin
+                                    ? capacitacion.FechaInicio.Value.ToString("dd/MM/yyyy")
+                                    : $"{capacitacion.FechaInicio:dd/MM/yyyy} - {capacitacion.FechaFin:dd/MM/yyyy}";
+                            <tr>
+                                <td><span class="font-bold">@capacitacion.NombreCapacitacion</span><small class="block text-[#804C2C]">CAP-@capacitacion.IdCapacitacion.ToString("D6")</small></td>
+                                <td>@capacitacion.NombreTipoCapacitacion</td>
+                                <td>@periodo</td>
+                                <td>@capacitacion.EmpleadosParticipantes</td>
+                                <td><span class="bemo-status @ClaseEstado(capacitacion.Estado)">@EtiquetaEstado(capacitacion.Estado)</span></td>
+                                <td>
+                                    <div class="flex flex-wrap gap-x-3 gap-y-1">
+                                        <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Detalle" asp-route-id="@capacitacion.IdCapacitacion" class="bemo-link-action"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-eye"></use></svg> Ver</a>
+                                        @if (!string.Equals(capacitacion.Estado, "FINALIZADA", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Participantes" asp-route-id="@capacitacion.IdCapacitacion" class="bemo-link-action"><svg class="bemo-icon-sm inline" viewBox="0 0 24 24"><use href="#icon-user-plus"></use></svg> Asignar</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-sm text-[#804C2C]">Asignación cerrada</span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.TotalRegistros > 0)
+        {
+            <nav class="flex flex-col justify-between gap-3 border-t border-[#E3D2AE] px-5 py-4 sm:flex-row sm:items-center" aria-label="Paginación de capacitaciones">
+                <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros capacitaciones</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if (Model.PaginaActual > 1)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                    }
+
+                    @if (Model.TotalPaginas <= 7)
+                    {
+                        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual
+                                ? "bemo-button bemo-button-primary"
+                                : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                    }
+                    else
+                    {
+                        var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                        var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                        var clasePrimera = Model.PaginaActual == 1
+                            ? "bemo-button bemo-button-primary"
+                            : "bemo-button bemo-button-secondary";
+                        var claseUltima = Model.PaginaActual == Model.TotalPaginas
+                            ? "bemo-button bemo-button-primary"
+                            : "bemo-button bemo-button-secondary";
+
+                        <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                        @if (paginaInicio > 2)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual
+                                ? "bemo-button bemo-button-primary"
+                                : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                        @if (paginaFin < Model.TotalPaginas - 1)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                    }
+
+                    @if (Model.PaginaActual < Model.TotalPaginas)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                    }
+                </div>
+            </nav>
+        }
+    </section>
 </div>

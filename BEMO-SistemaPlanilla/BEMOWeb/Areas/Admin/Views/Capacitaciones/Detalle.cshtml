@@ -1,0 +1,170 @@
+@using System
+@using System.Collections.Generic
+@model BEMOWeb.Models.CapacitacionDetalleModel
+
+@{
+    ViewData["Title"] = "Detalle de capacitación";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+    var capacitacion = Model.Capacitacion;
+    var mensaje = TempData["Mensaje"] as string;
+    var error = TempData["Error"] as string;
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+
+    string UrlPagina(int pagina)
+    {
+        return $"?id={capacitacion.IdCapacitacion}&pagina={pagina}";
+    }
+    var estadoTexto = capacitacion.Estado switch
+    {
+        "SIN ASIGNAR" => "Sin asignar",
+        "EN CURSO" => "En curso",
+        "PROGRAMADA" => "Programada",
+        "FINALIZADA" => "Finalizada",
+        _ => capacitacion.Estado
+    };
+    var claseEstado = capacitacion.Estado is "EN CURSO" ? "bemo-status-green" : capacitacion.Estado is "PROGRAMADA" or "SIN ASIGNAR" ? "bemo-status-yellow" : "bemo-status-gray";
+}
+
+<div class="space-y-5">
+    <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div>
+            <p class="bemo-breadcrumb">Capacitaciones <span class="mx-2">›</span> Detalle</p>
+            <h1 class="bemo-title mt-3">@capacitacion.NombreCapacitacion</h1>
+            <p class="bemo-subtitle mt-2">CAP-@capacitacion.IdCapacitacion.ToString("D6") · @capacitacion.NombreTipoCapacitacion</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            @if (!string.Equals(capacitacion.Estado, "FINALIZADA", StringComparison.OrdinalIgnoreCase))
+            {
+                <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Participantes" asp-route-id="@capacitacion.IdCapacitacion" class="bemo-button bemo-button-primary"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-user-plus"></use></svg>Asignar personal</a>
+            }
+            <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Index" class="bemo-button bemo-button-secondary">Volver</a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(mensaje) || !string.IsNullOrWhiteSpace(error))
+    {
+        <div class="bemo-notifications" aria-live="polite" aria-atomic="true">
+            @if (!string.IsNullOrWhiteSpace(mensaje))
+            {
+                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5" role="status">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@mensaje</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7" role="alert">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@error</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+        </div>
+    }
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-calendar"></use></svg></div><div><p class="bemo-stat-label">Estado</p><p class="mt-1"><span class="bemo-status @claseEstado">@estadoTexto</span></p></div></div>
+        <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-users"></use></svg></div><div><p class="bemo-stat-label">Participantes</p><p class="bemo-stat-value">@capacitacion.EmpleadosParticipantes</p></div></div>
+        <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-check"></use></svg></div><div><p class="bemo-stat-label">Promedio resultado</p><p class="bemo-stat-value">@(capacitacion.PromedioResultados?.ToString("N2") ?? "—")</p></div></div>
+        <div class="bemo-stat"><div class="bemo-stat-icon"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-document"></use></svg></div><div><p class="bemo-stat-label">Periodo</p><p class="mt-1 font-extrabold">@(capacitacion.FechaInicio?.ToString("dd/MM/yyyy") ?? "Pendiente")</p><p class="text-sm text-[#684026]">@(capacitacion.FechaFin?.ToString("dd/MM/yyyy") ?? "Sin fecha")</p></div></div>
+    </section>
+
+    <section class="bemo-card overflow-hidden">
+        <div class="border-b border-[#E3D2AE] px-5 py-4"><h2 class="text-xl font-extrabold">Participantes asignados</h2><p class="mt-1 text-sm text-[#684026]">Consulta el periodo y el resultado registrado para cada empleado.</p></div>
+        <div class="bemo-table-wrap">
+            <table class="bemo-table min-w-[800px]">
+                <thead><tr><th>Empleado</th><th>DUI</th><th>Departamento</th><th>Inicio</th><th>Fin</th><th>Resultado</th><th>Acción</th></tr></thead>
+                <tbody>
+                    @if (Model.Participantes.Count == 0)
+                    {
+                        <tr><td colspan="7" class="py-10 text-center text-[#684026]">Todavía no hay participantes asignados.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var participante in Model.Participantes)
+                        {
+                            <tr>
+                                <td><span class="font-semibold">@participante.NombreEmpleado</span><small class="block text-[#804C2C]">EMP-@participante.IdEmpleado.ToString("D6")</small></td>
+                                <td>@participante.Dui</td>
+                                <td>@participante.NombreDepartamento</td>
+                                <td>@participante.FechaInicio.ToString("dd/MM/yyyy")</td>
+                                <td>@participante.FechaFin.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <form asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="ActualizarResultado" method="post" class="flex items-center gap-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="idCapacitacion" value="@capacitacion.IdCapacitacion" />
+                                        <input type="hidden" name="idDetalleCapacitacion" value="@participante.IdDetalleCapacitacion" />
+                                        <input type="hidden" name="pagina" value="@Model.PaginaActual" />
+                                        <input class="bemo-input w-24 py-2" type="number" name="resultado" value="@participante.Resultado.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" min="0" max="100" step="0.01" aria-label="Resultado de @participante.NombreEmpleado" />
+                                        <button class="bemo-button bemo-button-secondary px-3 py-2" type="submit">Guardar</button>
+                                    </form>
+                                </td>
+                                <td><span class="text-sm text-[#684026]">0 - 100</span></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.TotalRegistros > 0)
+        {
+            <nav class="flex flex-col justify-between gap-3 border-t border-[#E3D2AE] px-5 py-4 sm:flex-row sm:items-center" aria-label="Paginación de participantes">
+                <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros participantes</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if (Model.PaginaActual > 1)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                    }
+
+                    @if (Model.TotalPaginas <= 7)
+                    {
+                        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                    }
+                    else
+                    {
+                        var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                        var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                        <a class="@(Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary")" href="@UrlPagina(1)">1</a>
+                        @if (paginaInicio > 2)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                        @if (paginaFin < Model.TotalPaginas - 1)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        <a class="@(Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary")" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                    }
+
+                    @if (Model.PaginaActual < Model.TotalPaginas)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                    }
+                </div>
+            </nav>
+        }
+    </section>
+</div>

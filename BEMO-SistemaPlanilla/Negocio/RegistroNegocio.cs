@@ -24,6 +24,7 @@ public static class RegistroNegocio
         servicios.AddScoped<CN_Empleado>();
         servicios.AddScoped<CN_Planilla>();
         servicios.AddScoped<CN_PrestamosAnticipos>();
+        servicios.AddScoped<CN_Capacitacion>();
         servicios.AddScoped<CN_Usuario>();
         servicios.AddScoped<CN_Login>();
 
