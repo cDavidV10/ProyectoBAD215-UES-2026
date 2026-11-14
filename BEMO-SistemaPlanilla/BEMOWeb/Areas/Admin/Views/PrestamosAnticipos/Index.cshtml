@@ -53,13 +53,39 @@
         </div>
     </header>
 
-    @if (!string.IsNullOrWhiteSpace(mensaje))
+    @if (!string.IsNullOrWhiteSpace(mensaje) || !string.IsNullOrWhiteSpace(error))
     {
-        <div class="bemo-alert bemo-alert-success">@mensaje</div>
-    }
-    @if (!string.IsNullOrWhiteSpace(error))
-    {
-        <div class="bemo-alert bemo-alert-error">@error</div>
+        <div class="bemo-notifications" aria-live="polite" aria-atomic="true">
+            @if (!string.IsNullOrWhiteSpace(mensaje))
+            {
+                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5" role="status">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@mensaje</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7" role="alert">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@error</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
+            }
+        </div>
     }
 
     <div class="flex gap-6 border-b border-[#D7C49E]">
