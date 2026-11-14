@@ -144,6 +144,9 @@
                     <option value="POR VENCER"
                             selected="@(string.Equals(Model.EstadoSeleccionado, "POR VENCER", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
                         Por vencer</option>
+                    <option value="FINALIZADO"
+                            selected="@(string.Equals(Model.EstadoSeleccionado, "FINALIZADO", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                        Finalizado</option>
                     </select>
                 </div>
         
@@ -175,13 +178,14 @@
                             {
                                 foreach (var contrato in Model.Contratos)
                                 {
-                                    var porVencer = contrato.Situacion == "POR VENCER";
-                                    var claseEstado = porVencer ? "bemo-status-yellow" : "bemo-status-green";
-                                    var textoEstado = porVencer ? "Por vencer" : "Vigente";
+                                    var finalizado = string.Equals(contrato.Estado, "FINALIZADO", StringComparison.OrdinalIgnoreCase);
+                                    var porVencer = !finalizado && contrato.Situacion == "POR VENCER";
+                                    var claseEstado = finalizado ? "bemo-status-gray" : porVencer ? "bemo-status-yellow" : "bemo-status-green";
+                                    var textoEstado = finalizado ? "Finalizado" : porVencer ? "Por vencer" : "Vigente";
                                     var fechaCulminacion = contrato.FechaCulminacion?.ToString("dd/MM/yyyy") ?? "Indefinido";
                                     var fechaContratacion = contrato.FechaContratacion.ToString("dd/MM/yyyy");
                                     var salario = contrato.SalarioBruto.ToString("N2");
-                                    var dias = contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" : string.Empty;
+                                    var dias = !finalizado && contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" : string.Empty;
                                     var estadoDetalle = $"{textoEstado}{dias}";
                                     <tr>
                                         <td>@contrato.NombreEmpleado</td>
@@ -205,22 +209,25 @@
                                                 </svg>
                                                 Ver
                                             </button>
-                                            <a asp-area="@areaActual" asp-controller="Contratos" asp-action="Editar"
-                                               asp-route-id="@contrato.IdContrato" class="bemo-button bemo-button-ghost">
-                                                <svg class="bemo-icon-sm" viewBox="0 0 24 24">
-                                                    <use href="#icon-edit"></use>
-                                                </svg>
-                                                Editar
-                                            </a>
-                                            <form asp-area="@areaActual" asp-controller="Contratos" asp-action="Finalizar"
-                                                  method="post" class="inline" data-confirm="¿Deseas finalizar este contrato? El empleado quedará inactivo y sus contratos vigentes serán finalizados.">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@contrato.IdContrato" />
-                                                <button class="bemo-button bemo-button-ghost text-red-700" type="submit">
-                                                    <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-close"></use></svg>
-                                                    Finalizar
-                                                </button>
-                                            </form>
+                                            @if (!finalizado)
+                                            {
+                                                <a asp-area="@areaActual" asp-controller="Contratos" asp-action="Editar"
+                                                   asp-route-id="@contrato.IdContrato" class="bemo-button bemo-button-ghost">
+                                                    <svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                        <use href="#icon-edit"></use>
+                                                    </svg>
+                                                    Editar
+                                                </a>
+                                                <form asp-area="@areaActual" asp-controller="Contratos" asp-action="Finalizar"
+                                                      method="post" class="inline" data-confirm="¿Deseas finalizar este contrato? El empleado permanecerá activo, se finalizarán sus contratos vigentes y se desactivará su usuario si existe.">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@contrato.IdContrato" />
+                                                    <button class="bemo-button bemo-button-ghost text-red-700" type="submit">
+                                                        <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-close"></use></svg>
+                                                        Finalizar
+                                                    </button>
+                                                </form>
+                                            }
                                         </td>
                                     </tr>
                                 }

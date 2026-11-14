@@ -13,7 +13,7 @@ public class DAOContrato
         _conexion = conexion;
     }
 
-    public List<ContratoListado> ListarVigentes()
+    public List<ContratoListado> ListarVigentes(bool incluirFinalizados = false)
     {
         const string consulta = @"
             SELECT
@@ -39,8 +39,9 @@ public class DAOContrato
             INNER JOIN dbo.CARGO ca ON ca.id_cargo = c.id_cargo
             INNER JOIN dbo.TIPO_CONTRATO tc ON tc.id_tipo_contrato = c.id_tipo_contrato
             INNER JOIN dbo.DEPARTAMENTO d ON d.id_departamento = c.id_departamento
-            WHERE c.estado = 'VIGENTE'
-              AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= CAST(GETDATE() AS DATE))
+            WHERE @incluir_finalizados = 1
+               OR (c.estado = 'VIGENTE'
+                   AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= CAST(GETDATE() AS DATE)))
             ORDER BY
                 CASE WHEN c.fecha_culminacion IS NULL THEN 1 ELSE 0 END,
                 c.fecha_culminacion,
@@ -50,6 +51,7 @@ public class DAOContrato
         var contratos = new List<ContratoListado>();
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@incluir_finalizados", SqlDbType.Bit).Value = incluirFinalizados;
 
         conexionSql.Open();
         using var dr = cmd.ExecuteReader();
@@ -114,7 +116,7 @@ public class DAOContrato
         var desplazamiento = (pagina - 1) * tamanoPagina;
 
         const string consulta = @"
-            WITH ContratosVigentes AS
+            WITH Contratos AS
             (
                 SELECT
                     c.id_contrato,
@@ -139,8 +141,7 @@ public class DAOContrato
                 INNER JOIN dbo.CARGO ca ON ca.id_cargo = c.id_cargo
                 INNER JOIN dbo.TIPO_CONTRATO tc ON tc.id_tipo_contrato = c.id_tipo_contrato
                 INNER JOIN dbo.DEPARTAMENTO d ON d.id_departamento = c.id_departamento
-                WHERE c.estado = 'VIGENTE'
-                  AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= CAST(GETDATE() AS DATE))
+                WHERE c.estado IN ('VIGENTE', 'FINALIZADO')
                   AND (@busqueda IS NULL
                        OR CAST(e.id_empleado AS VARCHAR(20)) LIKE '%' + @busqueda + '%'
                        OR e.dui LIKE '%' + @busqueda + '%'
@@ -150,10 +151,14 @@ public class DAOContrato
                   AND (@id_empleado IS NULL OR c.id_empleado = @id_empleado)
                   AND (@tipo_contrato IS NULL OR tc.nombre_tipo_contrato = @tipo_contrato)
                   AND (@situacion IS NULL
+                       OR (@situacion = 'FINALIZADO'
+                           AND c.estado = 'FINALIZADO')
                        OR (@situacion = 'POR VENCER'
+                           AND c.estado = 'VIGENTE'
                            AND c.fecha_culminacion IS NOT NULL
                            AND DATEDIFF(DAY, CAST(GETDATE() AS DATE), c.fecha_culminacion) BETWEEN 0 AND 30)
                        OR (@situacion = 'VIGENTE'
+                           AND c.estado = 'VIGENTE'
                            AND (c.fecha_culminacion IS NULL
                                 OR DATEDIFF(DAY, CAST(GETDATE() AS DATE), c.fecha_culminacion) > 30))
                   )
@@ -174,7 +179,7 @@ public class DAOContrato
                 estado,
                 dias_restantes,
                 COUNT(*) OVER() AS total_registros
-            FROM ContratosVigentes
+            FROM Contratos
             ORDER BY
                 CASE WHEN fecha_culminacion IS NULL THEN 1 ELSE 0 END,
                 fecha_culminacion,
@@ -431,12 +436,10 @@ public class DAOContrato
                 WHERE id_empleado = @id_empleado
                   AND estado = 'VIGENTE';
 
-                UPDATE dbo.EMPLEADO
+                UPDATE dbo.USUARIO
                 SET estado = 'INACTIVO'
-                WHERE id_empleado = @id_empleado;
-
-                IF @@ROWCOUNT <> 1
-                    THROW 51031, N'No se pudo inactivar al empleado asociado', 1;
+                WHERE id_empleado = @id_empleado
+                  AND estado != 'INACTIVO';
 
                 COMMIT TRANSACTION;
             END TRY
@@ -458,6 +461,7 @@ public class DAOContrato
         var diasRestantes = dr["dias_restantes"] == DBNull.Value
             ? (int?)null
             : Convert.ToInt32(dr["dias_restantes"]);
+        var estado = Convert.ToString(dr["estado"]) ?? string.Empty;
 
         return new ContratoListado
         {
@@ -475,9 +479,11 @@ public class DAOContrato
             FechaCulminacion = dr["fecha_culminacion"] == DBNull.Value
                 ? null
                 : DateOnly.FromDateTime(Convert.ToDateTime(dr["fecha_culminacion"])),
-            Estado = Convert.ToString(dr["estado"]) ?? string.Empty,
+            Estado = estado,
             DiasRestantes = diasRestantes,
-            Situacion = diasRestantes is >= 0 and <= 30 ? "POR VENCER" : "VIGENTE"
+            Situacion = string.Equals(estado, "FINALIZADO", StringComparison.OrdinalIgnoreCase)
+                ? "FINALIZADO"
+                : diasRestantes is >= 0 and <= 30 ? "POR VENCER" : "VIGENTE"
         };
     }
 

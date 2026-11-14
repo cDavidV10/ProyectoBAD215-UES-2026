@@ -40,6 +40,7 @@ public class ContratosController : Controller
         const int tamanoPagina = 5;
         pagina = Math.Max(1, pagina);
         var todosLosContratos = _contratos.ListarVigentes();
+        var contratosParaFiltro = _contratos.ListarVigentes(true);
         var resultado = _contratos.ListarPaginado(
             pagina,
             tamanoPagina,
@@ -67,7 +68,7 @@ public class ContratosController : Controller
             ContratosVigentes = todosLosContratos.Count,
             ContratosPorVencer = todosLosContratos.Count(contrato => contrato.Situacion == "POR VENCER"),
             Contratos = resultado.Contratos,
-            Empleados = todosLosContratos
+            Empleados = contratosParaFiltro
                 .GroupBy(contrato => new { contrato.IdEmpleado, contrato.NombreEmpleado })
                 .OrderBy(grupo => grupo.Key.NombreEmpleado)
                 .Select(grupo => new Models.ContratoEmpleadoOption
@@ -101,7 +102,7 @@ public class ContratosController : Controller
         try
         {
             _contratos.Finalizar(id);
-            TempData["Mensaje"] = "El contrato fue finalizado y el empleado quedó inactivo.";
+            TempData["Mensaje"] = "El contrato fue finalizado. El empleado permanece activo y su usuario fue desactivado si existía.";
         }
         catch (SqlException ex)
         {
@@ -296,7 +297,7 @@ public class ContratosController : Controller
                 ?? "No se pudo finalizar el contrato.";
         }
 
-        return "No se pudo finalizar el contrato. El empleado no fue inactivado.";
+        return "No se pudo finalizar el contrato ni desactivar el usuario asociado.";
     }
 
     [HttpGet]

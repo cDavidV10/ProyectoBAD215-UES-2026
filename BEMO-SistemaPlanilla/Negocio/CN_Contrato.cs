@@ -12,9 +12,9 @@ public class CN_Contrato
         _metodos = metodos;
     }
 
-    public List<ContratoListado> ListarVigentes()
+    public List<ContratoListado> ListarVigentes(bool incluirFinalizados = false)
     {
-        return _metodos.ListarVigentes();
+        return _metodos.ListarVigentes(incluirFinalizados);
     }
 
     public ContratoListado? ObtenerPorId(int idContrato)
