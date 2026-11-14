@@ -38,13 +38,23 @@ public class DAOEmpleado
                 e.apellido,
                 e.estado
             FROM dbo.EMPLEADO e
-            WHERE e.estado = 'ACTIVO'
-              AND NOT EXISTS
+            WHERE NOT EXISTS
               (
                   SELECT 1
                   FROM dbo.CONTRATO c
                   WHERE c.id_empleado = e.id_empleado
                     AND c.estado = 'VIGENTE'
+              )
+              AND (
+                  e.estado = 'ACTIVO'
+                  OR EXISTS
+                  (
+                      SELECT 1
+                      FROM dbo.CONTRATO c
+                      WHERE c.id_empleado = e.id_empleado
+                        AND c.estado = 'FINALIZADO'
+                        AND c.fecha_culminacion IS NOT NULL
+                  )
               )
             ORDER BY e.apellido, e.nombre, e.id_empleado;";
 

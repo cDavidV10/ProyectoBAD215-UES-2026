@@ -231,11 +231,24 @@ public class DAOContrato
                 DECLARE @msg NVARCHAR(200);
                 DECLARE @rango_min DECIMAL(10,2), @rango_max DECIMAL(10,2);
                 DECLARE @nombre_tipo VARCHAR(50);
+                DECLARE @ultima_fecha_culminacion DATE;
 
                 IF NOT EXISTS
                 (
-                    SELECT 1 FROM dbo.EMPLEADO
-                    WHERE id_empleado = @id_empleado AND estado = 'ACTIVO'
+                    SELECT 1
+                    FROM dbo.EMPLEADO e
+                    WHERE e.id_empleado = @id_empleado
+                      AND (
+                          e.estado = 'ACTIVO'
+                          OR EXISTS
+                          (
+                              SELECT 1
+                              FROM dbo.CONTRATO c
+                              WHERE c.id_empleado = e.id_empleado
+                                AND c.estado = 'FINALIZADO'
+                                AND c.fecha_culminacion IS NOT NULL
+                          )
+                      )
                 )
                     THROW 51020, N'El empleado no existe o no está activo', 1;
 
@@ -245,6 +258,16 @@ public class DAOContrato
                     WHERE id_empleado = @id_empleado AND estado = 'VIGENTE'
                 )
                     THROW 51028, N'El empleado ya tiene un contrato vigente', 1;
+
+                SELECT @ultima_fecha_culminacion = MAX(c.fecha_culminacion)
+                FROM dbo.CONTRATO c
+                WHERE c.id_empleado = @id_empleado
+                  AND c.estado = 'FINALIZADO'
+                  AND c.fecha_culminacion IS NOT NULL;
+
+                IF @ultima_fecha_culminacion IS NOT NULL
+                   AND @fecha_contratacion <> DATEADD(DAY, 1, @ultima_fecha_culminacion)
+                    THROW 51034, N'El nuevo contrato debe iniciar un dia despues de la fecha de culminacion del contrato anterior', 1;
 
                 IF NOT EXISTS (SELECT 1 FROM dbo.DEPARTAMENTO WHERE id_departamento = @id_departamento)
                     THROW 51006, N'El departamento indicado no existe', 1;
@@ -309,6 +332,11 @@ public class DAOContrato
                     @fecha_culminacion,
                     'VIGENTE'
                 );
+
+                UPDATE dbo.EMPLEADO
+                SET estado = 'ACTIVO'
+                WHERE id_empleado = @id_empleado
+                  AND estado = 'INACTIVO';
 
                 COMMIT TRANSACTION;
                 SELECT @id_contrato;

@@ -365,7 +365,7 @@ public class ContratosController : Controller
         var empleado = modelo.EmpleadosDisponibles.FirstOrDefault(item => item.IdEmpleado == modelo.IdEmpleado);
         if (modelo.IdEmpleado.HasValue && empleado is null)
         {
-            ModelState.AddModelError(nameof(modelo.IdEmpleado), "Seleccione un empleado activo sin contrato vigente.");
+            ModelState.AddModelError(nameof(modelo.IdEmpleado), "Seleccione un empleado activo sin contrato vigente o con contrato finalizado.");
         }
         else if (empleado is not null
                  && !string.Equals(modelo.DuiBusqueda.Trim(), empleado.Dui, StringComparison.OrdinalIgnoreCase))
@@ -467,6 +467,7 @@ public class ContratosController : Controller
         {
             51020 => "El empleado seleccionado no existe o no está activo.",
             51028 => "El empleado seleccionado ya tiene un contrato vigente.",
+            51034 => "El nuevo contrato debe iniciar un día después de la fecha de culminación del contrato anterior.",
             51032 => "Un contrato permanente no lleva fecha de culminación.",
             51033 => "Un contrato temporal requiere fecha de culminación.",
             51009 => "El salario ingresado no está dentro del rango permitido para el cargo.",
@@ -478,6 +479,7 @@ public class ContratosController : Controller
                 => "Un contrato temporal requiere fecha de culminación.",
             50003 => "El empleado ya tiene un contrato vigente.",
             50015 => "Las fechas del contrato se traslapan con otro contrato del empleado.",
+            50019 => "El nuevo contrato debe iniciar un día después de la fecha de culminación del contrato anterior.",
             _ => "No se pudo guardar el contrato. Verifica la información ingresada e inténtalo nuevamente."
         };
     }
