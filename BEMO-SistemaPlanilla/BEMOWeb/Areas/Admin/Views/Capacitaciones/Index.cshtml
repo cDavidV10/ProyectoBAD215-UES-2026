@@ -98,7 +98,7 @@
     }
 
     <section class="bemo-card p-4">
-        <form method="get" asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Index" class="grid gap-4 md:grid-cols-[1.4fr_1fr_1fr_auto] md:items-end" data-server-search>
+        <form method="get" asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Index" class="grid gap-4 md:grid-cols-[1.4fr_1fr_1fr] md:items-end" data-server-search data-auto-submit>
             <div>
                 <label class="bemo-label" for="busqueda">Buscar capacitación</label>
                 <div class="relative">
@@ -110,7 +110,7 @@
             </div>
             <div>
                 <label class="bemo-label" for="tipo">Tipo</label>
-                <select class="bemo-select" id="tipo" name="tipo" onchange="this.form.submit()">
+                <select class="bemo-select" id="tipo" name="tipo">
                     <option value="">Todos los tipos</option>
                     @foreach (var tipo in Model.TiposCapacitacion)
                     {
@@ -120,7 +120,7 @@
             </div>
             <div>
                 <label class="bemo-label" for="estado">Estado</label>
-                <select class="bemo-select" id="estado" name="estado" onchange="this.form.submit()">
+                <select class="bemo-select" id="estado" name="estado">
                     <option value="">Todos los estados</option>
                     <option value="SIN ASIGNAR" selected="@(Model.EstadoSeleccionado == "SIN ASIGNAR" ? "selected" : null)">Sin asignar</option>
                     <option value="PROGRAMADA" selected="@(Model.EstadoSeleccionado == "PROGRAMADA" ? "selected" : null)">Programada</option>
@@ -128,7 +128,6 @@
                     <option value="FINALIZADA" selected="@(Model.EstadoSeleccionado == "FINALIZADA" ? "selected" : null)">Finalizada</option>
                 </select>
             </div>
-            <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Index" class="bemo-button bemo-button-secondary">Limpiar</a>
         </form>
     </section>
 
