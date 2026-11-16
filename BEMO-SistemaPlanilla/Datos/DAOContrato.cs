@@ -499,10 +499,13 @@ public class DAOContrato
                 WHERE id_empleado = @id_empleado
                   AND estado = 'VIGENTE';
 
-                UPDATE dbo.USUARIO
-                SET estado = 'INACTIVO'
-                WHERE id_empleado = @id_empleado
-                  AND estado != 'INACTIVO';
+                UPDATE u
+                SET u.estado = 'INACTIVO'
+                FROM dbo.USUARIO u
+                INNER JOIN dbo.ROL r ON r.id_rol = u.id_rol
+                WHERE u.id_empleado = @id_empleado
+                  AND u.estado != 'INACTIVO'
+                  AND UPPER(LTRIM(RTRIM(r.nombre_rol))) <> 'ADMINISTRADOR';
 
                 COMMIT TRANSACTION;
             END TRY

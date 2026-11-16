@@ -115,9 +115,11 @@ public class UsuariosController : Controller
         {
             TempData["Error"] = ex.Message;
         }
-        catch (SqlException)
+        catch (SqlException ex)
         {
-            TempData["Error"] = "No se pudo desactivar el usuario.";
+            TempData["Error"] = ex.Number == 51051
+                ? "Los usuarios con rol ADMINISTRADOR no pueden desactivarse."
+                : "No se pudo desactivar el usuario.";
         }
 
         return RedirectToAction(nameof(Index), new { pagina, busqueda, rol, estado });

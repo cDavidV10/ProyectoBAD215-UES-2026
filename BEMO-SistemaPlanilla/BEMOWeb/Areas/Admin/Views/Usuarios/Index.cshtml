@@ -148,6 +148,7 @@
                                 var estadoTexto = string.Equals(usuario.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase)
                                     ? "Activo"
                                     : "Inactivo";
+                                var esAdministrador = string.Equals(usuario.NombreRol.Trim(), "ADMINISTRADOR", StringComparison.OrdinalIgnoreCase);
                                 <tr>
                                     <td class="font-bold">@usuario.NombreUsuario</td>
                                     <td>@usuario.NombreEmpleado</td>
@@ -163,7 +164,7 @@
                                                 <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg>
                                                 Editar
                                             </button>
-                                        @if (string.Equals(usuario.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase))
+                                        @if (string.Equals(usuario.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase) && !esAdministrador)
                                         {
                                             <form asp-area="Admin" asp-controller="Usuarios" asp-action="Desactivar"
                                                   method="post" class="inline" data-confirm="¿Deseas desactivar este usuario? Ya no podrá iniciar sesión.">
@@ -178,6 +179,12 @@
                                                     Desactivar
                                                 </button>
                                             </form>
+                                        }
+                                        else if (string.Equals(usuario.Estado, "ACTIVO", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <span class="self-center text-sm font-semibold text-[#684026]" title="Los usuarios administradores no pueden desactivarse.">
+                                                Administrador protegido
+                                            </span>
                                         }
                                         else
                                         {

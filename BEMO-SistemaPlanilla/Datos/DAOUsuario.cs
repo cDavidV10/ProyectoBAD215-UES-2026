@@ -157,6 +157,22 @@ public class DAOUsuario
     public void Desactivar(int idUsuario)
     {
         const string consulta = @"
+            DECLARE @nombre_rol VARCHAR(50), @estado VARCHAR(20);
+
+            SELECT @nombre_rol = r.nombre_rol, @estado = u.estado
+            FROM dbo.USUARIO u
+            INNER JOIN dbo.ROL r ON r.id_rol = u.id_rol
+            WHERE u.id_usuario = @id_usuario;
+
+            IF @nombre_rol IS NULL
+                THROW 51050, N'El usuario no existe.', 1;
+
+            IF UPPER(LTRIM(RTRIM(@nombre_rol))) = 'ADMINISTRADOR'
+                THROW 51051, N'Los usuarios con rol ADMINISTRADOR no pueden desactivarse.', 1;
+
+            IF @estado <> 'ACTIVO'
+                THROW 51052, N'El usuario no existe o ya está inactivo.', 1;
+
             UPDATE dbo.USUARIO
             SET estado = 'INACTIVO'
             WHERE id_usuario = @id_usuario

@@ -377,6 +377,17 @@ public class DAOEmpleado
             WHERE id_empleado = @id_empleado;";
 
         const string actualizarEmpleado = @"
+            IF UPPER(LTRIM(RTRIM(@estado))) = 'INACTIVO'
+               AND EXISTS
+               (
+                   SELECT 1
+                   FROM dbo.USUARIO u
+                   INNER JOIN dbo.ROL r ON r.id_rol = u.id_rol
+                   WHERE u.id_empleado = @id_empleado
+                     AND UPPER(LTRIM(RTRIM(r.nombre_rol))) = 'ADMINISTRADOR'
+               )
+                THROW 51051, N'Los usuarios con rol ADMINISTRADOR no pueden desactivarse.', 1;
+
             UPDATE dbo.EMPLEADO
             SET id_afp = @id_afp,
                 nombre = @nombre,

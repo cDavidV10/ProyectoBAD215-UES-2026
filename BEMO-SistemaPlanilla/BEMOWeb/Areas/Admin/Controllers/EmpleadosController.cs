@@ -254,6 +254,7 @@ public class EmpleadosController : Controller
         {
             51012 => ex.Message.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()
                 ?? "La fecha de contratación debe ser posterior al cierre de la última planilla.",
+            51051 => "Los usuarios con rol ADMINISTRADOR no pueden desactivarse.",
             51001 => "Ya existe un empleado registrado con ese DUI.",
             51002 => "Ya existe un empleado registrado con ese número de ISSS.",
             51003 => "Ya existe un empleado registrado con ese NIT.",
