@@ -20,6 +20,7 @@ public static class RegistroDatos
         servicios.AddScoped<DAOPlanilla>();
         servicios.AddScoped<DAOPrestamosAnticipos>();
         servicios.AddScoped<DAOUsuario>();
+        servicios.AddScoped<DAOParametrosLegales>();
         servicios.AddScoped<DAOLogin>();
         servicios.AddScoped<DAOAuditoria>();
         servicios.AddScoped<DAOReporteCostos>();

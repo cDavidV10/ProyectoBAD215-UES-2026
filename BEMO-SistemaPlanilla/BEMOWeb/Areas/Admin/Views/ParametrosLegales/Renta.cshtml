@@ -1,0 +1,70 @@
+@model BEMOWeb.Models.ParametroRentaModel
+
+@{
+    var edicion = Model.IdRenta.HasValue;
+    ViewData["Title"] = edicion ? "Editar tramo de renta" : "Nuevo tramo de renta";
+}
+
+<div class="mx-auto max-w-4xl space-y-5">
+    <div>
+        <p class="bemo-kicker">Administración › Parámetros legales</p>
+        <h1 class="bemo-title mt-2">@(edicion ? "Editar tramo de renta" : "Nuevo tramo de renta")</h1>
+        <p class="bemo-subtitle mt-2">@(edicion ? "Actualiza un tramo que todavía no haya sido usado por una planilla cerrada." : "Registra un tramo de retención para una nueva vigencia legal.")</p>
+    </div>
+
+    <form asp-action="GuardarRenta" method="post" class="bemo-card space-y-5 p-5 md:p-8">
+        @Html.AntiForgeryToken()
+        <input asp-for="IdRenta" type="hidden" />
+        <div asp-validation-summary="ModelOnly" class="bemo-alert bemo-alert-error"></div>
+        <div class="grid gap-5 md:grid-cols-2">
+            <div>
+                <label class="bemo-label bemo-required" asp-for="IdTipoRenta">Tipo de tramo</label>
+                <select class="bemo-select" asp-for="IdTipoRenta">
+                    <option value="">Seleccione un tramo</option>
+                    @foreach (var tipo in Model.TiposRenta)
+                    {
+                        <option value="@tipo.IdTipoRenta">@tipo.NombreTramo</option>
+                    }
+                </select>
+                <span asp-validation-for="IdTipoRenta" class="bemo-validation-message"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" asp-for="CodigoRenta">Código del tramo</label>
+                <input class="bemo-input" asp-for="CodigoRenta" maxlength="20" placeholder="Ej. TRAMO_1" />
+                <span asp-validation-for="CodigoRenta" class="bemo-validation-message"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" asp-for="RangoMinimoRenta">Rango mínimo</label>
+                <input class="bemo-input" asp-for="RangoMinimoRenta" type="number" min="0" step="0.01" />
+                <span asp-validation-for="RangoMinimoRenta" class="bemo-validation-message"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" asp-for="RangoMaximoRenta">Rango máximo</label>
+                <input class="bemo-input" asp-for="RangoMaximoRenta" type="number" min="0.01" step="0.01" />
+                <span asp-validation-for="RangoMaximoRenta" class="bemo-validation-message"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" asp-for="PorcentajeRenta">Porcentaje</label>
+                <div class="relative"><input class="bemo-input pr-10" asp-for="PorcentajeRenta" type="number" min="0" max="100" step="0.01" /><span class="absolute right-3 top-2.5 text-[#684026]">%</span></div>
+                <span asp-validation-for="PorcentajeRenta" class="bemo-validation-message"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" asp-for="ValorFijo">Valor fijo</label>
+                <input class="bemo-input" asp-for="ValorFijo" type="number" min="0" step="0.01" />
+                <span asp-validation-for="ValorFijo" class="bemo-validation-message"></span>
+            </div>
+            <div>
+                <label class="bemo-label bemo-required" asp-for="FechaVigenciaRenta">Fecha de vigencia</label>
+                <input class="bemo-input" asp-for="FechaVigenciaRenta" type="date" />
+                <span asp-validation-for="FechaVigenciaRenta" class="bemo-validation-message"></span>
+            </div>
+        </div>
+        <div class="bemo-info"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg><span>Registra todos los tramos con la misma fecha para construir una tabla completa de retención.</span></div>
+        <div class="flex flex-wrap gap-3">
+            <button type="submit" class="bemo-button bemo-button-primary"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-save"></use></svg>Guardar tramo</button>
+            <a asp-action="Index" class="bemo-button bemo-button-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
