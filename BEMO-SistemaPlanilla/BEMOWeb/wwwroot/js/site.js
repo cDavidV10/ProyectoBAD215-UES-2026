@@ -2,6 +2,28 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 document.addEventListener("DOMContentLoaded", () => {
+    const navbarDate = document.querySelector("[data-navbar-date]");
+    if (navbarDate) {
+        const actualizarFechaNavbar = () => {
+            const ahora = new Date();
+            const fecha = new Intl.DateTimeFormat("es-SV", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }).format(ahora);
+
+            navbarDate.textContent = fecha;
+            navbarDate.setAttribute("datetime", [
+                ahora.getFullYear(),
+                String(ahora.getMonth() + 1).padStart(2, "0"),
+                String(ahora.getDate()).padStart(2, "0")
+            ].join("-"));
+        };
+
+        actualizarFechaNavbar();
+        window.setInterval(actualizarFechaNavbar, 60 * 1000);
+    }
+
     const normalizarBusqueda = (valor) => (valor || "")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")

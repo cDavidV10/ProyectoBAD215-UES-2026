@@ -155,6 +155,12 @@
                 </span>
             </a>
             <div class="flex items-center gap-4">
+                <div class="hidden items-center gap-2 text-sm text-[#F5E8D2] sm:flex" aria-label="Fecha actual">
+                    <svg class="bemo-icon shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="#icon-calendar"></use>
+                    </svg>
+                    <time data-navbar-date></time>
+                </div>
                 <span class="hidden text-base text-[#F5E8D2] sm:inline">@(User.Identity?.Name ?? "vr24001")</span>
                 <form asp-area="" asp-controller="Login" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
