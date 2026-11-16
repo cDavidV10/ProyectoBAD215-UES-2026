@@ -36,7 +36,14 @@ public class DAOEmpleado
                 e.dui,
                 e.nombre,
                 e.apellido,
-                e.estado
+                e.estado,
+                (
+                    SELECT MAX(c.fecha_culminacion)
+                    FROM dbo.CONTRATO c
+                    WHERE c.id_empleado = e.id_empleado
+                      AND c.estado = 'FINALIZADO'
+                      AND c.fecha_culminacion IS NOT NULL
+                ) AS fecha_culminacion_ultimo_contrato
             FROM dbo.EMPLEADO e
             WHERE NOT EXISTS
               (
@@ -72,7 +79,10 @@ public class DAOEmpleado
                 Dui = Convert.ToString(dr["dui"])?.Trim() ?? string.Empty,
                 Nombre = Convert.ToString(dr["nombre"]) ?? string.Empty,
                 Apellido = Convert.ToString(dr["apellido"]) ?? string.Empty,
-                Estado = Convert.ToString(dr["estado"]) ?? string.Empty
+                Estado = Convert.ToString(dr["estado"]) ?? string.Empty,
+                FechaCulminacionUltimoContrato = dr["fecha_culminacion_ultimo_contrato"] == DBNull.Value
+                    ? null
+                    : DateOnly.FromDateTime(Convert.ToDateTime(dr["fecha_culminacion_ultimo_contrato"]))
             });
         }
 

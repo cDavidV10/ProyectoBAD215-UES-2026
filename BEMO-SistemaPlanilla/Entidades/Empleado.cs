@@ -65,6 +65,9 @@ public class Empleado
     [Column("estado")]
     public string Estado { get; set; } = "ACTIVO";
 
+    [NotMapped]
+    public DateOnly? FechaCulminacionUltimoContrato { get; set; }
+
     [ForeignKey(nameof(IdAfp))]
     public Afp Afp { get; set; } = null!;
 

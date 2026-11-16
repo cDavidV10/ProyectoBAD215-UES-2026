@@ -518,11 +518,51 @@ document.addEventListener("DOMContentLoaded", () => {
         const codeElement = result?.querySelector("[data-employee-code]");
         const nameElement = result?.querySelector("[data-employee-name]");
         const statusElement = result?.querySelector("[data-employee-status]");
+        const previousContractElement = result?.querySelector("[data-employee-previous-contract]");
+        const previousContractDateElement = result?.querySelector("[data-employee-previous-contract-date]");
+        const previousContractMinimumElement = result?.querySelector("[data-employee-previous-contract-min]");
+        const startDate = document.querySelector("[data-contract-start]");
+        const generalMinimumStartDate = startDate?.dataset.contractStartMin || startDate?.min || "";
         const options = Array.from(employeeOptions).map((option) => ({
             dui: option.dataset.employeeDui?.trim() || "",
             id: option.dataset.employeeId || "",
-            name: option.dataset.employeeName || ""
+            name: option.dataset.employeeName || "",
+            lastContractEnd: option.dataset.employeeLastContractEnd || ""
         }));
+
+        const formatIsoDate = (date) => [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0")
+        ].join("-");
+
+        const nextDate = (isoDate) => {
+            if (!isoDate) return "";
+            const [year, month, day] = isoDate.split("-").map(Number);
+            const date = new Date(year, month - 1, day);
+            date.setDate(date.getDate() + 1);
+            return formatIsoDate(date);
+        };
+
+        const displayDate = (isoDate) => {
+            if (!isoDate) return "";
+            const [year, month, day] = isoDate.split("-");
+            return `${day}/${month}/${year}`;
+        };
+
+        const updateStartDateMinimum = (employee) => {
+            if (!startDate) return;
+
+            const previousContractMinimum = nextDate(employee?.lastContractEnd);
+            const minimums = [generalMinimumStartDate, previousContractMinimum].filter(Boolean);
+            const effectiveMinimum = minimums.sort().pop() || "";
+            startDate.min = effectiveMinimum;
+            startDate.dataset.contractStartMin = effectiveMinimum;
+
+            if (effectiveMinimum && startDate.value && startDate.value < effectiveMinimum) {
+                startDate.value = "";
+            }
+        };
 
         const updateEmployee = () => {
             if (!searchInput || !employeeIdInput) return;
@@ -536,12 +576,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (nameElement) nameElement.textContent = employee.name;
                 if (statusElement) statusElement.textContent = "ACTIVO";
                 if (message) message.textContent = "";
+                updateStartDateMinimum(employee);
+                if (employee.lastContractEnd) {
+                    previousContractElement?.classList.remove("hidden");
+                    if (previousContractDateElement) {
+                        previousContractDateElement.textContent = displayDate(employee.lastContractEnd);
+                    }
+                    if (previousContractMinimumElement) {
+                        previousContractMinimumElement.textContent = displayDate(nextDate(employee.lastContractEnd));
+                    }
+                } else {
+                    previousContractElement?.classList.add("hidden");
+                }
                 searchInput.setCustomValidity("");
                 return;
             }
 
             employeeIdInput.value = "";
             result?.classList.add("hidden");
+            updateStartDateMinimum(null);
             if (message) {
                 message.textContent = dui.length > 0
                     ? "No se encontró un empleado activo sin contrato vigente con ese DUI."

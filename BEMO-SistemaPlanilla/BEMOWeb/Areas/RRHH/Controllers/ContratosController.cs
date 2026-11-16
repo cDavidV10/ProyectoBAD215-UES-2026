@@ -412,7 +412,8 @@ public class ContratosController : Controller
             {
                 IdEmpleado = empleado.IdEmpleado,
                 Nombre = $"{empleado.Nombre} {empleado.Apellido}".Trim(),
-                Dui = empleado.Dui
+                Dui = empleado.Dui,
+                FechaCulminacionUltimoContrato = empleado.FechaCulminacionUltimoContrato
             })
             .ToList();
         modelo.Departamentos = _departamento.Listar();

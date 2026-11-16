@@ -49,4 +49,6 @@ public class ContratoEmpleadoDisponibleOption
     public string Nombre { get; init; } = string.Empty;
 
     public string Dui { get; init; } = string.Empty;
+
+    public DateOnly? FechaCulminacionUltimoContrato { get; init; }
 }

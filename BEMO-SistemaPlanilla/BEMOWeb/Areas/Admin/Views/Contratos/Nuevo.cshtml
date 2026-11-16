@@ -48,7 +48,8 @@
                             <span data-employee-option
                                   data-employee-dui="@empleado.Dui"
                                   data-employee-id="@empleado.IdEmpleado"
-                                  data-employee-name="@empleado.Nombre"></span>
+                                  data-employee-name="@empleado.Nombre"
+                                  data-employee-last-contract-end="@empleado.FechaCulminacionUltimoContrato?.ToString("yyyy-MM-dd")"></span>
                         }
                     </div>
                     <span asp-validation-for="DuiBusqueda" class="bemo-validation-message text-sm text-red-700"></span>
@@ -64,6 +65,10 @@
                         <p class="mt-1">Código: <span data-employee-code></span></p>
                         <p>Nombre: <span data-employee-name></span></p>
                         <p>Estado: <span data-employee-status>ACTIVO</span></p>
+                        <p class="mt-2 hidden text-sm" data-employee-previous-contract>
+                            El contrato anterior culminó el <span data-employee-previous-contract-date></span>.
+                            La nueva fecha debe ser como mínimo el <strong data-employee-previous-contract-min></strong>.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -126,7 +131,7 @@
                        value="@(Model.FechaContratacion?.ToString("yyyy-MM-dd"))" min="@(Model.FechaMinimaContratacion?.ToString("yyyy-MM-dd"))" type="date" data-contract-start required />
                 @if (Model.FechaMinimaContratacion.HasValue)
                 {
-                    <p class="mt-1 text-xs italic text-[#684026]">La fecha debe ser posterior al cierre de la última planilla. Mínimo: @Model.FechaMinimaContratacion.Value.ToString("dd/MM/yyyy").</p>
+                    <p class="mt-1 text-xs italic text-[#684026]">La fecha debe ser posterior al cierre de la última planilla. Mínimo general: @Model.FechaMinimaContratacion.Value.ToString("dd/MM/yyyy").</p>
                 }
                 <span asp-validation-for="FechaContratacion" class="bemo-validation-message text-sm text-red-700"></span>
             </div>
