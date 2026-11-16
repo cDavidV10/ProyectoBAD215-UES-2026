@@ -126,17 +126,7 @@ public class EmpleadosController : Controller
     [HttpGet]
     public IActionResult Nuevo()
     {
-        var modelo = new Models.NuevoEmpleadoModel
-        {
-            DepartamentosUbicacion = _departamentosUbicacion.listar(),
-            Municipios = _municipiosUbicacion.Listar(),
-            Afps = _afps.Listar(),
-            Departamentos = _departamento.Listar(),
-            Cargos = _cargos.Listar(),
-            TiposContrato = _tiposContrato.Listar()
-        };
-
-        return View("~/Areas/Admin/Views/Empleados/Nuevo.cshtml", modelo);
+        return View("~/Areas/Admin/Views/Empleados/Nuevo.cshtml", CargarCatalogos(new Models.NuevoEmpleadoModel()));
     }
 
     private Models.EditarEmpleadoModel CrearModeloEdicion(Empleado empleado)

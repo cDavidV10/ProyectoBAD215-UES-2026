@@ -562,6 +562,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const endDate = form?.querySelector("[data-contract-end]");
         if (!endDate) return;
 
+        const minimumStartDate = startDate.dataset.contractStartMin || startDate.min;
+        if (minimumStartDate && startDate.value && startDate.value < minimumStartDate) {
+            startDate.value = "";
+        }
+
         const validateContractDates = () => {
             const formatDate = (date) => [
                 date.getFullYear(),

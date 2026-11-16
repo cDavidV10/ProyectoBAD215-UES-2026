@@ -163,7 +163,7 @@
             </div>
             <div>
                 <label class="bemo-label bemo-required" for="fecha-contratacion">Fecha de contratación</label>
-                <input class="bemo-input" id="fecha-contratacion" name="FechaContratacion" value="@(Model.FechaContratacion?.ToString("yyyy-MM-dd"))" min="@(Model.FechaMinimaContratacion?.ToString("yyyy-MM-dd"))" type="date" data-contract-start required />
+                <input class="bemo-input" id="fecha-contratacion" name="FechaContratacion" value="@(Model.FechaContratacion?.ToString("yyyy-MM-dd"))" min="@(Model.FechaMinimaContratacion?.ToString("yyyy-MM-dd"))" data-contract-start-min="@(Model.FechaMinimaContratacion?.ToString("yyyy-MM-dd"))" type="date" data-contract-start autocomplete="off" required />
                 @if (Model.FechaMinimaContratacion.HasValue)
                 {
                     <p class="mt-1 text-xs italic text-[#684026]">La fecha debe ser posterior al cierre de la última planilla. Mínimo: @Model.FechaMinimaContratacion.Value.ToString("dd/MM/yyyy").</p>
