@@ -79,14 +79,18 @@
         <div class="bemo-notifications" aria-live="polite" aria-atomic="true">
             @if (!string.IsNullOrWhiteSpace(mensajeNotificacion))
             {
-                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5" role="status">
+                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5"
+                     role="status">
                     <div class="bemo-notification-body">
-                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24">
+                            <use href="#icon-check"></use>
+                        </svg>
                         <div class="min-w-0 flex-1">
                             <p>@mensajeNotificacion</p>
                             <span class="bemo-notification-countdown" data-notification-countdown></span>
                         </div>
-                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                        <button type="button" class="bemo-notification-close" data-notification-close
+                                aria-label="Cerrar notificación">&times;</button>
                     </div>
                     <div class="bemo-notification-progress" data-notification-progress></div>
                 </div>
@@ -94,14 +98,18 @@
 
             @if (!string.IsNullOrWhiteSpace(errorNotificacion))
             {
-                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7" role="alert">
+                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7"
+                     role="alert">
                     <div class="bemo-notification-body">
-                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24">
+                            <use href="#icon-ban"></use>
+                        </svg>
                         <div class="min-w-0 flex-1">
                             <p>@errorNotificacion</p>
                             <span class="bemo-notification-countdown" data-notification-countdown></span>
                         </div>
-                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                        <button type="button" class="bemo-notification-close" data-notification-close
+                                aria-label="Cerrar notificación">&times;</button>
                     </div>
                     <div class="bemo-notification-progress" data-notification-progress></div>
                 </div>
@@ -144,218 +152,228 @@
                     <option value="POR VENCER"
                             selected="@(string.Equals(Model.EstadoSeleccionado, "POR VENCER", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
                         Por vencer</option>
-                    <option value="FINALIZADO"
-                            selected="@(string.Equals(Model.EstadoSeleccionado, "FINALIZADO", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
-                        Finalizado</option>
-                    </select>
-                </div>
+                        <option value="FINALIZADO"
+                                selected="@(string.Equals(Model.EstadoSeleccionado, "FINALIZADO", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                            Finalizado</option>
+                        </select>
+                    </div>
         
-            </form>
+                </form>
 
-            <section class="bemo-card overflow-hidden">
-                <div class="bemo-table-wrap">
-                    <table class="bemo-table">
-                        <thead>
-                            <tr>
-                                <th>Empleado</th>
-                                <th>Cargo</th>
-                                <th>Tipo</th>
-                                <th>Salario mensual</th>
-                                <th>Inicio</th>
-                                <th>Finalización</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.Contratos.Count == 0)
-                            {
+                <section class="bemo-card overflow-hidden">
+                    <div class="bemo-table-wrap">
+                        <table class="bemo-table">
+                            <thead>
                                 <tr>
-                                    <td colspan="8" class="text-center">No hay contratos que coincidan con los filtros.</td>
+                                    <th>Empleado</th>
+                                    <th>Cargo</th>
+                                    <th>Tipo</th>
+                                    <th>Salario mensual</th>
+                                    <th>Inicio</th>
+                                    <th>Finalización</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
-                            }
-                            else
-                            {
-                                foreach (var contrato in Model.Contratos)
+                            </thead>
+                            <tbody>
+                                @if (Model.Contratos.Count == 0)
                                 {
-                                    var finalizado = string.Equals(contrato.Estado, "FINALIZADO", StringComparison.OrdinalIgnoreCase);
-                                    var porVencer = !finalizado && contrato.Situacion == "POR VENCER";
-                                    var claseEstado = finalizado ? "bemo-status-gray" : porVencer ? "bemo-status-yellow" : "bemo-status-green";
-                                    var textoEstado = finalizado ? "Finalizado" : porVencer ? "Por vencer" : "Vigente";
-                                    var fechaCulminacion = contrato.FechaCulminacion?.ToString("dd/MM/yyyy") ?? "Indefinido";
-                                    var fechaContratacion = contrato.FechaContratacion.ToString("dd/MM/yyyy");
-                                    var salario = contrato.SalarioBruto.ToString("N2");
-                                    var dias = !finalizado && contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" : string.Empty;
-                                    var estadoDetalle = $"{textoEstado}{dias}";
                                     <tr>
-                                        <td>@contrato.NombreEmpleado</td>
-                                        <td>@contrato.NombreCargo</td>
-                                        <td>@contrato.NombreTipoContrato</td>
-                                        <td>$@contrato.SalarioBruto.ToString("N2")</td>
-                                        <td>@contrato.FechaContratacion.ToString("dd/MM/yyyy")</td>
-                                        <td>@fechaCulminacion</td>
-                                        <td><span class="bemo-status @claseEstado">@textoEstado@dias</span></td>
-                                        <td>
-                                            <button class="bemo-button bemo-button-ghost" type="button" data-contract-view
-                                                    data-contract-employee="@contrato.NombreEmpleado"
-                                                    data-contract-position="@contrato.NombreCargo"
-                                                    data-contract-type="@contrato.NombreTipoContrato"
-                                                    data-contract-department="@contrato.NombreDepartamento" data-contract-salary="@salario"
-                                                    data-contract-start="@fechaContratacion" data-contract-end="@fechaCulminacion"
-                                                    data-contract-status="@estadoDetalle"
-                                                    aria-label="Ver contrato de @contrato.NombreEmpleado">
-                                                <svg class="bemo-icon-sm" viewBox="0 0 24 24">
-                                                    <use href="#icon-eye"></use>
-                                                </svg>
-                                                Ver
-                                            </button>
-                                            @if (!finalizado)
-                                            {
-                                                <a asp-area="@areaActual" asp-controller="Contratos" asp-action="Editar"
-                                                   asp-route-id="@contrato.IdContrato" class="bemo-button bemo-button-ghost">
-                                                    <svg class="bemo-icon-sm" viewBox="0 0 24 24">
-                                                        <use href="#icon-edit"></use>
-                                                    </svg>
-                                                    Editar
-                                                </a>
-                                                <form asp-area="@areaActual" asp-controller="Contratos" asp-action="Finalizar"
-                                                      method="post" class="inline" data-confirm="¿Deseas finalizar este contrato? El empleado permanecerá activo, se finalizarán sus contratos vigentes y se desactivará su usuario si existe.">
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@contrato.IdContrato" />
-                                                    <input type="hidden" name="confirmarObligaciones" value="false" data-confirmed-field />
-                                                    <input type="hidden" value="@Url.Action("ObligacionesActivas", "Contratos", new { area = areaActual, id = contrato.IdContrato })" data-obligations-url />
-                                                    <button class="bemo-button bemo-button-ghost text-red-700" type="submit">
-                                                        <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-close"></use></svg>
-                                                        Finalizar
-                                                    </button>
-                                                </form>
-                                            }
-                                        </td>
+                                        <td colspan="8" class="text-center">No hay contratos que coincidan con los filtros.</td>
                                     </tr>
                                 }
+                                else
+                                {
+                                    foreach (var contrato in Model.Contratos)
+                                    {
+                                        var finalizado = string.Equals(contrato.Estado, "FINALIZADO", StringComparison.OrdinalIgnoreCase);
+                                        var porVencer = !finalizado && contrato.Situacion == "POR VENCER";
+                                        var claseEstado = finalizado ? "bemo-status-gray" : porVencer ? "bemo-status-yellow" :
+                       "bemo-status-green";
+                                        var textoEstado = finalizado ? "Finalizado" : porVencer ? "Por vencer" : "Vigente";
+                                        var fechaCulminacion = contrato.FechaCulminacion?.ToString("dd/MM/yyyy") ?? "Indefinido";
+                                        var fechaContratacion = contrato.FechaContratacion.ToString("dd/MM/yyyy");
+                                        var salario = contrato.SalarioBruto.ToString("N2");
+                                        var dias = !finalizado && contrato.DiasRestantes.HasValue ? $" ({contrato.DiasRestantes} días)" :
+                        string.Empty;
+                                        var estadoDetalle = $"{textoEstado}{dias}";
+                                        <tr>
+                                            <td>@contrato.NombreEmpleado</td>
+                                            <td>@contrato.NombreCargo</td>
+                                            <td>@contrato.NombreTipoContrato</td>
+                                            <td>$@contrato.SalarioBruto.ToString("N2")</td>
+                                            <td>@contrato.FechaContratacion.ToString("dd/MM/yyyy")</td>
+                                            <td>@fechaCulminacion</td>
+                                            <td><span class="bemo-status @claseEstado">@textoEstado@dias</span></td>
+                                            <td>
+                                                <button class="bemo-button bemo-button-ghost" type="button" data-contract-view
+                                                        data-contract-employee="@contrato.NombreEmpleado"
+                                                        data-contract-position="@contrato.NombreCargo"
+                                                        data-contract-type="@contrato.NombreTipoContrato"
+                                                        data-contract-department="@contrato.NombreDepartamento" data-contract-salary="@salario"
+                                                        data-contract-start="@fechaContratacion" data-contract-end="@fechaCulminacion"
+                                                        data-contract-status="@estadoDetalle"
+                                                        aria-label="Ver contrato de @contrato.NombreEmpleado">
+                                                    <svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                        <use href="#icon-eye"></use>
+                                                    </svg>
+                                                    Ver
+                                                </button>
+                                                @if (!finalizado)
+                                                {
+                                                    <a asp-area="@areaActual" asp-controller="Contratos" asp-action="Editar"
+                                                       asp-route-id="@contrato.IdContrato" class="bemo-button bemo-button-ghost">
+                                                        <svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                            <use href="#icon-edit"></use>
+                                                        </svg>
+                                                        Editar
+                                                    </a>
+                                                    <form asp-area="@areaActual" asp-controller="Contratos" asp-action="Finalizar" method="post"
+                                                          class="inline" data-confirm-accept-text="Confirmar"
+                                                          data-confirm="¿Deseas finalizar este contrato? El empleado permanecerá activo, se finalizarán sus contratos vigentes y se desactivará su usuario si existe.">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@contrato.IdContrato" />
+                                                        <input type="hidden" name="confirmarObligaciones" value="false" data-confirmed-field />
+                                                        <input type="hidden"
+                                                               value="@Url.Action("ObligacionesActivas", "Contratos", new { area = areaActual, id = contrato.IdContrato })"
+                                                               data-obligations-url />
+                                                        <button class="bemo-button bemo-button-ghost text-red-700" type="submit">
+                                                            <svg class="bemo-icon-sm" viewBox="0 0 24 24">
+                                                                <use href="#icon-close"></use>
+                                                            </svg>
+                                                            Finalizar
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de contratos">
+                    <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros contratos</p>
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if (Model.PaginaActual > 1)
+                        {
+                            <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                        }
+
+                        @if (Model.TotalPaginas <= 7)
+                        {
+                            @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                            {
+                                var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                                <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
                             }
-                        </tbody>
-                    </table>
+                        }
+                        else
+                        {
+                            var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                            var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                            var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" :
+                  "bemo-button bemo-button-secondary";
+
+                            <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                            @if (paginaInicio > 2)
+                            {
+                                <span class="flex items-center px-1 text-[#684026]">...</span>
+                            }
+                            @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                            {
+                                var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                                <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                            }
+                            @if (paginaFin < Model.TotalPaginas - 1)
+                            {
+                                <span class="flex items-center px-1 text-[#684026]">...</span>
+                            }
+                            <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                        }
+
+                        @if (Model.PaginaActual < Model.TotalPaginas)
+                        {
+                            <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                        }
+                    </div>
+                </nav>
+
+                <div class="fixed inset-0 z-50 hidden bg-black/50 p-4" data-contract-modal aria-hidden="true">
+                    <section class="relative mx-auto max-h-full max-w-3xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl md:p-8"
+                             role="dialog" aria-modal="true" aria-labelledby="contract-modal-title">
+                        <button type="button"
+                                class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                                data-contract-modal-close aria-label="Cerrar detalle">&times;</button>
+
+                        <div class="pr-10">
+                            <p class="bemo-kicker">Detalle del contrato</p>
+                            <h2 id="contract-modal-title" class="bemo-title mt-2" data-contract-field="employee">Contrato</h2>
+                            <p class="bemo-subtitle mt-2">Información laboral y condiciones del contrato.</p>
+                        </div>
+
+                        <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Empleado</dt>
+                                <dd class="mt-1 font-semibold" data-contract-field="employee"></dd>
+                            </div>
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Cargo</dt>
+                                <dd class="mt-1 font-semibold" data-contract-field="position"></dd>
+                            </div>
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Tipo de contrato</dt>
+                                <dd class="mt-1 font-semibold" data-contract-field="type"></dd>
+                            </div>
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Departamento</dt>
+                                <dd class="mt-1 font-semibold" data-contract-field="department"></dd>
+                            </div>
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Salario mensual</dt>
+                                <dd class="mt-1 font-semibold">$<span data-contract-field="salary"></span></dd>
+                            </div>
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Estado</dt>
+                                <dd class="mt-1 font-semibold" data-contract-field="status"></dd>
+                            </div>
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Fecha de contratación</dt>
+                                <dd class="mt-1 font-semibold" data-contract-field="start"></dd>
+                            </div>
+                            <div class="bemo-card p-4">
+                                <dt class="bemo-label">Fecha de finalización</dt>
+                                <dd class="mt-1 font-semibold" data-contract-field="end"></dd>
+                            </div>
+                        </dl>
+                    </section>
                 </div>
-            </section>
 
-            <nav class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center" aria-label="Paginación de contratos">
-                <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros contratos</p>
-                <div class="flex flex-wrap items-center gap-2">
-                    @if (Model.PaginaActual > 1)
-                    {
-                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
-                    }
-
-                    @if (Model.TotalPaginas <= 7)
-                    {
-                        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
-                        {
-                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
-                        }
-                    }
-                    else
-                    {
-                        var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
-                        var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
-                        var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                        var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" :
-              "bemo-button bemo-button-secondary";
-
-                        <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
-                        @if (paginaInicio > 2)
-                        {
-                            <span class="flex items-center px-1 text-[#684026]">...</span>
-                        }
-                        @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
-                        {
-                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
-                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
-                        }
-                        @if (paginaFin < Model.TotalPaginas - 1)
-                        {
-                            <span class="flex items-center px-1 text-[#684026]">...</span>
-                        }
-                        <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
-                    }
-
-                    @if (Model.PaginaActual < Model.TotalPaginas)
-                    {
-                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
-                    }
+                <div class="fixed inset-0 z-[60] hidden bg-black/50 p-4" data-confirm-modal aria-hidden="true">
+                    <section class="relative mx-auto mt-20 max-w-lg rounded-xl bg-white p-6 shadow-2xl" role="dialog"
+                             aria-modal="true" aria-labelledby="confirm-modal-title">
+                        <button type="button"
+                                class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
+                                data-confirm-cancel aria-label="Cerrar confirmación">&times;</button>
+                        <div class="flex items-start gap-4 pr-8">
+                            <div class="bemo-stat-icon shrink-0">
+                                <svg class="bemo-icon" viewBox="0 0 24 24">
+                                    <use href="#icon-info"></use>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 id="confirm-modal-title" class="text-xl font-extrabold">Confirmar finalización</h2>
+                                <p class="mt-2 text-[#684026]" data-confirm-message></p>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button" class="bemo-button bemo-button-secondary" data-confirm-cancel>Cancelar</button>
+                            <button type="button" class="bemo-button bemo-button-primary" data-confirm-accept>Finalizar
+                                contrato</button>
+                            </div>
+                        </section>
+                    </div>
                 </div>
-            </nav>
-
-            <div class="fixed inset-0 z-50 hidden bg-black/50 p-4" data-contract-modal aria-hidden="true">
-                <section class="relative mx-auto max-h-full max-w-3xl overflow-y-auto rounded-xl bg-white p-5 shadow-2xl md:p-8"
-                         role="dialog" aria-modal="true" aria-labelledby="contract-modal-title">
-                    <button type="button"
-                            class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
-                            data-contract-modal-close aria-label="Cerrar detalle">&times;</button>
-
-                    <div class="pr-10">
-                        <p class="bemo-kicker">Detalle del contrato</p>
-                        <h2 id="contract-modal-title" class="bemo-title mt-2" data-contract-field="employee">Contrato</h2>
-                        <p class="bemo-subtitle mt-2">Información laboral y condiciones del contrato.</p>
-                    </div>
-
-                    <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Empleado</dt>
-                            <dd class="mt-1 font-semibold" data-contract-field="employee"></dd>
-                        </div>
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Cargo</dt>
-                            <dd class="mt-1 font-semibold" data-contract-field="position"></dd>
-                        </div>
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Tipo de contrato</dt>
-                            <dd class="mt-1 font-semibold" data-contract-field="type"></dd>
-                        </div>
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Departamento</dt>
-                            <dd class="mt-1 font-semibold" data-contract-field="department"></dd>
-                        </div>
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Salario mensual</dt>
-                            <dd class="mt-1 font-semibold">$<span data-contract-field="salary"></span></dd>
-                        </div>
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Estado</dt>
-                            <dd class="mt-1 font-semibold" data-contract-field="status"></dd>
-                        </div>
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Fecha de contratación</dt>
-                            <dd class="mt-1 font-semibold" data-contract-field="start"></dd>
-                        </div>
-                        <div class="bemo-card p-4">
-                            <dt class="bemo-label">Fecha de finalización</dt>
-                            <dd class="mt-1 font-semibold" data-contract-field="end"></dd>
-                        </div>
-                    </dl>
-                </section>
-            </div>
-
-            <div class="fixed inset-0 z-[60] hidden bg-black/50 p-4" data-confirm-modal aria-hidden="true">
-                <section class="relative mx-auto mt-20 max-w-lg rounded-xl bg-white p-6 shadow-2xl"
-                         role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
-                    <button type="button"
-                            class="absolute right-4 top-4 rounded-md p-2 text-2xl leading-none text-[#684026] hover:bg-[#F7F0E2]"
-                            data-confirm-cancel aria-label="Cerrar confirmación">&times;</button>
-                    <div class="flex items-start gap-4 pr-8">
-                        <div class="bemo-stat-icon shrink-0">
-                            <svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
-                        </div>
-                        <div>
-                            <h2 id="confirm-modal-title" class="text-xl font-extrabold">Confirmar finalización</h2>
-                            <p class="mt-2 text-[#684026]" data-confirm-message></p>
-                        </div>
-                    </div>
-                    <div class="mt-6 flex justify-end gap-3">
-                        <button type="button" class="bemo-button bemo-button-secondary" data-confirm-cancel>Cancelar</button>
-                        <button type="button" class="bemo-button bemo-button-primary" data-confirm-accept>Finalizar contrato</button>
-                    </div>
-                </section>
-            </div>
-        </div>
