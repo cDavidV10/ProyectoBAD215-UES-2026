@@ -316,9 +316,9 @@ public class ContratosController : Controller
         }
 
         var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
-        if (modelo.FechaCulminacion.HasValue && modelo.FechaCulminacion.Value <= fechaHoy)
+        if (modelo.FechaCulminacion.HasValue && modelo.FechaCulminacion.Value < fechaHoy)
         {
-            ModelState.AddModelError(nameof(modelo.FechaCulminacion), "La fecha de culminación debe ser posterior a la fecha actual.");
+            ModelState.AddModelError(nameof(modelo.FechaCulminacion), "La fecha de culminación no puede ser anterior a la fecha actual.");
         }
         else if (modelo.FechaCulminacion.HasValue
                  && modelo.FechaContratacion.HasValue
@@ -482,9 +482,9 @@ public class ContratosController : Controller
         }
 
         var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
-        if (modelo.FechaCulminacion.HasValue && modelo.FechaCulminacion.Value <= fechaHoy)
+        if (modelo.FechaCulminacion.HasValue && modelo.FechaCulminacion.Value < fechaHoy)
         {
-            ModelState.AddModelError(nameof(modelo.FechaCulminacion), "La fecha de culminación debe ser posterior a la fecha actual.");
+            ModelState.AddModelError(nameof(modelo.FechaCulminacion), "La fecha de culminación no puede ser anterior a la fecha actual.");
         }
         else if (modelo.FechaCulminacion.HasValue
                  && modelo.FechaContratacion.HasValue
@@ -544,7 +544,7 @@ public class ContratosController : Controller
             51033 => "Un contrato temporal requiere fecha de culminación.",
             51009 => "El salario ingresado no está dentro del rango permitido para el cargo.",
             51010 => "La fecha de culminación no puede ser anterior a la contratación.",
-            51011 => "La fecha de culminación debe ser posterior a la fecha actual.",
+            51011 => "La fecha de culminación no puede ser anterior a la fecha actual.",
             50003 when ex.Message.Contains("permanente", StringComparison.OrdinalIgnoreCase)
                 => "Un contrato permanente no lleva fecha de culminación.",
             50003 when ex.Message.Contains("temporal", StringComparison.OrdinalIgnoreCase)

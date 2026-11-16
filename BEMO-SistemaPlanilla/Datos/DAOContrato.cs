@@ -336,8 +336,8 @@ public class DAOContrato
                 IF @nombre_tipo = 'TEMPORAL' AND @fecha_culminacion IS NULL
                     THROW 51033, N'Un contrato temporal requiere fecha de culminación', 1;
 
-                IF @fecha_culminacion IS NOT NULL AND @fecha_culminacion <= CAST(GETDATE() AS DATE)
-                    THROW 51011, N'La fecha de culminación debe ser posterior a la fecha actual', 1;
+                IF @fecha_culminacion IS NOT NULL AND @fecha_culminacion < CAST(GETDATE() AS DATE)
+                    THROW 51011, N'La fecha de culminación no puede ser anterior a la fecha actual', 1;
 
                 IF @fecha_culminacion IS NOT NULL AND @fecha_culminacion < @fecha_contratacion
                     THROW 51010, N'La fecha de culminación no puede ser anterior a la contratación', 1;

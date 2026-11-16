@@ -653,10 +653,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 String(date.getMonth() + 1).padStart(2, "0"),
                 String(date.getDate()).padStart(2, "0")
             ].join("-");
-            const tomorrow = new Date();
-            tomorrow.setHours(0, 0, 0, 0);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const fechaMinima = formatDate(tomorrow);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const fechaMinima = formatDate(today);
             const fechaMinimaContrato = startDate.value && startDate.value > fechaMinima
                 ? startDate.value
                 : fechaMinima;
@@ -665,7 +664,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let mensaje = "";
             if (endDate.value && endDate.value < fechaMinima) {
-                mensaje = "La fecha de culminación debe ser posterior a la fecha actual.";
+                mensaje = "La fecha de culminación no puede ser anterior a la fecha actual.";
             } else if (startDate.value && endDate.value && endDate.value < startDate.value) {
                 mensaje = "La fecha de culminación no puede ser anterior a la fecha de contratación.";
             }
