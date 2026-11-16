@@ -57,10 +57,10 @@ public class DAOConstanciaSalarial
                 ON departamento.id_departamento = cv.id_departamento
             WHERE e.estado = 'ACTIVO'
               AND (@busqueda IS NULL
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
             ORDER BY e.nombre, e.apellido, e.id_empleado;";
 
         var empleados = new List<ConstanciaEmpleadoOpcion>();

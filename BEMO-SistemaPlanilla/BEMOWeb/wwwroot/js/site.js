@@ -2,6 +2,11 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 document.addEventListener("DOMContentLoaded", () => {
+    const normalizarBusqueda = (valor) => (valor || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLocaleLowerCase();
+
     document.querySelectorAll("[data-password-toggle]").forEach((button) => {
         const targetId = button.dataset.passwordTarget;
         const input = targetId ? document.getElementById(targetId) : null;
@@ -47,9 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!table) return;
 
         input.addEventListener("input", () => {
-            const query = input.value.trim().toLocaleLowerCase();
+            const query = normalizarBusqueda(input.value.trim());
             table.querySelectorAll("tbody tr").forEach((row) => {
-                const value = (row.dataset.filterValue || row.textContent || "").toLocaleLowerCase();
+                const value = normalizarBusqueda(row.dataset.filterValue || row.textContent || "");
                 row.hidden = query.length > 0 && !value.includes(query);
             });
         });

@@ -91,8 +91,8 @@ public class DAOCapacitacion
             SELECT *, COUNT(*) OVER() AS total_registros
             FROM ConEstado
             WHERE (@busqueda IS NULL
-                   OR nombre_capacitacion LIKE '%' + @busqueda + '%'
-                   OR nombre_tipo_capacitacion LIKE '%' + @busqueda + '%')
+                   OR nombre_capacitacion COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR nombre_tipo_capacitacion COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
               AND (@id_tipo_capacitacion IS NULL OR id_tipo_capacitacion = @id_tipo_capacitacion)
               AND (@estado IS NULL OR estado = @estado)
             ORDER BY
@@ -324,10 +324,10 @@ public class DAOCapacitacion
                AND contrato.fila = 1
             WHERE e.estado = 'ACTIVO'
               AND (@busqueda IS NULL
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
               AND (@departamento IS NULL OR contrato.nombre_departamento = @departamento)
             ORDER BY e.nombre, e.apellido, e.id_empleado
             OFFSET @desplazamiento ROWS

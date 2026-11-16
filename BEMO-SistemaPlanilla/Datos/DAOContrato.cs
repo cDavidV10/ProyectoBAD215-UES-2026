@@ -161,11 +161,11 @@ public class DAOContrato
                 INNER JOIN dbo.DEPARTAMENTO d ON d.id_departamento = c.id_departamento
                 WHERE c.estado IN ('VIGENTE', 'FINALIZADO')
                   AND (@busqueda IS NULL
-                       OR CAST(e.id_empleado AS VARCHAR(20)) LIKE '%' + @busqueda + '%'
-                       OR e.dui LIKE '%' + @busqueda + '%'
-                       OR e.nombre LIKE '%' + @busqueda + '%'
-                       OR e.apellido LIKE '%' + @busqueda + '%'
-                       OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                       OR CAST(e.id_empleado AS VARCHAR(20)) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
                   AND (@id_empleado IS NULL OR c.id_empleado = @id_empleado)
                   AND (@tipo_contrato IS NULL OR tc.nombre_tipo_contrato = @tipo_contrato)
                   AND (@situacion IS NULL

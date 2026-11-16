@@ -129,7 +129,7 @@ public class DAOPlanilla
             FROM dbo.VW_Registro_Asistencia_Empleados
             WHERE id_planilla = @id_planilla
               AND (@busqueda IS NULL
-                   OR CONCAT(nombre, ' ', apellido) LIKE '%' + @busqueda + '%')
+                   OR CONCAT(nombre, ' ', apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
             ORDER BY nombre, apellido, id_empleado
             OFFSET @desplazamiento ROWS
             FETCH NEXT @tamanoPagina ROWS ONLY;";
@@ -218,7 +218,7 @@ public class DAOPlanilla
             FROM dbo.VW_Detalle_Planilla
             WHERE id_planilla = @id_planilla
               AND (@busqueda IS NULL
-                   OR CONCAT(nombre, ' ', apellido) LIKE '%' + @busqueda + '%')
+                   OR CONCAT(nombre, ' ', apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
             ORDER BY nombre, apellido, id_empleado
             OFFSET @desplazamiento ROWS
             FETCH NEXT @tamanoPagina ROWS ONLY;";

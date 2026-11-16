@@ -40,11 +40,11 @@ public class DAOUsuario
             INNER JOIN dbo.EMPLEADO e ON e.id_empleado = u.id_empleado
             INNER JOIN dbo.ROL r ON r.id_rol = u.id_rol
             WHERE (@busqueda IS NULL
-                   OR u.nombre_usuario LIKE '%' + @busqueda + '%'
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR u.nombre_usuario COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
               AND (@rol IS NULL OR r.nombre_rol = @rol)
               AND (@estado IS NULL OR u.estado = @estado)
             ORDER BY u.id_usuario

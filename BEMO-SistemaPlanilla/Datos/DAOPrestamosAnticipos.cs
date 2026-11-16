@@ -76,10 +76,10 @@ public class DAOPrestamosAnticipos
                     AND c.estado = 'VIGENTE'
               )
               AND (@busqueda IS NULL
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
             ORDER BY e.apellido, e.nombre, e.id_empleado
             OFFSET @desplazamiento ROWS FETCH NEXT @tamano_pagina ROWS ONLY;";
 
@@ -129,10 +129,10 @@ public class DAOPrestamosAnticipos
             FROM dbo.PRESTAMO pr
             INNER JOIN dbo.EMPLEADO e ON e.id_empleado = pr.id_empleado
             WHERE (@busqueda IS NULL
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
               AND (@estado IS NULL OR pr.estado = @estado)
             ORDER BY pr.fecha_otorgamiento DESC, pr.id_prestamo DESC;";
 
@@ -196,10 +196,10 @@ public class DAOPrestamosAnticipos
             FROM dbo.PRESTAMO pr
             INNER JOIN dbo.EMPLEADO e ON e.id_empleado = pr.id_empleado
             WHERE (@busqueda IS NULL
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
               AND (@estado IS NULL OR pr.estado = @estado)
             ORDER BY pr.fecha_otorgamiento DESC, pr.id_prestamo DESC
             OFFSET @desplazamiento ROWS FETCH NEXT @tamano_pagina ROWS ONLY;";
@@ -259,10 +259,10 @@ public class DAOPrestamosAnticipos
             FROM dbo.ANTICIPO_SALARIO a
             INNER JOIN dbo.EMPLEADO e ON e.id_empleado = a.id_empleado
             WHERE (@busqueda IS NULL
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
               AND (@estado IS NULL OR a.estado = @estado)
             ORDER BY a.fecha_anticipo DESC, a.id_anticipo DESC;";
 
@@ -316,10 +316,10 @@ public class DAOPrestamosAnticipos
             FROM dbo.ANTICIPO_SALARIO a
             INNER JOIN dbo.EMPLEADO e ON e.id_empleado = a.id_empleado
             WHERE (@busqueda IS NULL
-                   OR e.dui LIKE '%' + @busqueda + '%'
-                   OR e.nombre LIKE '%' + @busqueda + '%'
-                   OR e.apellido LIKE '%' + @busqueda + '%'
-                   OR CONCAT(e.nombre, ' ', e.apellido) LIKE '%' + @busqueda + '%')
+                   OR e.dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR e.apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                   OR CONCAT(e.nombre, ' ', e.apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
               AND (@estado IS NULL OR a.estado = @estado)
             ORDER BY a.fecha_anticipo DESC, a.id_anticipo DESC
             OFFSET @desplazamiento ROWS FETCH NEXT @tamano_pagina ROWS ONLY;";

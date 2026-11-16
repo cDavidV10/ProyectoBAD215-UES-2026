@@ -182,10 +182,10 @@ public class DAOEmpleado
                     ) AS fila
                 FROM dbo.VW_Empleados_General
                 WHERE (@busqueda IS NULL
-                       OR dui LIKE '%' + @busqueda + '%'
-                       OR nombre LIKE '%' + @busqueda + '%'
-                       OR apellido LIKE '%' + @busqueda + '%'
-                       OR CONCAT(nombre, ' ', apellido) LIKE '%' + @busqueda + '%')
+                       OR dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR CONCAT(nombre, ' ', apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
                   AND (@departamento IS NULL OR nombre_departamento = @departamento)
                   AND (@estado IS NULL OR estado = @estado)
             )
@@ -255,10 +255,10 @@ public class DAOEmpleado
                     ) AS fila
                 FROM dbo.VW_Empleados_General
                 WHERE (@busqueda IS NULL
-                       OR dui LIKE '%' + @busqueda + '%'
-                       OR nombre LIKE '%' + @busqueda + '%'
-                       OR apellido LIKE '%' + @busqueda + '%'
-                       OR CONCAT(nombre, ' ', apellido) LIKE '%' + @busqueda + '%')
+                       OR dui COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR nombre COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR apellido COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%'
+                       OR CONCAT(nombre, ' ', apellido) COLLATE Latin1_General_100_CI_AI LIKE '%' + @busqueda + '%')
                   AND (@departamento IS NULL OR nombre_departamento = @departamento)
                   AND (@estado IS NULL OR estado = @estado)
             )
