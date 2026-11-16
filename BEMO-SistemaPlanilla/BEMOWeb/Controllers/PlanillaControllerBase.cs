@@ -222,6 +222,22 @@ public abstract class PlanillaControllerBase : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        if (modelo.IncluirAguinaldo)
+        {
+            var planilla = _planillas.Obtener(modelo.IdPlanilla.Value);
+            if (planilla is null)
+            {
+                TempData["Error"] = "La planilla indicada no existe.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!EsUltimaPlanillaDiciembre(planilla.PeriodoInicio, planilla.PeriodoFin))
+            {
+                TempData["Error"] = "El aguinaldo solo puede aplicarse a la última planilla de diciembre, del 16 al último día del mes.";
+                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla.Value });
+            }
+        }
+
         try
         {
             _planillas.Calcular(modelo.IdPlanilla.Value, modelo.IncluirAguinaldo, UsuarioActualId);
@@ -430,6 +446,15 @@ public abstract class PlanillaControllerBase : Controller
             : null;
     }
 
+    private static bool EsUltimaPlanillaDiciembre(DateOnly inicio, DateOnly fin)
+    {
+        return inicio.Year == fin.Year
+            && inicio.Month == 12
+            && fin.Month == 12
+            && inicio.Day == 16
+            && fin.Day == DateTime.DaysInMonth(fin.Year, 12);
+    }
+
     private static string MensajeError(SqlException ex)
     {
         if (ex.Number == 50011)
@@ -465,6 +490,11 @@ public abstract class PlanillaControllerBase : Controller
         if (ex.Number == 51086)
         {
             return "No se puede crear la planilla porque la quincena anterior aun no existe.";
+        }
+
+        if (ex.Number == 51108)
+        {
+            return "El aguinaldo solo puede aplicarse a la última planilla de diciembre, del 16 al último día del mes.";
         }
 
         if (ex.Number is 50012 or 50013)
