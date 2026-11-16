@@ -184,6 +184,9 @@ public class PrestamosAnticiposController : Controller
         }
 
         var info = _prestamosAnticipos.ObtenerInformacionEmpleado(idEmpleado, fecha);
+        var maximoAnticipo = info is null || info.TieneAnticipoPendiente
+            ? null
+            : _prestamosAnticipos.ObtenerMaximoAnticipo(idEmpleado, fecha);
         return info is null
             ? Json(new { disponible = false })
             : Json(new
@@ -194,7 +197,7 @@ public class PrestamosAnticiposController : Controller
                 salarioBruto = info.SalarioBruto,
                 salarioQuincenal = info.SalarioQuincenal,
                 maximoPrestamo = info.MaximoPrestamo,
-                maximoAnticipo = info.MaximoAnticipo,
+                maximoAnticipo,
                 contratoValidoEnFecha = info.ContratoValidoEnFecha,
                 tienePrestamoActivo = info.TienePrestamoActivo,
                 tieneAnticipoPendiente = info.TieneAnticipoPendiente

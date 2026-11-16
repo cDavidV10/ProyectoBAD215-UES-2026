@@ -106,6 +106,25 @@
             const employeeMessage = document.querySelector("[data-prestamo-employee-message]");
             const normalizar = (valor) => (valor || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
             const moneda = (valor) => `$${Number(valor || 0).toFixed(2)}`;
+            const minimoMonto = Number(amount?.min || 0.01);
+
+            const actualizarDisponibilidadMonto = (maximo) => {
+                const valor = Number(maximo);
+                const disponible = Number.isFinite(valor) && valor >= minimoMonto;
+
+                if (!disponible) {
+                    amount?.removeAttribute("max");
+                    if (amount) {
+                        amount.value = "";
+                        amount.disabled = true;
+                    }
+                    return false;
+                }
+
+                amount.disabled = false;
+                amount.max = valor.toFixed(2);
+                return true;
+            };
 
             const cargarInformacionEmpleado = async () => {
                 if (!employee?.value || !date?.value) {
@@ -126,11 +145,15 @@
                     infoCargo.textContent = data.cargo;
                     infoSalary.textContent = moneda(data.salarioBruto);
                     infoBiweekly.textContent = moneda(data.salarioQuincenal);
+                    const maximoAnticipo = Number(data.maximoAnticipo);
+                    const anticipoDisponible = Number.isFinite(maximoAnticipo) && maximoAnticipo >= minimoMonto;
                     infoLimit.textContent = !data.contratoValidoEnFecha
                         ? "No disponible para la fecha seleccionada"
                         : data.tieneAnticipoPendiente
                             ? "No disponible: ya tiene un anticipo pendiente"
-                            : moneda(data.maximoAnticipo);
+                            : anticipoDisponible
+                                ? moneda(maximoAnticipo)
+                                : "No disponible para la fecha seleccionada";
                     if (employeeMessage && !data.contratoValidoEnFecha) {
                         employeeMessage.textContent = "Empleado seleccionado. La fecha no coincide con un contrato vigente.";
                     }
@@ -212,6 +235,7 @@
                 if (!employee?.value || !date?.value) {
                     limit.textContent = "Seleccione empleado";
                     amount.removeAttribute("max");
+                    amount.disabled = false;
                     return;
                 }
 
@@ -222,16 +246,16 @@
                     const data = await response.json();
                     if (data.maximo === null || data.maximo === undefined) {
                         limit.textContent = "No disponible";
-                        amount.removeAttribute("max");
+                        actualizarDisponibilidadMonto(null);
                         return;
                     }
 
                     const maximo = Number(data.maximo);
-                    limit.textContent = `$${maximo.toFixed(2)}`;
-                    amount.max = maximo.toFixed(2);
+                    limit.textContent = maximo >= minimoMonto ? `$${maximo.toFixed(2)}` : "No disponible";
+                    actualizarDisponibilidadMonto(maximo);
                 } catch {
                     limit.textContent = "Consulte al guardar";
-                    amount.removeAttribute("max");
+                    actualizarDisponibilidadMonto(null);
                 }
             };
 
