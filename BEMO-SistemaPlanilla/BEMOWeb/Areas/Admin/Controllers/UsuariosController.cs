@@ -143,9 +143,11 @@ public class UsuariosController : Controller
         {
             TempData["Error"] = ex.Message;
         }
-        catch (SqlException)
+        catch (SqlException ex)
         {
-            TempData["Error"] = "No se pudo activar el usuario.";
+            TempData["Error"] = ex.Number == 51053
+                ? "No se puede activar el usuario: el empleado debe estar activo y tener un contrato vigente con el cargo de Recursos Humanos."
+                : "No se pudo activar el usuario.";
         }
 
         return RedirectToAction(nameof(Index), new { pagina, busqueda, rol, estado });

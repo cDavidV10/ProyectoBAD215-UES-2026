@@ -192,7 +192,20 @@ public class DAOUsuario
     public void Activar(int idUsuario)
     {
         const string obtenerEstados = @"
-            SELECT u.estado AS estado_usuario, e.estado AS estado_empleado
+            SELECT
+                u.estado AS estado_usuario,
+                e.estado AS estado_empleado,
+                CASE WHEN EXISTS
+                (
+                    SELECT 1
+                    FROM dbo.CONTRATO c
+                    INNER JOIN dbo.CARGO cargo ON cargo.id_cargo = c.id_cargo
+                    WHERE c.id_empleado = e.id_empleado
+                      AND c.estado = 'VIGENTE'
+                      AND c.fecha_contratacion <= CAST(GETDATE() AS DATE)
+                      AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= CAST(GETDATE() AS DATE))
+                      AND UPPER(LTRIM(RTRIM(cargo.nombre_cargo))) LIKE '%RECURSOS HUMANOS%'
+                ) THEN 1 ELSE 0 END AS tiene_contrato_rrhh
             FROM dbo.USUARIO u
             INNER JOIN dbo.EMPLEADO e ON e.id_empleado = u.id_empleado
             WHERE u.id_usuario = @id_usuario;";
@@ -225,6 +238,11 @@ public class DAOUsuario
             if (!string.Equals(estadoUsuario, "INACTIVO", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException("El usuario no existe o ya está activo.");
+            }
+
+            if (!Convert.ToBoolean(dr["tiene_contrato_rrhh"]))
+            {
+                throw new InvalidOperationException("No se puede activar el usuario porque el empleado no tiene un contrato activo con el cargo de Recursos Humanos.");
             }
         }
 
