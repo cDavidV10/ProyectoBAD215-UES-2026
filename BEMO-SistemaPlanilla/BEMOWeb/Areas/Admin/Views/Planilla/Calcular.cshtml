@@ -99,7 +99,7 @@
             <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                     <h2 class="text-xl font-extrabold">Captura de asistencia</h2>
-                    <p class="mt-1 text-sm text-[#684026]">Los valores se guardan en el borrador y pueden corregirse antes del calculo.</p>
+            <p class="mt-1 text-sm text-[#684026]">Los valores se guardan en el borrador y pueden corregirse antes del calculo. Los días trabajados y no trabajados se completan automáticamente hasta sumar 15.</p>
                 </div>
                 <span class="bemo-status bemo-status-yellow">BORRADOR</span>
             </div>
@@ -120,14 +120,18 @@
                             {
                                 var asistencia = Model.Asistencias[i];
                                 var bonificaciones = asistencia.Bonificaciones.ToString("0.00", CultureInfo.InvariantCulture);
-                                <tr>
+                                <tr data-attendance-row>
                                     <td class="font-semibold">
                                         @asistencia.NombreEmpleado
                                         <input type="hidden" name="Asistencias[@i].IdDetallePlanilla" value="@asistencia.IdDetallePlanilla" />
                                     </td>
                                     <td>@asistencia.NombreDepartamento</td>
-                                    <td><input class="bemo-input min-w-24" type="number" min="0" name="Asistencias[@i].DiasTrabajados" value="@asistencia.DiasTrabajados" required /></td>
-                                    <td><input class="bemo-input min-w-24" type="number" min="0" name="Asistencias[@i].DiasNoTrabajados" value="@asistencia.DiasNoTrabajados" required /></td>
+                                    <td>
+                                        <input class="bemo-input min-w-24" type="number" min="0" max="15" step="1" name="Asistencias[@i].DiasTrabajados" value="@asistencia.DiasTrabajados" data-attendance-days="worked" required />
+                                    </td>
+                                    <td>
+                                        <input class="bemo-input min-w-24" type="number" min="0" max="15" step="1" name="Asistencias[@i].DiasNoTrabajados" value="@asistencia.DiasNoTrabajados" data-attendance-days="not-worked" required />
+                                    </td>
                                     <td><input class="bemo-input min-w-24" type="number" min="0" name="Asistencias[@i].HorasExtras" value="@asistencia.HorasExtras" required /></td>
                                     <td><input class="bemo-input min-w-32" type="number" min="0" step="0.01" name="Asistencias[@i].Bonificaciones" value="@bonificaciones" required /></td>
                                 </tr>
@@ -215,4 +219,28 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll("[data-attendance-row]").forEach((row) => {
+            const diasTrabajados = row.querySelector("[data-attendance-days='worked']");
+            const diasNoTrabajados = row.querySelector("[data-attendance-days='not-worked']");
+            if (!diasTrabajados || !diasNoTrabajados) return;
+
+            const completarDias = (campoOrigen, campoComplementario) => {
+                if (campoOrigen.value === "") {
+                    campoComplementario.value = "";
+                    return;
+                }
+
+                const valor = Number(campoOrigen.value);
+                if (!Number.isFinite(valor)) return;
+
+                const diasIngresados = Math.min(15, Math.max(0, Math.trunc(valor)));
+                campoOrigen.value = diasIngresados;
+                campoComplementario.value = 15 - diasIngresados;
+            };
+
+            diasTrabajados.addEventListener("input", () => completarDias(diasTrabajados, diasNoTrabajados));
+            diasNoTrabajados.addEventListener("input", () => completarDias(diasNoTrabajados, diasTrabajados));
+        });
+    </script>
 }
