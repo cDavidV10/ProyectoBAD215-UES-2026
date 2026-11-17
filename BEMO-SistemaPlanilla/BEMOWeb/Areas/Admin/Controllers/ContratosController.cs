@@ -540,7 +540,7 @@ public class ContratosController : Controller
                 ?? "La fecha de contratación debe ser posterior al cierre de la última planilla.",
             51020 => "El empleado seleccionado no existe o no está activo.",
             51028 => "El empleado seleccionado ya tiene un contrato vigente.",
-            51034 => "El nuevo contrato debe iniciar un día después de la fecha de culminación del contrato anterior.",
+            51034 => "El nuevo contrato debe iniciar después de la fecha de culminación del contrato anterior.",
             51032 => "Un contrato permanente no lleva fecha de culminación.",
             51033 => "Un contrato temporal requiere fecha de culminación.",
             51009 => "El salario ingresado no está dentro del rango permitido para el cargo.",
@@ -552,7 +552,7 @@ public class ContratosController : Controller
                 => "Un contrato temporal requiere fecha de culminación.",
             50003 => "El empleado ya tiene un contrato vigente.",
             50015 => "Las fechas del contrato se traslapan con otro contrato del empleado.",
-            50019 => "El nuevo contrato debe iniciar un día después de la fecha de culminación del contrato anterior.",
+            50019 => "El nuevo contrato debe iniciar después de la fecha de culminación del contrato anterior.",
             _ => "No se pudo guardar el contrato. Verifica la información ingresada e inténtalo nuevamente."
         };
     }

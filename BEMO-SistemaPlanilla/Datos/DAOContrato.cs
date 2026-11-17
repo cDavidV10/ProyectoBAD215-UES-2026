@@ -304,8 +304,8 @@ public class DAOContrato
                 END;
 
                 IF @ultima_fecha_culminacion IS NOT NULL
-                   AND @fecha_contratacion <> DATEADD(DAY, 1, @ultima_fecha_culminacion)
-                    THROW 51034, N'El nuevo contrato debe iniciar un dia despues de la fecha de culminacion del contrato anterior', 1;
+                   AND @fecha_contratacion <= @ultima_fecha_culminacion
+                    THROW 51034, N'El nuevo contrato debe iniciar despues de la fecha de culminacion del contrato anterior', 1;
 
                 IF NOT EXISTS (SELECT 1 FROM dbo.DEPARTAMENTO WHERE id_departamento = @id_departamento)
                     THROW 51006, N'El departamento indicado no existe', 1;
