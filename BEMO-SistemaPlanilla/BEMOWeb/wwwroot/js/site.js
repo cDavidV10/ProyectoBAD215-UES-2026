@@ -205,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 messageElement.textContent = message;
             }
             if (titleElement) {
-                titleElement.textContent = form.dataset.confirmTitle || "Confirmar desactivacion";
+                titleElement.textContent = form.dataset.confirmTitle || "Confirmar desactivación";
             }
             if (acceptButton) {
                 acceptButton.textContent = form.dataset.confirmAcceptText || "Desactivar usuario";
