@@ -71,10 +71,23 @@
                             </span>
                         </div>
                         <h2 class="text-3xl font-bold text-[#381F12]">Iniciar sesión</h2>
-                        <p class="mt-2 text-sm leading-6 text-[#804C2C]">
+                        <p class="mt-2 text-base leading-6 text-[#804C2C]">
                             Ingresa tus credenciales para continuar.
                         </p>
                     </div>
+
+                    @if (!conectado && ViewBag.ErrorConexion is string errorConexion && !string.IsNullOrWhiteSpace(errorConexion))
+                    {
+                        <div role="alert" class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs leading-5 text-red-700">
+                            <strong class="font-semibold">Detalle de conexión:</strong> @errorConexion
+                        </div>
+                    }
+                    else if (ViewBag.AdvertenciaPermisos is string advertenciaPermisos && !string.IsNullOrWhiteSpace(advertenciaPermisos))
+                    {
+                        <div role="alert" class="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
+                            <strong class="font-semibold">Permisos SQL pendientes:</strong> @advertenciaPermisos
+                        </div>
+                    }
 
                     <form asp-controller="Login" asp-action="Login" method="post" class="space-y-5">
                         @Html.AntiForgeryToken()

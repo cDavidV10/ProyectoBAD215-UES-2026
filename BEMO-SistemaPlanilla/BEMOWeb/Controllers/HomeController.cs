@@ -2,32 +2,23 @@ using BEMOWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using BEMO.Datos;
 using System.Diagnostics;
-using Microsoft.Data.SqlClient;
 
 namespace BEMOWeb.Controllers
 {
     public class HomeController : Controller
     {
         private readonly Conexion _conexion;
+        private readonly IWebHostEnvironment _entorno;
 
-        public HomeController(Conexion conexion)
+        public HomeController(Conexion conexion, IWebHostEnvironment entorno)
         {
             _conexion = conexion;
+            _entorno = entorno;
         }
 
         public IActionResult Index()
         {
-            try
-            {
-                using var conexionSql = new SqlConnection(_conexion.Cadena);
-                conexionSql.Open();
-                ViewBag.Conectado = true;
-            }
-            catch (SqlException)
-            {
-                ViewBag.Conectado = false;
-            }
-
+            ConexionUiHelper.CargarEstadoConexion(this, _conexion, _entorno);
             return View(new LoginViewModel());
         }
 

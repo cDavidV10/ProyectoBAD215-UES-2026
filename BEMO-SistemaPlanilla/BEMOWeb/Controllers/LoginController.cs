@@ -17,25 +17,19 @@ namespace BEMOWeb.Controllers
     {
         private readonly CN_Login _loginNegocio;
         private readonly Conexion _conexion;
+        private readonly IWebHostEnvironment _entorno;
+        private readonly ILogger<LoginController> _logger;
 
-        public LoginController(CN_Login loginNegocio, Conexion conexion)
+        public LoginController(
+            CN_Login loginNegocio,
+            Conexion conexion,
+            IWebHostEnvironment entorno,
+            ILogger<LoginController> logger)
         {
             _loginNegocio = loginNegocio;
             _conexion = conexion;
-        }
-
-        private bool HayConexion()
-        {
-            try
-            {
-                using var conexionSql = new SqlConnection(_conexion.Cadena);
-                conexionSql.Open();
-                return true;
-            }
-            catch (SqlException)
-            {
-                return false;
-            }
+            _entorno = entorno;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -52,14 +46,14 @@ namespace BEMOWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel modelo)
         {
-            ViewBag.Conectado = HayConexion();
+            var conectado = ConexionUiHelper.CargarEstadoConexion(this, _conexion, _entorno);
 
             if (!ModelState.IsValid)
             {
                 return View("~/Views/Home/Index.cshtml", modelo);
             }
 
-            if (ViewBag.Conectado is not true)
+            if (!conectado)
             {
                 modelo.Clave = string.Empty;
                 ModelState.AddModelError(string.Empty, "No fue posible conectar con la base de datos.");
@@ -82,11 +76,14 @@ namespace BEMOWeb.Controllers
             }
             catch (SqlException ex)
             {
+                _logger.LogError(
+                    ex,
+                    "Error de SQL Server al autenticar al usuario {Usuario} (código {CodigoSql}).",
+                    modelo.NombreUsuario,
+                    ex.Number);
+
                 modelo.Clave = string.Empty;
-                var mensaje = ex.Message.Contains("revocado", StringComparison.OrdinalIgnoreCase)
-                    ? "Acceso denegado: tu acceso ha sido revocado temporalmente."
-                    : "El usuario o la contraseña son incorrectos.";
-                ModelState.AddModelError(string.Empty, mensaje);
+                ModelState.AddModelError(string.Empty, MensajeErrorAutenticacion(ex));
                 return View("~/Views/Home/Index.cshtml", modelo);
             }
 
@@ -150,8 +147,33 @@ namespace BEMOWeb.Controllers
             // Mensaje simple para la web indicando dónde buscar
             return Content("¡Hash generado! Ve a Visual Studio, abre la ventana 'Salida' (Output) y selecciona 'Depurar' para copiar el código.");
         }
-        
-    }
 
-    
+        private string MensajeErrorAutenticacion(SqlException ex)
+        {
+            if (ex.Message.Contains("revocado", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Acceso denegado: tu acceso ha sido revocado temporalmente.";
+            }
+
+            if (ex.Number is 229 or 230 or 262 or 297)
+            {
+                return "Tu usuario de SQL Server no tiene permiso EXECUTE sobre dbo.sp_Autenticar. Ejecuta scripts/permisos_bd_remota.sql en la base de datos remota.";
+            }
+
+            if (ex.Number is 2812 or 208)
+            {
+                return "No se encontró dbo.sp_Autenticar o las tablas del sistema en la base de datos conectada. Revisa Database en tu archivo .env.";
+            }
+
+            // Los errores >= 50000 provienen de THROW/RAISERROR dentro del procedimiento almacenado.
+            if (ex.Number >= 50000)
+            {
+                return "El usuario o la contraseña son incorrectos.";
+            }
+
+            return _entorno.IsDevelopment()
+                ? $"Error de SQL Server al autenticar (código {ex.Number}): {Conexion.PrimeraLinea(ex.Message)}"
+                : "No se pudo completar la autenticación en la base de datos. Inténtalo nuevamente.";
+        }
+    }
 }

@@ -26,8 +26,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-var cadena = builder.Configuration.GetConnectionString("Bemo")
-    ?? throw new InvalidOperationException("Falta ConnectionStrings__Bemo en el archivo .env");
+var cadena = builder.Configuration.GetConnectionString("Bemo");
+if (string.IsNullOrWhiteSpace(cadena))
+{
+    throw new InvalidOperationException(
+        "Falta ConnectionStrings__Bemo en el archivo .env (copia .env.example a .env y configura tu servidor SQL).");
+}
 
 builder.Services.AgregarNegocio(cadena);
 
