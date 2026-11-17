@@ -4,7 +4,6 @@ public class CapturarAsistenciaModel
 {
     public int IdPlanilla { get; set; }
     public int Pagina { get; set; } = 1;
-    public bool MostrarTodos { get; set; }
     public string? Busqueda { get; set; }
     public List<AsistenciaInputModel> Asistencias { get; set; } = new();
 }

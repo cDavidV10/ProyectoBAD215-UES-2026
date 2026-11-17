@@ -50,11 +50,6 @@ public class CN_Planilla
         return _metodos.Crear(periodoInicio, periodoFin, fechaPago, idUsuario);
     }
 
-    public int ActualizarEmpleados(int idPlanilla, int? idUsuario = null)
-    {
-        return _metodos.ActualizarEmpleados(idPlanilla, idUsuario);
-    }
-
     public void CapturarAsistencia(int idDetallePlanilla, int diasTrabajados, int diasNoTrabajados, int horasExtras, decimal bonificaciones, int? idUsuario = null)
     {
         _metodos.CapturarAsistencia(idDetallePlanilla, diasTrabajados, diasNoTrabajados, horasExtras, bonificaciones, idUsuario);
