@@ -218,9 +218,11 @@ public abstract class CapacitacionesControllerBase : Controller
         var participantesPorId = participantes.ToDictionary(item => item.IdDetalleCapacitacion);
         var idsRecibidos = modelo.Resultados.Select(item => item.IdDetalleCapacitacion).ToList();
 
-        if (modelo.Resultados.Count == 0
+        if (!ModelState.IsValid
+            || modelo.Resultados.Count == 0
             || idsRecibidos.Count != idsRecibidos.Distinct().Count()
             || modelo.Resultados.Any(item => item.Resultado is < 0 or > 100)
+            || modelo.Resultados.Any(item => decimal.Round(item.Resultado, 2) != item.Resultado)
             || modelo.Resultados.Any(item => !participantesPorId.ContainsKey(item.IdDetalleCapacitacion)))
         {
             TempData["Error"] = "Verifica que todas las notas estén entre 0 y 100 y correspondan a los participantes asignados.";

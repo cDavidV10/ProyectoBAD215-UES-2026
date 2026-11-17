@@ -1,7 +1,6 @@
 using BEMO.Entidades;
 using Microsoft.Data.SqlClient;
 using System.Data;
-using System.Text.Json;
 
 namespace BEMO.Datos;
 
@@ -494,22 +493,47 @@ public class DAOCapacitacion
             return;
         }
 
-        var json = JsonSerializer.Serialize(lista.Select(resultado => new
-        {
-            resultado.IdDetalleCapacitacion,
-            resultado.Resultado
-        }));
-
         using var conexionSql = new SqlConnection(_conexion.Cadena);
-        using var cmd = new SqlCommand("dbo.usp_Actualizar_Resultados_Capacitacion", conexionSql)
-        {
-            CommandType = CommandType.StoredProcedure
-        };
-        cmd.Parameters.Add("@id_capacitacion", SqlDbType.Int).Value = idCapacitacion;
-        cmd.Parameters.Add("@resultados_json", SqlDbType.NVarChar, -1).Value = json;
-
         conexionSql.Open();
-        cmd.ExecuteNonQuery();
+        using var transaccion = conexionSql.BeginTransaction();
+
+        const string consulta = @"
+            UPDATE dbo.DETALLE_CAPACITACION
+            SET resultado = @resultado
+            WHERE id_detalle_capacitacion = @id_detalle_capacitacion
+              AND id_capacitacion = @id_capacitacion;";
+
+        try
+        {
+            foreach (var resultado in lista)
+            {
+                if (resultado.Resultado is < 0 or > 100
+                    || decimal.Round(resultado.Resultado, 2) != resultado.Resultado)
+                {
+                    throw new InvalidOperationException("El resultado debe estar entre 0 y 100 y tener como máximo dos decimales.");
+                }
+
+                using var cmd = new SqlCommand(consulta, conexionSql, transaccion);
+                cmd.Parameters.Add("@id_detalle_capacitacion", SqlDbType.Int).Value = resultado.IdDetalleCapacitacion;
+                cmd.Parameters.Add("@id_capacitacion", SqlDbType.Int).Value = idCapacitacion;
+                var resultadoParametro = cmd.Parameters.Add("@resultado", SqlDbType.Decimal);
+                resultadoParametro.Precision = 5;
+                resultadoParametro.Scale = 2;
+                resultadoParametro.Value = resultado.Resultado;
+
+                if (cmd.ExecuteNonQuery() != 1)
+                {
+                    throw new InvalidOperationException("La participación no existe o no pertenece a esta capacitación.");
+                }
+            }
+
+            transaccion.Commit();
+        }
+        catch
+        {
+            transaccion.Rollback();
+            throw;
+        }
     }
 
     private static CapacitacionListado MapearListado(SqlDataReader dr)

@@ -82,6 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.querySelectorAll("[data-decimal-input]").forEach((input) => {
+        const normalizarDecimal = () => {
+            input.value = input.value.replace(",", ".");
+        };
+
+        input.addEventListener("input", normalizarDecimal);
+        input.form?.addEventListener("submit", normalizarDecimal);
+    });
+
     const serverSearchTimers = new WeakMap();
     document.querySelectorAll("form[data-server-search]").forEach((form) => {
         const input = form.querySelector("input[name='busqueda']");
