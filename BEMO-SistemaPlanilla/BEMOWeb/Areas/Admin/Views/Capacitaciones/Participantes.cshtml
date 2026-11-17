@@ -62,14 +62,14 @@
             <a asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Detalle" asp-route-id="@Model.IdCapacitacion" class="bemo-button bemo-button-secondary">Ver detalle</a>
         </div>
 
-        <form method="get" asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Participantes" class="mt-5 grid gap-4 border-t border-[#E3D2AE] pt-5 md:grid-cols-[1.4fr_1fr_auto] md:items-end" data-assignment-filter-form>
+        <form method="get" asp-area="@areaActual" asp-controller="Capacitaciones" asp-action="Participantes" class="mt-5 grid gap-4 border-t border-[#E3D2AE] pt-5 md:grid-cols-[1.4fr_1fr_auto] md:items-end" data-assignment-filter-form data-server-search>
             <input type="hidden" name="id" value="@Model.IdCapacitacion" />
             <input type="hidden" name="seleccionados" value="@string.Join(",", Model.IdEmpleadosSeleccionados)" />
             <div>
                 <label class="bemo-label" for="busqueda">Buscar empleado</label>
                 <div class="relative">
                     <button class="absolute left-3 top-2.5 z-10 rounded-md p-1 text-[#381F12]" type="submit" aria-label="Buscar empleado"><svg class="bemo-icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg></button>
-                    <input class="bemo-input pl-12" id="busqueda" name="busqueda" type="search" value="@Model.Busqueda" placeholder="Nombre o DUI..." />
+                    <input class="bemo-input pl-12" id="busqueda" name="busqueda" type="search" value="@Model.Busqueda" placeholder="Nombre o DUI..." autocomplete="off" />
                 </div>
             </div>
             <div>
