@@ -66,12 +66,23 @@ public class DAOParametrosLegales
     public List<DescuentoLey> ListarDescuentosLey()
     {
         const string consulta = @"
-            SELECT d.id_descuento, d.id_tipo_descuento, t.nombre_tipo_descuento,
-                   d.porcentaje_descuento, d.tope_mensual, d.fecha_vigencia
-            FROM dbo.DESCUENTO_LEY d
-            INNER JOIN dbo.TIPO_DESCUENTO t
-                ON t.id_tipo_descuento = d.id_tipo_descuento
-            ORDER BY d.fecha_vigencia DESC, t.nombre_tipo_descuento;";
+            WITH DescuentosVigentes AS (
+                SELECT d.id_descuento, d.id_tipo_descuento, t.nombre_tipo_descuento,
+                       d.porcentaje_descuento, d.tope_mensual, d.fecha_vigencia,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY d.id_tipo_descuento
+                           ORDER BY d.fecha_vigencia DESC, d.id_descuento DESC
+                       ) AS fila
+                FROM dbo.DESCUENTO_LEY d
+                INNER JOIN dbo.TIPO_DESCUENTO t
+                    ON t.id_tipo_descuento = d.id_tipo_descuento
+                WHERE d.fecha_vigencia <= CAST(GETDATE() AS DATE)
+            )
+            SELECT id_descuento, id_tipo_descuento, nombre_tipo_descuento,
+                   porcentaje_descuento, tope_mensual, fecha_vigencia
+            FROM DescuentosVigentes
+            WHERE fila = 1
+            ORDER BY fecha_vigencia DESC, nombre_tipo_descuento;";
 
         var descuentos = new List<DescuentoLey>();
         using var conexionSql = new SqlConnection(_conexion.Cadena);
@@ -112,7 +123,12 @@ public class DAOParametrosLegales
             FROM dbo.RENTA r
             INNER JOIN dbo.TIPO_RENTA tr
                 ON tr.id_tipo_renta = r.id_tipo_renta
-            ORDER BY r.fecha_vigencia_renta DESC, r.rango_minimo_renta, r.codigo_renta;";
+            WHERE r.fecha_vigencia_renta = (
+                SELECT MAX(fecha_vigencia_renta)
+                FROM dbo.RENTA
+                WHERE fecha_vigencia_renta <= CAST(GETDATE() AS DATE)
+            )
+            ORDER BY r.rango_minimo_renta, r.codigo_renta;";
 
         var rentas = new List<Renta>();
         using var conexionSql = new SqlConnection(_conexion.Cadena);
