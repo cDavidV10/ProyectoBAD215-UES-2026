@@ -21,6 +21,7 @@ public class CalcularPlanillaModel
     public DateOnly? FechaPago { get; set; }
 
     public bool IncluirAguinaldo { get; set; }
+    public bool MostrarTodos { get; set; }
     public string? Busqueda { get; set; }
     public List<RegistroAsistenciaPlanilla> Asistencias { get; set; } = new();
     public int PaginaActual { get; set; }

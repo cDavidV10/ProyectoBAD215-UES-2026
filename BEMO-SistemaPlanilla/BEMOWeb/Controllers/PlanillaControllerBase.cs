@@ -57,7 +57,7 @@ public abstract class PlanillaControllerBase : Controller
     }
 
     [HttpGet]
-    public IActionResult Calcular(int? id, int pagina = 1, string? busqueda = null)
+    public IActionResult Calcular(int? id, int pagina = 1, string? busqueda = null, bool mostrarTodos = false)
     {
         if (!id.HasValue)
         {
@@ -85,9 +85,9 @@ public abstract class PlanillaControllerBase : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        const int tamanoPagina = 5;
+        var tamanoPagina = mostrarTodos ? int.MaxValue : 5;
         pagina = Math.Max(1, pagina);
-        busqueda = NormalizarBusqueda(busqueda);
+        busqueda = mostrarTodos ? null : NormalizarBusqueda(busqueda);
         var resultadoAsistencia = _planillas.ListarAsistenciaPaginado(planilla.IdPlanilla, pagina, tamanoPagina, busqueda);
         var totalPaginas = Math.Max(1, (int)Math.Ceiling(resultadoAsistencia.Total / (double)tamanoPagina));
 
@@ -105,6 +105,7 @@ public abstract class PlanillaControllerBase : Controller
             PeriodoFin = planilla.PeriodoFin,
             FechaPago = planilla.FechaPago,
             Busqueda = busqueda,
+            MostrarTodos = mostrarTodos,
             Asistencias = resultadoAsistencia.Asistencias,
             PaginaActual = pagina,
             TotalPaginas = totalPaginas,
@@ -148,6 +149,38 @@ public abstract class PlanillaControllerBase : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public IActionResult ActualizarEmpleados(int id, int pagina = 1, string? busqueda = null)
+    {
+        pagina = Math.Max(1, pagina);
+        var planilla = _planillas.Obtener(id);
+        if (planilla is null)
+        {
+            return NotFound();
+        }
+
+        if (!string.Equals(planilla.Estado, "BORRADOR", StringComparison.OrdinalIgnoreCase))
+        {
+            TempData["Error"] = "Solo se pueden actualizar los empleados de una planilla en borrador.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        try
+        {
+            var empleadosAgregados = _planillas.ActualizarEmpleados(id, UsuarioActualId);
+            TempData["Mensaje"] = empleadosAgregados == 0
+                ? "No se encontraron contratos nuevos elegibles para este periodo."
+                : $"Se agregaron {empleadosAgregados} empleado{(empleadosAgregados == 1 ? "" : "s")} nuevo{(empleadosAgregados == 1 ? "" : "s")} a la planilla. Ahora puede registrar su asistencia.";
+        }
+        catch (SqlException ex)
+        {
+            TempData["Error"] = MensajeError(ex);
+        }
+
+        return RedirectToAction(nameof(Calcular), new { id, pagina = 1, busqueda = (string?)null, mostrarTodos = true });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult CapturarAsistencia(Models.CapturarAsistenciaModel modelo)
     {
         var pagina = Math.Max(1, modelo.Pagina);
@@ -173,7 +206,7 @@ public abstract class PlanillaControllerBase : Controller
             if (!idsValidos.Contains(asistencia.IdDetallePlanilla))
             {
                 TempData["Error"] = "La asistencia contiene un detalle de planilla no valido.";
-                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda });
+                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda, mostrarTodos = modelo.MostrarTodos });
             }
 
             if (asistencia.DiasTrabajados < 0
@@ -183,7 +216,7 @@ public abstract class PlanillaControllerBase : Controller
                 || asistencia.DiasTrabajados + asistencia.DiasNoTrabajados > diasPeriodo)
             {
                 TempData["Error"] = "Los dias, horas y bonificaciones deben ser validos y no superar los dias del periodo.";
-                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda });
+                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda, mostrarTodos = modelo.MostrarTodos });
             }
         }
 
@@ -207,7 +240,7 @@ public abstract class PlanillaControllerBase : Controller
             TempData["Error"] = MensajeError(ex);
         }
 
-        return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda });
+        return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda, mostrarTodos = modelo.MostrarTodos });
     }
 
     [HttpPost]
@@ -490,6 +523,11 @@ public abstract class PlanillaControllerBase : Controller
         if (ex.Number == 51086)
         {
             return "No se puede crear la planilla porque la quincena anterior aun no existe.";
+        }
+
+        if (ex.Number is 51087 or 51088)
+        {
+            return ex.Message;
         }
 
         if (ex.Number == 51108)

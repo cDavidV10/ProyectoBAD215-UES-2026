@@ -299,6 +299,24 @@ public class DAOPlanilla
         return Convert.ToInt32(idPlanilla.Value);
     }
 
+    public int ActualizarEmpleados(int idPlanilla, int? idUsuario = null)
+    {
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand("dbo.usp_Actualizar_Empleados_Planilla", conexionSql)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        cmd.Parameters.Add("@id_planilla", SqlDbType.Int).Value = idPlanilla;
+        var empleadosAgregados = cmd.Parameters.Add("@empleados_agregados", SqlDbType.Int);
+        empleadosAgregados.Direction = ParameterDirection.Output;
+
+        conexionSql.Open();
+        EstablecerUsuario(conexionSql, idUsuario);
+        cmd.ExecuteNonQuery();
+        return Convert.ToInt32(empleadosAgregados.Value);
+    }
+
     public void CapturarAsistencia(
         int idDetallePlanilla,
         int diasTrabajados,

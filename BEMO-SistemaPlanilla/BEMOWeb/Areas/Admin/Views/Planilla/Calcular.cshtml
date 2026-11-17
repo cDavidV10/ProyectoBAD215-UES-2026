@@ -14,7 +14,7 @@
         && Model.Planilla.PeriodoFin.Day == DateTime.DaysInMonth(Model.Planilla.PeriodoFin.Year, 12);
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
-    string UrlPagina(int pagina) => Url.Action("Calcular", new { id = Model.Planilla?.IdPlanilla, pagina, busqueda = Model.Busqueda }) ?? "#";
+    string UrlPagina(int pagina) => Url.Action("Calcular", new { id = Model.Planilla?.IdPlanilla, pagina, busqueda = Model.Busqueda, mostrarTodos = Model.MostrarTodos }) ?? "#";
 }
 
 <div class="space-y-5">
@@ -26,14 +26,34 @@
 
     @if (!string.IsNullOrWhiteSpace(mensaje) || !string.IsNullOrWhiteSpace(error))
     {
-        <div class="space-y-3">
+        <div class="bemo-notifications" aria-live="polite" aria-atomic="true">
             @if (!string.IsNullOrWhiteSpace(mensaje))
             {
-                <div class="bemo-alert bemo-alert-success"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg><span>@mensaje</span></div>
+                <div class="bemo-notification bemo-notification-success" data-notification data-notification-seconds="5" role="status">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-check"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@mensaje</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
             }
             @if (!string.IsNullOrWhiteSpace(error))
             {
-                <div class="bemo-alert bemo-alert-error"><svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg><span>@error</span></div>
+                <div class="bemo-notification bemo-notification-error" data-notification data-notification-seconds="7" role="alert">
+                    <div class="bemo-notification-body">
+                        <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+                        <div class="min-w-0 flex-1">
+                            <p>@error</p>
+                            <span class="bemo-notification-countdown" data-notification-countdown></span>
+                        </div>
+                        <button type="button" class="bemo-notification-close" data-notification-close aria-label="Cerrar notificación">&times;</button>
+                    </div>
+                    <div class="bemo-notification-progress" data-notification-progress></div>
+                </div>
             }
         </div>
     }
@@ -92,18 +112,31 @@
             }
         </form>
 
-        <form asp-action="CapturarAsistencia" method="post" class="bemo-card space-y-5 p-5 md:p-8">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="IdPlanilla" value="@Model.Planilla.IdPlanilla" />
-            <input type="hidden" name="Busqueda" value="@Model.Busqueda" />
+        <section class="bemo-card space-y-5 p-5 md:p-8">
             <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                     <h2 class="text-xl font-extrabold">Captura de asistencia</h2>
             <p class="mt-1 text-sm text-[#684026]">Los valores se guardan en el borrador y pueden corregirse antes del calculo. Los días trabajados y no trabajados se completan automáticamente hasta sumar 15.</p>
                 </div>
-                <span class="bemo-status bemo-status-yellow">BORRADOR</span>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="bemo-status bemo-status-yellow">BORRADOR</span>
+                    <form asp-action="ActualizarEmpleados" method="post" class="inline-flex">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Planilla.IdPlanilla" />
+                        <input type="hidden" name="pagina" value="@Model.PaginaActual" />
+                        <input type="hidden" name="busqueda" value="@Model.Busqueda" />
+                        <button type="submit" class="bemo-button bemo-button-secondary" title="Buscar contratos nuevos elegibles para este periodo">
+                            Actualizar empleados
+                        </button>
+                    </form>
+                </div>
             </div>
 
+            <form asp-action="CapturarAsistencia" method="post" class="space-y-5">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="IdPlanilla" value="@Model.Planilla.IdPlanilla" />
+                <input type="hidden" name="MostrarTodos" value="@(Model.MostrarTodos ? "true" : "false")" />
+                <input type="hidden" name="Busqueda" value="@Model.Busqueda" />
             <div class="bemo-table-wrap">
                 <table class="bemo-table min-w-[900px]">
                     <thead>
@@ -188,7 +221,8 @@
                 <input type="hidden" name="Pagina" value="@Model.PaginaActual" />
                 <button type="submit" class="bemo-button bemo-button-secondary">Guardar asistencia</button>
             </div>
-        </form>
+            </form>
+        </section>
 
         <form asp-action="Calcular" method="post" class="bemo-card space-y-5 p-5 md:p-8" data-clear-planilla-filters>
             @Html.AntiForgeryToken()
