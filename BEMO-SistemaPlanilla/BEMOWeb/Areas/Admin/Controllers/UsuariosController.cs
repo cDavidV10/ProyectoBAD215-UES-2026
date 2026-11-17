@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Security.Claims;
 using BEMO.Negocio;
 
 namespace BEMOWeb.Areas.Admin.Controllers;
@@ -11,6 +12,20 @@ public class UsuariosController : Controller
 {
     private readonly CN_Empleado _empleado;
     private readonly CN_Usuario _usuarios;
+
+    private int? UsuarioActualId
+    {
+        get
+        {
+            var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(idClaim, out var idUsuario))
+            {
+                return idUsuario;
+            }
+
+            return HttpContext.Session.GetInt32("id_usuario");
+        }
+    }
 
     public UsuariosController(CN_Empleado empleado, CN_Usuario usuarios)
     {
@@ -179,11 +194,18 @@ public class UsuariosController : Controller
         {
             TempData["Error"] = "La contrasena debe tener minimo 8 caracteres, una mayuscula, una minuscula, un numero y un simbolo.";
         }
+        else if (!UsuarioActualId.HasValue)
+        {
+            TempData["Error"] = "No se pudo identificar al administrador actual.";
+        }
         else
         {
             try
             {
-                _usuarios.CambiarPasswordAdministrador(modelo.IdUsuario, modelo.PasswordNueva);
+                _usuarios.CambiarPasswordAdministrador(
+                    modelo.IdUsuario,
+                    modelo.PasswordNueva,
+                    UsuarioActualId.Value);
                 TempData["Mensaje"] = "La contrasena del usuario fue actualizada correctamente.";
             }
             catch (SqlException ex)
@@ -251,6 +273,11 @@ public class UsuariosController : Controller
 
     private static string MensajeErrorCambioPassword(SqlException ex)
     {
+        if (ex.Number == 51054)
+        {
+            return "No tienes permisos para cambiar contrasenas desde este modulo.";
+        }
+
         if (ex.Message.Contains("no existe", StringComparison.OrdinalIgnoreCase))
         {
             return "El usuario que se desea modificar no existe.";

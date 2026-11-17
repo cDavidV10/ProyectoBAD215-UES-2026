@@ -47,8 +47,11 @@ public class CN_Usuario
         _metodos.Activar(idUsuario);
     }
 
-    public void CambiarPasswordAdministrador(int idUsuario, string passwordNueva)
+    public void CambiarPasswordAdministrador(
+        int idUsuario,
+        string passwordNueva,
+        int idUsuarioAdministrador)
     {
-        _metodos.CambiarPasswordAdministrador(idUsuario, passwordNueva);
+        _metodos.CambiarPasswordAdministrador(idUsuario, passwordNueva, idUsuarioAdministrador);
     }
 }

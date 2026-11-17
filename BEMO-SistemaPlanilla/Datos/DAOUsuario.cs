@@ -254,7 +254,10 @@ public class DAOUsuario
         }
     }
 
-    public void CambiarPasswordAdministrador(int idUsuario, string passwordNueva)
+    public void CambiarPasswordAdministrador(
+        int idUsuario,
+        string passwordNueva,
+        int idUsuarioAdministrador)
     {
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand("dbo.sp_Administrador_Cambiar_Password", conexionSql)
@@ -264,6 +267,7 @@ public class DAOUsuario
 
         cmd.Parameters.Add("@id_usuario", SqlDbType.Int).Value = idUsuario;
         cmd.Parameters.Add("@password_nueva", SqlDbType.VarChar, 255).Value = passwordNueva;
+        cmd.Parameters.Add("@id_usuario_admin", SqlDbType.Int).Value = idUsuarioAdministrador;
 
         conexionSql.Open();
         cmd.ExecuteNonQuery();
