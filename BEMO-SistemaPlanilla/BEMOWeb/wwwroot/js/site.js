@@ -549,6 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
             dui: option.dataset.employeeDui?.trim() || "",
             id: option.dataset.employeeId || "",
             name: option.dataset.employeeName || "",
+            status: option.dataset.employeeStatus?.trim() || "",
             lastContractEnd: option.dataset.employeeLastContractEnd || ""
         }));
 
@@ -596,7 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 result?.classList.remove("hidden");
                 if (codeElement) codeElement.textContent = employee.id;
                 if (nameElement) nameElement.textContent = employee.name;
-                if (statusElement) statusElement.textContent = "ACTIVO";
+                if (statusElement) statusElement.textContent = employee.status || "ACTIVO";
                 if (message) message.textContent = "";
                 updateStartDateMinimum(employee);
                 if (employee.lastContractEnd) {

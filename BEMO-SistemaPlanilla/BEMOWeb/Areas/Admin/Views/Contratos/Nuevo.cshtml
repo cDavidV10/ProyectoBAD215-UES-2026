@@ -49,6 +49,7 @@
                                   data-employee-dui="@empleado.Dui"
                                   data-employee-id="@empleado.IdEmpleado"
                                   data-employee-name="@empleado.Nombre"
+                                  data-employee-status="@empleado.Estado"
                                   data-employee-last-contract-end="@empleado.FechaCulminacionUltimoContrato?.ToString("yyyy-MM-dd")"></span>
                         }
                     </div>
@@ -64,7 +65,7 @@
                         <p class="font-extrabold">Empleado encontrado</p>
                         <p class="mt-1">Código: <span data-employee-code></span></p>
                         <p>Nombre: <span data-employee-name></span></p>
-                        <p>Estado: <span data-employee-status>ACTIVO</span></p>
+                        <p>Estado: <span data-employee-status></span></p>
                         <p class="mt-2 hidden text-sm" data-employee-previous-contract>
                             El contrato anterior culminó el <span data-employee-previous-contract-date></span>.
                             La nueva fecha debe ser como mínimo el <strong data-employee-previous-contract-min></strong>.

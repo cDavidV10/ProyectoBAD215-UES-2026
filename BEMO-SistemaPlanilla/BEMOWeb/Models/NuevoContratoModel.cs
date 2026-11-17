@@ -50,5 +50,7 @@ public class ContratoEmpleadoDisponibleOption
 
     public string Dui { get; init; } = string.Empty;
 
+    public string Estado { get; init; } = string.Empty;
+
     public DateOnly? FechaCulminacionUltimoContrato { get; init; }
 }
