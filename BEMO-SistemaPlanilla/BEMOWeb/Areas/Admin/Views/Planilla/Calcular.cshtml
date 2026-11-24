@@ -40,12 +40,12 @@
             <div class="grid gap-5 md:grid-cols-3">
                 <div>
                     <label class="bemo-label bemo-required" asp-for="PeriodoInicio">Inicio del periodo</label>
-                    <input asp-for="PeriodoInicio" type="date" class="bemo-input" />
+                    <input asp-for="PeriodoInicio" type="date" class="bemo-input" data-planilla-period-start />
                     <span asp-validation-for="PeriodoInicio" class="bemo-validation-message"></span>
                 </div>
                 <div>
                     <label class="bemo-label bemo-required" asp-for="PeriodoFin">Fin del periodo</label>
-                    <input asp-for="PeriodoFin" type="date" class="bemo-input" />
+                    <input asp-for="PeriodoFin" type="date" class="bemo-input" data-planilla-period-end readonly />
                     <span asp-validation-for="PeriodoFin" class="bemo-validation-message"></span>
                 </div>
                 <div>

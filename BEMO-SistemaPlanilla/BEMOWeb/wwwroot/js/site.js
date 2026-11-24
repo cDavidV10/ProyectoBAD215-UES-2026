@@ -86,6 +86,38 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const periodStart = document.querySelector("[data-planilla-period-start]");
+    const periodEnd = document.querySelector("[data-planilla-period-end]");
+    if (periodStart && periodEnd) {
+        const pad = (value) => String(value).padStart(2, "0");
+
+        const syncPeriodEnd = () => {
+            if (!periodStart.value) {
+                periodEnd.value = "";
+                return;
+            }
+
+            const [year, month, day] = periodStart.value.split("-").map(Number);
+            if (!year || !month || !day) return;
+
+            let endDay;
+            if (day === 1) {
+                endDay = 15;
+            } else if (day === 16) {
+                endDay = new Date(year, month, 0).getDate();
+            } else {
+                periodEnd.value = "";
+                return;
+            }
+
+            periodEnd.value = `${year}-${pad(month)}-${pad(endDay)}`;
+        };
+
+        periodStart.addEventListener("input", syncPeriodEnd);
+        periodStart.addEventListener("change", syncPeriodEnd);
+        syncPeriodEnd();
+    }
+
     document.querySelectorAll("[data-notification]").forEach((notification) => {
         const closeButton = notification.querySelector("[data-notification-close]");
         const countdownElement = notification.querySelector("[data-notification-countdown]");
