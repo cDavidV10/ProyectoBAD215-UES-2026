@@ -39,9 +39,10 @@ public class CN_Planilla
     public (List<DetallePlanillaListado> Detalles, int Total) ListarDetalle(
         int idPlanilla,
         int pagina,
-        int tamanoPagina)
+        int tamanoPagina,
+        string? busqueda = null)
     {
-        return _metodos.ListarDetalle(idPlanilla, pagina, tamanoPagina);
+        return _metodos.ListarDetalle(idPlanilla, pagina, tamanoPagina, busqueda);
     }
 
     public int Crear(DateOnly periodoInicio, DateOnly periodoFin, DateOnly fechaPago, int? idUsuario = null)

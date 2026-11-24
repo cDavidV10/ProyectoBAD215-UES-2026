@@ -366,7 +366,7 @@ public abstract class PlanillaControllerBase : Controller
     }
 
     [HttpGet]
-    public IActionResult Detalle(int id, int pagina = 1)
+    public IActionResult Detalle(int id, int pagina = 1, string? busqueda = null)
     {
         var planilla = _planillas.Obtener(id);
         if (planilla is null)
@@ -376,13 +376,14 @@ public abstract class PlanillaControllerBase : Controller
 
         const int tamanoPagina = 5;
         pagina = Math.Max(1, pagina);
-        var resultado = _planillas.ListarDetalle(id, pagina, tamanoPagina);
+        busqueda = NormalizarBusqueda(busqueda);
+        var resultado = _planillas.ListarDetalle(id, pagina, tamanoPagina, busqueda);
         var totalPaginas = Math.Max(1, (int)Math.Ceiling(resultado.Total / (double)tamanoPagina));
 
         if (pagina > totalPaginas)
         {
             pagina = totalPaginas;
-            resultado = _planillas.ListarDetalle(id, pagina, tamanoPagina);
+            resultado = _planillas.ListarDetalle(id, pagina, tamanoPagina, busqueda);
         }
 
         return Ver("Detalle", new Models.DetallePlanillaModel
@@ -392,7 +393,8 @@ public abstract class PlanillaControllerBase : Controller
             PaginaActual = pagina,
             TotalPaginas = totalPaginas,
             TotalRegistros = resultado.Total,
-            TamanoPagina = tamanoPagina
+            TamanoPagina = tamanoPagina,
+            Busqueda = busqueda
         });
     }
 

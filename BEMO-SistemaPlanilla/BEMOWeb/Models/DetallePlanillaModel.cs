@@ -10,4 +10,5 @@ public class DetallePlanillaModel
     public int TotalPaginas { get; set; }
     public int TotalRegistros { get; set; }
     public int TamanoPagina { get; set; }
+    public string? Busqueda { get; set; }
 }

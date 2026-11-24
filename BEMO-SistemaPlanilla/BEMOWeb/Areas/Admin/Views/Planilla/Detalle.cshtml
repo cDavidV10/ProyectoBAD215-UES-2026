@@ -8,7 +8,7 @@
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
 
-    string UrlPagina(int pagina) => Url.Action("Detalle", new { id = Model.Planilla.IdPlanilla, pagina }) ?? "#";
+    string UrlPagina(int pagina) => Url.Action("Detalle", new { id = Model.Planilla.IdPlanilla, pagina, busqueda = Model.Busqueda }) ?? "#";
 }
 
 <div class="space-y-5">
@@ -27,6 +27,14 @@
         <div class="bemo-stat"><div><p class="bemo-stat-label">Deducciones</p><p class="bemo-stat-value">@Model.Planilla.TotalDeducciones.ToString("C2")</p></div></div>
         <div class="bemo-stat"><div><p class="bemo-stat-label">Neto a pagar</p><p class="bemo-stat-value">@Model.Planilla.TotalLiquido.ToString("C2")</p></div></div>
     </section>
+
+    <form asp-action="Detalle" method="get" class="bemo-card flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between" data-server-search>
+        <input type="hidden" name="id" value="@Model.Planilla.IdPlanilla" />
+        <div class="w-full sm:max-w-xl">
+            <label class="bemo-label" for="busqueda-detalle-planilla">Buscar empleado</label>
+            <input class="bemo-input" id="busqueda-detalle-planilla" name="busqueda" value="@Model.Busqueda" placeholder="Nombre o apellido..." autocomplete="off" />
+        </div>
+    </form>
 
     <section class="bemo-card overflow-hidden">
         <div class="bemo-table-wrap">
