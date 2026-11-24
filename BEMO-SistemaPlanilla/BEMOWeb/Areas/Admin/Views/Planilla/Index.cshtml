@@ -79,7 +79,7 @@
     }
 
     <section class="bemo-card p-4">
-        <form method="get" asp-action="Index"
+        <form method="get" asp-action="Index" data-auto-submit
               class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)_auto] md:items-end">
             <div>
                 <label class="bemo-label" for="estado">Estado de la planilla</label>
@@ -102,7 +102,6 @@
                             </svg>
                             Solo se permiten periodos del 1 al 15 o del 16 al ultimo dia del mes.
                         </div>
-                        <button type="submit" class="bemo-button bemo-button-secondary">Aplicar filtro</button>
                     </form>
                 </section>
 
