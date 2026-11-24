@@ -46,6 +46,9 @@ public class CN_PrestamosAnticipos
 
     public PrestamosAnticiposResumen ObtenerResumen() => _metodos.ObtenerResumen();
 
+    public PrestamosAnticiposResumen ObtenerResumenEmpleado(int idEmpleado) =>
+        _metodos.ObtenerResumenEmpleado(idEmpleado);
+
     public int? ObtenerPlazoPrestamo(decimal monto) => _metodos.ObtenerPlazoPrestamo(monto);
 
     public decimal? ObtenerMaximoAnticipo(int idEmpleado, DateOnly fecha) =>

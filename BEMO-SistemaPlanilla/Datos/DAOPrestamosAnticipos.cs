@@ -391,6 +391,35 @@ public class DAOPrestamosAnticipos
         };
     }
 
+    public PrestamosAnticiposResumen ObtenerResumenEmpleado(int idEmpleado)
+    {
+        const string consulta = @"
+            SELECT
+                (SELECT COUNT(*) FROM dbo.PRESTAMO WHERE id_empleado = @id_empleado AND estado = 'ACTIVO') AS prestamos_activos,
+                (SELECT ISNULL(SUM(saldo_pendiente), 0) FROM dbo.PRESTAMO WHERE id_empleado = @id_empleado AND estado = 'ACTIVO') AS saldo_prestamos,
+                (SELECT COUNT(*) FROM dbo.ANTICIPO_SALARIO WHERE id_empleado = @id_empleado AND estado = 'PENDIENTE') AS anticipos_pendientes,
+                (SELECT ISNULL(SUM(monto_anticipo), 0) FROM dbo.ANTICIPO_SALARIO WHERE id_empleado = @id_empleado AND estado = 'PENDIENTE') AS monto_anticipos_pendientes;";
+
+        using var conexionSql = new SqlConnection(_conexion.Cadena);
+        using var cmd = new SqlCommand(consulta, conexionSql);
+        cmd.Parameters.Add("@id_empleado", SqlDbType.Int).Value = idEmpleado;
+
+        conexionSql.Open();
+        using var dr = cmd.ExecuteReader();
+        if (!dr.Read())
+        {
+            return new PrestamosAnticiposResumen();
+        }
+
+        return new PrestamosAnticiposResumen
+        {
+            PrestamosActivos = Convert.ToInt32(dr["prestamos_activos"]),
+            SaldoPrestamos = Convert.ToDecimal(dr["saldo_prestamos"]),
+            AnticiposPendientes = Convert.ToInt32(dr["anticipos_pendientes"]),
+            MontoAnticiposPendientes = Convert.ToDecimal(dr["monto_anticipos_pendientes"])
+        };
+    }
+
     public int? ObtenerPlazoPrestamo(decimal monto)
     {
         const string consulta = "SELECT dbo.fn_Plazo_Prestamo(@monto);";

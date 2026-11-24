@@ -11,6 +11,7 @@ namespace BEMOWeb.Areas.Admin.Controllers;
 public class ContratosController : Controller
 {
     private readonly CN_Contrato _contratos;
+    private readonly CN_PrestamosAnticipos _prestamosAnticipos;
     private readonly CN_Empleado _empleados;
     private readonly CN_TipoContrato _tiposContrato;
     private readonly CN_Cargo _cargos;
@@ -18,12 +19,14 @@ public class ContratosController : Controller
 
     public ContratosController(
         CN_Contrato contratos,
+        CN_PrestamosAnticipos prestamosAnticipos,
         CN_Empleado empleados,
         CN_TipoContrato tiposContrato,
         CN_Cargo cargos,
         CN_Departamento departamento)
     {
         _contratos = contratos;
+        _prestamosAnticipos = prestamosAnticipos;
         _empleados = empleados;
         _tiposContrato = tiposContrato;
         _cargos = cargos;
@@ -97,11 +100,37 @@ public class ContratosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Finalizar(int id)
+    public IActionResult Finalizar(int id, bool confirmarObligaciones = false)
     {
+        var contrato = _contratos.ObtenerPorId(id);
+        if (contrato is null || !string.Equals(contrato.Estado, "VIGENTE", StringComparison.OrdinalIgnoreCase))
+        {
+            TempData["Error"] = "El contrato no existe o ya fue finalizado.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var obligaciones = _prestamosAnticipos.ObtenerResumenEmpleado(contrato.IdEmpleado);
+        if (!confirmarObligaciones
+            && (obligaciones.PrestamosActivos > 0 || obligaciones.AnticiposPendientes > 0))
+        {
+            var detalles = new List<string>();
+            if (obligaciones.PrestamosActivos > 0)
+            {
+                detalles.Add($"{obligaciones.PrestamosActivos} préstamo(s) activo(s) con saldo de ${obligaciones.SaldoPrestamos:N2}");
+            }
+
+            if (obligaciones.AnticiposPendientes > 0)
+            {
+                detalles.Add($"{obligaciones.AnticiposPendientes} anticipo(s) pendiente(s) por ${obligaciones.MontoAnticiposPendientes:N2}");
+            }
+
+            TempData["Error"] = $"No se finalizó el contrato. El empleado tiene {string.Join(" y ", detalles)}. Confirma la operación desde la alerta.";
+            return RedirectToAction(nameof(Index));
+        }
+
         try
         {
-            _contratos.Finalizar(id);
+            _contratos.Finalizar(id, confirmarObligaciones);
             TempData["Mensaje"] = "El contrato fue finalizado. El empleado permanece activo y su usuario fue desactivado si existía.";
         }
         catch (SqlException ex)
@@ -114,6 +143,26 @@ public class ContratosController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
+    public IActionResult ObligacionesActivas(int id)
+    {
+        var contrato = _contratos.ObtenerPorId(id);
+        if (contrato is null || !string.Equals(contrato.Estado, "VIGENTE", StringComparison.OrdinalIgnoreCase))
+        {
+            return NotFound();
+        }
+
+        var obligaciones = _prestamosAnticipos.ObtenerResumenEmpleado(contrato.IdEmpleado);
+        return Json(new
+        {
+            tieneObligaciones = obligaciones.PrestamosActivos > 0 || obligaciones.AnticiposPendientes > 0,
+            prestamosActivos = obligaciones.PrestamosActivos,
+            saldoPrestamos = obligaciones.SaldoPrestamos,
+            anticiposPendientes = obligaciones.AnticiposPendientes,
+            montoAnticiposPendientes = obligaciones.MontoAnticiposPendientes
+        });
     }
 
     [HttpGet]
@@ -301,7 +350,7 @@ public class ContratosController : Controller
 
     private static string MensajeErrorFinalizar(SqlException ex)
     {
-        if (ex.Number is 51030 or 51031)
+        if (ex.Number is 51030 or 51031 or 51035)
         {
             return ex.Message.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()
                 ?? "No se pudo finalizar el contrato.";

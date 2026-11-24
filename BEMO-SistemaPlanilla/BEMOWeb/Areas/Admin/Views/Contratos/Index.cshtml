@@ -222,6 +222,8 @@
                                                       method="post" class="inline" data-confirm="¿Deseas finalizar este contrato? El empleado permanecerá activo, se finalizarán sus contratos vigentes y se desactivará su usuario si existe.">
                                                     @Html.AntiForgeryToken()
                                                     <input type="hidden" name="id" value="@contrato.IdContrato" />
+                                                    <input type="hidden" name="confirmarObligaciones" value="false" data-confirmed-field />
+                                                    <input type="hidden" value="@Url.Action("ObligacionesActivas", "Contratos", new { area = areaActual, id = contrato.IdContrato })" data-obligations-url />
                                                     <button class="bemo-button bemo-button-ghost text-red-700" type="submit">
                                                         <svg class="bemo-icon-sm" viewBox="0 0 24 24"><use href="#icon-close"></use></svg>
                                                         Finalizar

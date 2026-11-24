@@ -126,6 +126,22 @@ document.addEventListener("DOMContentLoaded", () => {
             pendingForm = null;
         };
 
+        const showConfirmation = (form, message = form.dataset.confirm || "¿Deseas continuar con esta operación?") => {
+            pendingForm = form;
+            if (messageElement) {
+                messageElement.textContent = message;
+            }
+            if (titleElement) {
+                titleElement.textContent = form.dataset.confirmTitle || "Confirmar desactivacion";
+            }
+            if (acceptButton) {
+                acceptButton.textContent = form.dataset.confirmAcceptText || "Desactivar usuario";
+            }
+            confirmationModal.classList.remove("hidden");
+            confirmationModal.setAttribute("aria-hidden", "false");
+            acceptButton?.focus();
+        };
+
         document.querySelectorAll("form[data-confirm]").forEach((form) => {
             form.addEventListener("submit", (event) => {
                 if (form.dataset.confirmed === "true") {
@@ -134,19 +150,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 event.preventDefault();
-                pendingForm = form;
-                if (messageElement) {
-                    messageElement.textContent = form.dataset.confirm || "¿Deseas continuar con esta operación?";
+                const obligationsUrl = form.querySelector("[data-obligations-url]")?.value;
+                if (!obligationsUrl) {
+                    showConfirmation(form);
+                    return;
                 }
-                if (titleElement) {
-                    titleElement.textContent = form.dataset.confirmTitle || "Confirmar desactivacion";
-                }
-                if (acceptButton) {
-                    acceptButton.textContent = form.dataset.confirmAcceptText || "Desactivar usuario";
-                }
-                confirmationModal.classList.remove("hidden");
-                confirmationModal.setAttribute("aria-hidden", "false");
-                acceptButton?.focus();
+
+                if (form.dataset.checkingObligations === "true") return;
+                form.dataset.checkingObligations = "true";
+                fetch(obligationsUrl, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                    .then((response) => {
+                        if (!response.ok) throw new Error("No se pudo consultar las obligaciones.");
+                        return response.json();
+                    })
+                    .then((data) => {
+                        let message = form.dataset.confirm || "¿Deseas continuar con esta operación?";
+                        if (data.tieneObligaciones) {
+                            const obligaciones = [];
+                            if (data.prestamosActivos > 0) {
+                                obligaciones.push(`${data.prestamosActivos} préstamo(s) activo(s) con saldo de $${Number(data.saldoPrestamos || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`);
+                            }
+                            if (data.anticiposPendientes > 0) {
+                                obligaciones.push(`${data.anticiposPendientes} anticipo(s) pendiente(s) por $${Number(data.montoAnticiposPendientes || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`);
+                            }
+                            message += ` El empleado tiene ${obligaciones.join(" y ")}. ¿Deseas finalizar el contrato de todas formas?`;
+                        } else {
+                            message += " No tiene préstamos activos ni anticipos pendientes.";
+                        }
+                        showConfirmation(form, message);
+                    })
+                    .catch(() => showConfirmation(form, `${form.dataset.confirm || "¿Deseas continuar con esta operación?"} No se pudo verificar las obligaciones; confirma solo si deseas continuar.`))
+                    .finally(() => delete form.dataset.checkingObligations);
             });
         });
 
@@ -154,6 +188,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const form = pendingForm;
             closeConfirmationModal();
             if (form) {
+                const confirmedField = form.querySelector("[data-confirmed-field]");
+                if (confirmedField) confirmedField.value = "true";
                 form.dataset.confirmed = "true";
                 form.submit();
             }

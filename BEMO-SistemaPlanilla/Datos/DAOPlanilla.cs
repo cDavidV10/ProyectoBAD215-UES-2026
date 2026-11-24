@@ -104,10 +104,12 @@ public class DAOPlanilla
     public (List<RegistroAsistenciaPlanilla> Asistencias, int Total) ListarAsistenciaPaginado(
         int idPlanilla,
         int pagina,
-        int tamanoPagina)
+        int tamanoPagina,
+        string? busqueda = null)
     {
         pagina = Math.Max(1, pagina);
         tamanoPagina = Math.Max(1, tamanoPagina);
+        busqueda = string.IsNullOrWhiteSpace(busqueda) ? null : busqueda.Trim();
 
         const string consulta = @"
             SELECT
@@ -126,6 +128,8 @@ public class DAOPlanilla
                 COUNT(*) OVER() AS total_registros
             FROM dbo.VW_Registro_Asistencia_Empleados
             WHERE id_planilla = @id_planilla
+              AND (@busqueda IS NULL
+                   OR CONCAT(nombre, ' ', apellido) LIKE '%' + @busqueda + '%')
             ORDER BY nombre, apellido, id_empleado
             OFFSET @desplazamiento ROWS
             FETCH NEXT @tamanoPagina ROWS ONLY;";
@@ -135,6 +139,8 @@ public class DAOPlanilla
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand(consulta, conexionSql);
         cmd.Parameters.Add("@id_planilla", SqlDbType.Int).Value = idPlanilla;
+        cmd.Parameters.Add("@busqueda", SqlDbType.VarChar, 100).Value =
+            (object?)busqueda ?? DBNull.Value;
         cmd.Parameters.Add("@desplazamiento", SqlDbType.Int).Value =
             (pagina - 1) * tamanoPagina;
         cmd.Parameters.Add("@tamanoPagina", SqlDbType.Int).Value = tamanoPagina;

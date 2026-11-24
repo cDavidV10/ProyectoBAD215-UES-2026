@@ -8,7 +8,7 @@
     string Fecha(DateOnly fecha) => fecha.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
     var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
     var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
-    string UrlPagina(int pagina) => Url.Action("Calcular", new { id = Model.Planilla?.IdPlanilla, pagina }) ?? "#";
+    string UrlPagina(int pagina) => Url.Action("Calcular", new { id = Model.Planilla?.IdPlanilla, pagina, busqueda = Model.Busqueda }) ?? "#";
 }
 
 <div class="space-y-5">
@@ -73,9 +73,23 @@
             <div class="bemo-stat"><div><p class="bemo-stat-label">Estado</p><p class="bemo-stat-value">@Model.Planilla.Estado</p></div></div>
         </section>
 
+        <form asp-action="Calcular" method="get" class="bemo-card flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between" data-server-search>
+            <input type="hidden" name="id" value="@Model.Planilla.IdPlanilla" />
+            <div class="w-full sm:max-w-xl">
+                <label class="bemo-label" for="busqueda-empleado">Buscar empleado</label>
+                <input class="bemo-input" id="busqueda-empleado" name="busqueda" value="@Model.Busqueda" placeholder="Nombre o apellido..." autocomplete="off" />
+                <p class="mt-1 text-xs text-[#684026]">La búsqueda se aplica automáticamente. Guarda la asistencia antes de buscar.</p>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Busqueda))
+            {
+                <a asp-action="Calcular" asp-route-id="@Model.Planilla.IdPlanilla" class="bemo-button bemo-button-secondary">Limpiar búsqueda</a>
+            }
+        </form>
+
         <form asp-action="CapturarAsistencia" method="post" class="bemo-card space-y-5 p-5 md:p-8">
             @Html.AntiForgeryToken()
             <input type="hidden" name="IdPlanilla" value="@Model.Planilla.IdPlanilla" />
+            <input type="hidden" name="Busqueda" value="@Model.Busqueda" />
             <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                     <h2 class="text-xl font-extrabold">Captura de asistencia</h2>
@@ -92,7 +106,7 @@
                     <tbody>
                         @if (Model.Asistencias.Count == 0)
                         {
-                            <tr><td colspan="6" class="py-8 text-center text-[#684026]">La planilla no tiene empleados elegibles.</td></tr>
+                            <tr><td colspan="6" class="py-8 text-center text-[#684026]">@(string.IsNullOrWhiteSpace(Model.Busqueda) ? "La planilla no tiene empleados elegibles." : "No se encontraron empleados con esa búsqueda.")</td></tr>
                         }
                         else
                         {

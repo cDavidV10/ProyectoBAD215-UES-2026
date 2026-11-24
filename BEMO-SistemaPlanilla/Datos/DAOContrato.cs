@@ -464,7 +464,7 @@ public class DAOContrato
         }
     }
 
-    public void Finalizar(int idContrato)
+    public void Finalizar(int idContrato, bool confirmarObligaciones = false)
     {
         const string consulta = @"
             SET XACT_ABORT ON;
@@ -480,6 +480,13 @@ public class DAOContrato
 
                 IF @id_empleado IS NULL
                     THROW 51030, N'El contrato no existe o ya fue finalizado', 1;
+
+                IF @confirmar_obligaciones = 0
+                   AND (
+                       EXISTS (SELECT 1 FROM dbo.PRESTAMO WHERE id_empleado = @id_empleado AND estado = 'ACTIVO')
+                       OR EXISTS (SELECT 1 FROM dbo.ANTICIPO_SALARIO WHERE id_empleado = @id_empleado AND estado = 'PENDIENTE')
+                   )
+                    THROW 51035, N'El empleado tiene prestamos activos o anticipos pendientes. Se requiere confirmar la finalizacion del contrato', 1;
 
                 UPDATE dbo.CONTRATO
                 SET estado = 'FINALIZADO',
@@ -505,6 +512,7 @@ public class DAOContrato
         using var conexionSql = new SqlConnection(_conexion.Cadena);
         using var cmd = new SqlCommand(consulta, conexionSql);
         cmd.Parameters.Add("@id_contrato", SqlDbType.Int).Value = idContrato;
+        cmd.Parameters.Add("@confirmar_obligaciones", SqlDbType.Bit).Value = confirmarObligaciones;
 
         conexionSql.Open();
         cmd.ExecuteNonQuery();

@@ -57,7 +57,7 @@ public abstract class PlanillaControllerBase : Controller
     }
 
     [HttpGet]
-    public IActionResult Calcular(int? id, int pagina = 1)
+    public IActionResult Calcular(int? id, int pagina = 1, string? busqueda = null)
     {
         if (!id.HasValue)
         {
@@ -87,13 +87,14 @@ public abstract class PlanillaControllerBase : Controller
 
         const int tamanoPagina = 5;
         pagina = Math.Max(1, pagina);
-        var resultadoAsistencia = _planillas.ListarAsistenciaPaginado(planilla.IdPlanilla, pagina, tamanoPagina);
+        busqueda = NormalizarBusqueda(busqueda);
+        var resultadoAsistencia = _planillas.ListarAsistenciaPaginado(planilla.IdPlanilla, pagina, tamanoPagina, busqueda);
         var totalPaginas = Math.Max(1, (int)Math.Ceiling(resultadoAsistencia.Total / (double)tamanoPagina));
 
         if (pagina > totalPaginas)
         {
             pagina = totalPaginas;
-            resultadoAsistencia = _planillas.ListarAsistenciaPaginado(planilla.IdPlanilla, pagina, tamanoPagina);
+            resultadoAsistencia = _planillas.ListarAsistenciaPaginado(planilla.IdPlanilla, pagina, tamanoPagina, busqueda);
         }
 
         return Ver("Calcular", new Models.CalcularPlanillaModel
@@ -103,6 +104,7 @@ public abstract class PlanillaControllerBase : Controller
             PeriodoInicio = planilla.PeriodoInicio,
             PeriodoFin = planilla.PeriodoFin,
             FechaPago = planilla.FechaPago,
+            Busqueda = busqueda,
             Asistencias = resultadoAsistencia.Asistencias,
             PaginaActual = pagina,
             TotalPaginas = totalPaginas,
@@ -171,7 +173,7 @@ public abstract class PlanillaControllerBase : Controller
             if (!idsValidos.Contains(asistencia.IdDetallePlanilla))
             {
                 TempData["Error"] = "La asistencia contiene un detalle de planilla no valido.";
-                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina });
+                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda });
             }
 
             if (asistencia.DiasTrabajados < 0
@@ -181,7 +183,7 @@ public abstract class PlanillaControllerBase : Controller
                 || asistencia.DiasTrabajados + asistencia.DiasNoTrabajados > diasPeriodo)
             {
                 TempData["Error"] = "Los dias, horas y bonificaciones deben ser validos y no superar los dias del periodo.";
-                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina });
+                return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda });
             }
         }
 
@@ -205,7 +207,7 @@ public abstract class PlanillaControllerBase : Controller
             TempData["Error"] = MensajeError(ex);
         }
 
-        return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina });
+        return RedirectToAction(nameof(Calcular), new { id = modelo.IdPlanilla, pagina, busqueda = modelo.Busqueda });
     }
 
     [HttpPost]
@@ -395,6 +397,11 @@ public abstract class PlanillaControllerBase : Controller
     private IActionResult Ver(string vista, object modelo)
     {
         return View($"{ViewPrefix}/{vista}.cshtml", modelo);
+    }
+
+    private static string? NormalizarBusqueda(string? busqueda)
+    {
+        return string.IsNullOrWhiteSpace(busqueda) ? null : busqueda.Trim();
     }
 
     private static string? ValidarPeriodo(Models.CalcularPlanillaModel modelo)

@@ -82,8 +82,8 @@ public class CN_Contrato
             fechaCulminacion);
     }
 
-    public void Finalizar(int idContrato)
+    public void Finalizar(int idContrato, bool confirmarObligaciones = false)
     {
-        _metodos.Finalizar(idContrato);
+        _metodos.Finalizar(idContrato, confirmarObligaciones);
     }
 }

@@ -30,9 +30,10 @@ public class CN_Planilla
     public (List<RegistroAsistenciaPlanilla> Asistencias, int Total) ListarAsistenciaPaginado(
         int idPlanilla,
         int pagina,
-        int tamanoPagina)
+        int tamanoPagina,
+        string? busqueda = null)
     {
-        return _metodos.ListarAsistenciaPaginado(idPlanilla, pagina, tamanoPagina);
+        return _metodos.ListarAsistenciaPaginado(idPlanilla, pagina, tamanoPagina, busqueda);
     }
 
     public (List<DetallePlanillaListado> Detalles, int Total) ListarDetalle(
