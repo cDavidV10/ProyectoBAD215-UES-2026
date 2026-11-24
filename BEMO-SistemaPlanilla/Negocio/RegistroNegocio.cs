@@ -29,6 +29,7 @@ public static class RegistroNegocio
         servicios.AddScoped<CN_Usuario>();
         servicios.AddScoped<CN_Login>();
         servicios.AddScoped<CN_Auditoria>();
+        servicios.AddScoped<CN_ReporteCostos>();
 
         return servicios;
     }

@@ -1,0 +1,263 @@
+@using System.Globalization
+@model BEMOWeb.Models.ReporteCostosModel
+
+@{
+    ViewData["Title"] = "Reportes de costos";
+    var areaActual = ViewContext.RouteData.Values["area"]?.ToString() ?? "Admin";
+    var inicio = Model.TotalRegistros == 0 ? 0 : ((Model.PaginaActual - 1) * Model.TamanoPagina) + 1;
+    var fin = Math.Min(Model.PaginaActual * Model.TamanoPagina, Model.TotalRegistros);
+    var costoMaximo = Model.Resumen.Count == 0 ? 0 : Model.Resumen.Max(item => item.CostoTotal);
+
+    string Fecha(DateOnly fecha) => fecha.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+    string Moneda(decimal valor) => valor.ToString("$#,##0.00", CultureInfo.InvariantCulture);
+    string Porcentaje(decimal? valor) => valor.HasValue
+        ? $"{valor.Value.ToString("N2", CultureInfo.InvariantCulture)}%"
+        : "Sin comparación";
+    string UrlPagina(int pagina)
+    {
+        var parametros = new List<string>
+        {
+            $"pagina={pagina}",
+            $"fechaDesde={Model.FechaDesde.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}",
+            $"fechaHasta={Model.FechaHasta.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}"
+        };
+
+        if (!string.IsNullOrWhiteSpace(Model.DepartamentoSeleccionado))
+        {
+            parametros.Add($"departamento={Uri.EscapeDataString(Model.DepartamentoSeleccionado)}");
+        }
+
+        return "?" + string.Join("&", parametros);
+    }
+}
+
+<div class="space-y-6">
+    <header class="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+            <p class="bemo-kicker">Administración</p>
+            <h1 class="bemo-title mt-2">Reportes de costos</h1>
+            <p class="bemo-subtitle mt-2">Compara el costo de las planillas cerradas entre departamentos.</p>
+        </div>
+        <div class="bemo-info max-w-xl">
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
+            La comparación utiliza únicamente planillas cerradas y relaciona cada departamento con su período anterior disponible.
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="bemo-alert bemo-alert-error" role="alert">
+            <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-ban"></use></svg>
+            <span>@Model.Error</span>
+        </div>
+    }
+
+    <section class="bemo-card p-5">
+        <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="text-xl font-extrabold">Filtros del reporte</h2>
+                <p class="mt-1 text-sm text-[#684026]">Selecciona un período y, si lo necesitas, un departamento específico.</p>
+            </div>
+            <a asp-area="@areaActual" asp-controller="Reportes" asp-action="Index" class="bemo-link-action">Limpiar filtros</a>
+        </div>
+
+        <form method="get" asp-area="@areaActual" asp-controller="Reportes" asp-action="Index"
+              class="mt-4 grid gap-4 md:grid-cols-3" data-auto-submit>
+            <div>
+                <label class="bemo-label" for="fechaDesde">Desde</label>
+                <input class="bemo-input" id="fechaDesde" name="fechaDesde" type="date"
+                       value="@Model.FechaDesde.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" />
+            </div>
+            <div>
+                <label class="bemo-label" for="fechaHasta">Hasta</label>
+                <input class="bemo-input" id="fechaHasta" name="fechaHasta" type="date"
+                       value="@Model.FechaHasta.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)" />
+            </div>
+            <div>
+                <label class="bemo-label" for="departamento">Departamento</label>
+                <select class="bemo-select" id="departamento" name="departamento">
+                    <option value="">Todos los departamentos</option>
+                    @foreach (var departamento in Model.Departamentos)
+                    {
+                        <option value="@departamento.NombreDepartamento"
+                                selected="@(string.Equals(Model.DepartamentoSeleccionado, departamento.NombreDepartamento, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">
+                            @departamento.NombreDepartamento
+                        </option>
+                    }
+                </select>
+            </div>
+        </form>
+    </section>
+
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="bemo-stat">
+            <div>
+                <p class="bemo-stat-label">Costo acumulado</p>
+                <p class="bemo-stat-value">@Moneda(Model.CostoTotal)</p>
+                <p class="mt-1 text-xs text-[#684026]">@Model.PlanillasComparadas planilla@(Model.PlanillasComparadas == 1 ? "" : "s") comparada@(Model.PlanillasComparadas == 1 ? "" : "s")</p>
+            </div>
+        </div>
+        <div class="bemo-stat">
+            <div>
+                <p class="bemo-stat-label">Costo período anterior</p>
+                <p class="bemo-stat-value">@Moneda(Model.CostoPeriodoAnterior)</p>
+                <p class="mt-1 text-xs text-[#684026]">Base disponible para comparar</p>
+            </div>
+        </div>
+        <div class="bemo-stat">
+            <div>
+                <p class="bemo-stat-label">Diferencia acumulada</p>
+                <p class="bemo-stat-value @(Model.DiferenciaTotal > 0 ? "text-[#A33D2E]" : "text-[#3C7652]")">@Moneda(Model.DiferenciaTotal)</p>
+                <p class="mt-1 text-xs text-[#684026]">@Porcentaje(Model.VariacionTotal)</p>
+            </div>
+        </div>
+        <div class="bemo-stat">
+            <div>
+                <p class="bemo-stat-label">Departamentos</p>
+                <p class="bemo-stat-value">@Model.Resumen.Count</p>
+                <p class="mt-1 text-xs text-[#684026]">Con datos en el período</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="bemo-card p-5">
+        <div class="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="text-xl font-extrabold">Comparación por departamento</h2>
+                <p class="mt-1 text-sm text-[#684026]">Costo acumulado y variación frente a los períodos anteriores disponibles.</p>
+            </div>
+            <span class="rounded-full bg-[#FFF3D7] px-4 py-2 text-sm font-bold text-[#684026]">@Model.Resumen.Count departamento@(Model.Resumen.Count == 1 ? "" : "s")</span>
+        </div>
+
+        @if (Model.Resumen.Count == 0)
+        {
+            <div class="bemo-info mt-5">
+                <svg class="bemo-icon shrink-0" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>
+                No hay costos de planillas cerradas para los filtros seleccionados.
+            </div>
+        }
+        else
+        {
+            <div class="mt-5 space-y-4">
+                @foreach (var resumen in Model.Resumen)
+                {
+                    var porcentajeBarra = costoMaximo == 0 ? 0 : Math.Max(4, (double)(resumen.CostoTotal * 100 / costoMaximo));
+                    var colorDiferencia = resumen.Diferencia > 0 ? "text-[#A33D2E]" : "text-[#3C7652]";
+                    <div class="rounded-xl border border-[#E3D2AE] bg-[#FBF8F1] p-4">
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="font-extrabold">@resumen.NombreDepartamento</p>
+                                <p class="text-sm text-[#684026]">@resumen.Periodos período@(resumen.Periodos == 1 ? "" : "s") · @resumen.Empleados empleados acumulados</p>
+                            </div>
+                            <div class="text-left sm:text-right">
+                                <p class="text-lg font-extrabold">@Moneda(resumen.CostoTotal)</p>
+                                <p class="text-sm font-bold @colorDiferencia">@Moneda(resumen.Diferencia) · @Porcentaje(resumen.VariacionPorcentual)</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 h-3 overflow-hidden rounded-full bg-[#EADDC4]" aria-label="Proporción del costo">
+                            <div class="h-full rounded-full bg-[#9F5F2F]" style="width: @(porcentajeBarra.ToString("0.##", CultureInfo.InvariantCulture))%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="bemo-card overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#E3D2AE] px-5 py-4">
+            <div>
+                <h2 class="text-xl font-extrabold">Detalle por período</h2>
+                <p class="mt-1 text-sm text-[#684026]">Consulta el costo de cada departamento en las planillas cerradas.</p>
+            </div>
+            <span class="rounded-full bg-[#FFF3D7] px-4 py-2 text-sm font-bold text-[#684026]">@Model.TotalRegistros registro@(Model.TotalRegistros == 1 ? "" : "s")</span>
+        </div>
+
+        <div class="bemo-table-wrap">
+            <table class="bemo-table min-w-[1050px]">
+                <thead>
+                    <tr>
+                        <th>Planilla</th>
+                        <th>Período</th>
+                        <th>Departamento</th>
+                        <th>Empleados</th>
+                        <th>Costo total</th>
+                        <th>Período anterior</th>
+                        <th>Diferencia</th>
+                        <th>Variación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Registros.Count == 0)
+                    {
+                        <tr><td colspan="8" class="py-10 text-center text-[#684026]">No hay resultados para los filtros seleccionados.</td></tr>
+                    }
+                    else
+                    {
+                        foreach (var registro in Model.Registros)
+                        {
+                            var diferencia = registro.Diferencia ?? 0;
+                            var colorDiferencia = diferencia > 0 ? "text-[#A33D2E]" : "text-[#3C7652]";
+                            <tr>
+                                <td class="font-semibold">PLAN-@registro.NumeroPlanilla.ToString("D6")</td>
+                                <td class="whitespace-nowrap">@Fecha(registro.PeriodoInicio) - @Fecha(registro.PeriodoFin)</td>
+                                <td>@registro.NombreDepartamento</td>
+                                <td>@registro.Empleados</td>
+                                <td class="font-semibold">@Moneda(registro.CostoTotal)</td>
+                                <td>@(registro.CostoPeriodoAnterior.HasValue ? Moneda(registro.CostoPeriodoAnterior.Value) : "Sin comparación")</td>
+                                <td class="font-semibold @colorDiferencia">@(registro.Diferencia.HasValue ? Moneda(registro.Diferencia.Value) : "Sin comparación")</td>
+                                <td class="font-semibold @colorDiferencia">@Porcentaje(registro.VariacionPorcentual)</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalRegistros > 0)
+        {
+            <nav class="flex flex-col justify-between gap-3 border-t border-[#E3D2AE] px-5 py-4 sm:flex-row sm:items-center" aria-label="Paginación del reporte de costos">
+                <p class="text-sm text-[#684026]">Mostrando @inicio - @fin de @Model.TotalRegistros registros</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    @if (Model.PaginaActual > 1)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual - 1)">Anterior</a>
+                    }
+                    @if (Model.TotalPaginas <= 7)
+                    {
+                        @for (var pagina = 1; pagina <= Model.TotalPaginas; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                    }
+                    else
+                    {
+                        var paginaInicio = Math.Max(2, Model.PaginaActual - 2);
+                        var paginaFin = Math.Min(Model.TotalPaginas - 1, Model.PaginaActual + 2);
+                        var clasePrimera = Model.PaginaActual == 1 ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                        var claseUltima = Model.PaginaActual == Model.TotalPaginas ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                        <a class="@clasePrimera" href="@UrlPagina(1)">1</a>
+                        @if (paginaInicio > 2)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        @for (var pagina = paginaInicio; pagina <= paginaFin; pagina++)
+                        {
+                            var clasePagina = pagina == Model.PaginaActual ? "bemo-button bemo-button-primary" : "bemo-button bemo-button-secondary";
+                            <a class="@clasePagina" href="@UrlPagina(pagina)">@pagina</a>
+                        }
+                        @if (paginaFin < Model.TotalPaginas - 1)
+                        {
+                            <span class="flex items-center px-1 text-[#684026]">...</span>
+                        }
+                        <a class="@claseUltima" href="@UrlPagina(Model.TotalPaginas)">@Model.TotalPaginas</a>
+                    }
+                    @if (Model.PaginaActual < Model.TotalPaginas)
+                    {
+                        <a class="bemo-button bemo-button-secondary" href="@UrlPagina(Model.PaginaActual + 1)">Siguiente</a>
+                    }
+                </div>
+            </nav>
+        }
+    </section>
+</div>

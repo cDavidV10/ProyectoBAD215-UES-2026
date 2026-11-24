@@ -22,6 +22,7 @@ public static class RegistroDatos
         servicios.AddScoped<DAOUsuario>();
         servicios.AddScoped<DAOLogin>();
         servicios.AddScoped<DAOAuditoria>();
+        servicios.AddScoped<DAOReporteCostos>();
         return servicios;
     }
 }
