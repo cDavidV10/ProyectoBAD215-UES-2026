@@ -214,6 +214,8 @@ public abstract class PlanillaControllerBase : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Calcular(Models.CalcularPlanillaModel modelo)
     {
+        modelo.Busqueda = null;
+
         if (!modelo.IdPlanilla.HasValue || modelo.IdPlanilla.Value <= 0)
         {
             TempData["Error"] = "Seleccione una planilla en borrador.";

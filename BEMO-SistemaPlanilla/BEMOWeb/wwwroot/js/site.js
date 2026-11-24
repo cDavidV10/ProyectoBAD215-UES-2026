@@ -55,14 +55,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const serverSearchTimers = new WeakMap();
     document.querySelectorAll("form[data-server-search]").forEach((form) => {
         const input = form.querySelector("input[name='busqueda']");
         if (!input) return;
 
-        let timer;
         input.addEventListener("input", () => {
-            window.clearTimeout(timer);
-            timer = window.setTimeout(() => form.submit(), 700);
+            window.clearTimeout(serverSearchTimers.get(form));
+            const timer = window.setTimeout(() => form.submit(), 700);
+            serverSearchTimers.set(form, timer);
+        });
+    });
+
+    document.querySelectorAll("form[data-clear-planilla-filters]").forEach((form) => {
+        form.addEventListener("submit", () => {
+            document.querySelectorAll("form[data-server-search]").forEach((searchForm) => {
+                window.clearTimeout(serverSearchTimers.get(searchForm));
+                serverSearchTimers.delete(searchForm);
+            });
+
+            document.querySelectorAll("[data-planilla-search]").forEach((input) => {
+                input.value = "";
+            });
         });
     });
 

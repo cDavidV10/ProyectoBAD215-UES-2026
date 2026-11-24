@@ -77,7 +77,7 @@
             <input type="hidden" name="id" value="@Model.Planilla.IdPlanilla" />
             <div class="w-full sm:max-w-xl">
                 <label class="bemo-label" for="busqueda-empleado">Buscar empleado</label>
-                <input class="bemo-input" id="busqueda-empleado" name="busqueda" value="@Model.Busqueda" placeholder="Nombre o apellido..." autocomplete="off" />
+                <input class="bemo-input" id="busqueda-empleado" name="busqueda" value="@Model.Busqueda" placeholder="Nombre o apellido..." autocomplete="off" data-planilla-search />
                 <p class="mt-1 text-xs text-[#684026]">La búsqueda se aplica automáticamente. Guarda la asistencia antes de buscar.</p>
             </div>
             @if (!string.IsNullOrWhiteSpace(Model.Busqueda))
@@ -180,7 +180,7 @@
             </div>
         </form>
 
-        <form asp-action="Calcular" method="post" class="bemo-card space-y-5 p-5 md:p-8">
+        <form asp-action="Calcular" method="post" class="bemo-card space-y-5 p-5 md:p-8" data-clear-planilla-filters>
             @Html.AntiForgeryToken()
             <input type="hidden" name="IdPlanilla" value="@Model.Planilla.IdPlanilla" />
             <h2 class="text-xl font-extrabold">Calculo de planilla</h2>
