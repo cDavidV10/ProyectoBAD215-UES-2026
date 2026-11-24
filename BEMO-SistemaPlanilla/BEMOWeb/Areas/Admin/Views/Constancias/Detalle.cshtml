@@ -9,7 +9,40 @@
 
 <style media="print">
     .no-print { display: none !important; }
-    .bemo-page { background: white !important; }
+    html,
+    body,
+    body.bemo-page {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        background: white !important;
+    }
+
+    body.bemo-page > header,
+    body.bemo-page > div > aside,
+    body.bemo-page > div > div > footer {
+        display: none !important;
+    }
+
+    body.bemo-page > div {
+        display: block !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    body.bemo-page > div > div {
+        display: block !important;
+        min-height: 0 !important;
+        margin-left: 0 !important;
+        overflow: visible !important;
+    }
+
+    body.bemo-page main {
+        padding: 0 !important;
+    }
+
     .bemo-card { border: 1px solid #D7C49E !important; box-shadow: none !important; }
 </style>
 
@@ -55,7 +88,7 @@
                 <strong>@Model.Meses meses</strong>.
             </p>
 
-            <section>
+            <section class="hidden">
                 <h2 class="mb-3 text-xl font-extrabold">Historial de planillas pagadas</h2>
                 @if (Model.Constancia.Periodos.Count == 0)
                 {
@@ -88,7 +121,7 @@
                 }
             </section>
 
-            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            <section class="hidden grid gap-4 md:grid-cols-2 xl:grid-cols-6">
                 <div class="bemo-stat"><div><p class="bemo-stat-label">Planillas incluidas</p><p class="bemo-stat-value">@resumen.PlanillasIncluidas</p></div></div>
                 <div class="bemo-stat"><div><p class="bemo-stat-label">Total bruto</p><p class="bemo-stat-value">$@resumen.TotalBruto.ToString("N2")</p></div></div>
                 <div class="bemo-stat"><div><p class="bemo-stat-label">Total deducciones</p><p class="bemo-stat-value">$@resumen.TotalDeducciones.ToString("N2")</p></div></div>
