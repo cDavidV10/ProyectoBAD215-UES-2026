@@ -43,6 +43,7 @@ public class DAOContrato
                OR (c.estado = 'VIGENTE'
                    AND (c.fecha_culminacion IS NULL OR c.fecha_culminacion >= CAST(GETDATE() AS DATE)))
             ORDER BY
+                CASE WHEN c.estado = 'FINALIZADO' THEN 1 ELSE 0 END,
                 CASE WHEN c.fecha_culminacion IS NULL THEN 1 ELSE 0 END,
                 c.fecha_culminacion,
                 e.apellido,
@@ -198,6 +199,7 @@ public class DAOContrato
                 COUNT(*) OVER() AS total_registros
             FROM Contratos
             ORDER BY
+                CASE WHEN estado = 'FINALIZADO' THEN 1 ELSE 0 END,
                 CASE WHEN fecha_culminacion IS NULL THEN 1 ELSE 0 END,
                 fecha_culminacion,
                 nombre_empleado,
